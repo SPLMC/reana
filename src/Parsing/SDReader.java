@@ -1,4 +1,4 @@
-package Modeling;
+package Parsing;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class SDReader {
 	private ArrayList<Message> messages;
 	private Fragment sd;
 
-	public void printAll() { // jogar pra cima?? DiagramAPI
+	public void printAll() {
 		System.out
 				.print("Sequence Diagram " + (this.index + 1) + ": " + this.sd.getName() + "\n\n");
 		printInSequence(this.sd, 0);
@@ -48,7 +48,11 @@ public class SDReader {
 			for (int i = 0; i < indent; i++)
 				System.out.print("\t");
 			if (n.getClass().equals(Fragment.class)) {
-				System.out.println(((Fragment) n).getName());
+				if (((Fragment) n).getName() != null) {
+					System.out.println("[Fragment = " + ((Fragment) n).getName() + "]");
+				} else {
+					System.out.println("[Fragment = " + ((Fragment) n).getOperandName() + "]");
+				}
 				// n.print();
 				printInSequence((Fragment) n, (indent + 1));
 			} else if (n.getClass().equals(Message.class)) {
@@ -112,6 +116,7 @@ public class SDReader {
 		org.w3c.dom.Node node = nodes.item(this.index);
 		NodeList elements = node.getChildNodes();
 		this.lifelines = new ArrayList<Lifeline>();
+		
 		for (int s = 0; s < elements.getLength(); s++) {
 			if (elements.item(s).getNodeName().equals("lifeline")) {
 				Lifeline tmp = new Lifeline(elements.item(s).getAttributes().getNamedItem("xmi:id")
@@ -186,8 +191,9 @@ public class SDReader {
 				}
 				if (elements.item(s).getAttributes().getNamedItem("messageSort") != null) {
 					if (elements.item(s).getAttributes().getNamedItem("messageSort")
-							.getTextContent().equals("asynchCall")) {
-						message.setType(MessageType.assynchronous);
+							.getTextContent().equals("asynchCall") || elements.item(s).getAttributes().getNamedItem("messageSort")
+							.getTextContent().equals("asynchSignal") ) {
+						message.setType(MessageType.asynchronous);
 					} else if (elements.item(s).getAttributes().getNamedItem("messageSort")
 							.getTextContent().equals("reply")) {
 						message.setType(MessageType.reply);

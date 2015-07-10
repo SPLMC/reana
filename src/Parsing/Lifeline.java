@@ -1,4 +1,4 @@
-package Modeling;
+package Parsing;
 
 public class Lifeline {
 	private String id;
