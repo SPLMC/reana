@@ -111,33 +111,33 @@ public class CommandLineInterface {
             analyzer.printStats(OUTPUT);
             memoryCollector.printStats(OUTPUT);
             printEvaluationReuse();
-            printAddSizeMetrics(familyReliability); 
+            printAddSizeMetrics(familyReliability);
         }
         long totalRunningTime = System.currentTimeMillis() - startTime;
         OUTPUT.println("Total running time: " +  totalRunningTime + " ms");
     }
 
     private static void printAddSizeMetrics(ADD familyReliability) {
-		int numVariables; 
-		int numNodes; 
-		int numDeadNodes; 
+		int numVariables;
+		int numNodes;
+		int numDeadNodes;
 		int numTerminalsNonZero;
-		double numPathsToNonZeroTerminals; 
+		double numPathsToNonZeroTerminals;
 		double numPathsToZeroTerminal;
-		int numReorderings; 
-		int numGarbageCollections; 
-		long numBytesADD; 
-		
+		int numReorderings;
+		int numGarbageCollections;
+		long numBytesADD;
+
 		numVariables = familyReliability.getVariables().size();
 		numNodes = familyReliability.getNodeCount();
 		numDeadNodes = familyReliability.getDeadNodesCount();
 		numTerminalsNonZero = familyReliability.getTerminalsDifferentThanZeroCount();
 		numPathsToNonZeroTerminals = familyReliability.getPathsToNonZeroTerminalsCount();
 		numPathsToZeroTerminal = familyReliability.getPathsToZeroTerminalCount();
-		numReorderings = familyReliability.getReorderingsCount(); 
+		numReorderings = familyReliability.getReorderingsCount();
 		numGarbageCollections = familyReliability.getGarbageCollectionsCount();
-		numBytesADD = familyReliability.getAddSizeInBytes(); 
-		
+		numBytesADD = familyReliability.getAddSizeInBytes();
+
 		OUTPUT.println("# variables: " + numVariables);
 		OUTPUT.println("# internal nodes: " + numNodes);
 		OUTPUT.println("# dead nodes: " + numDeadNodes);
@@ -157,7 +157,7 @@ public class CommandLineInterface {
             for (Map.Entry<RDGNode, Integer> entry: numberOfPaths.entrySet()) {
                 nodes++;
                 totalPaths += entry.getValue();
-                OUTPUT.println(entry.getKey().getId() + ": " + entry.getValue() + " paths");
+                OUTPUT.println(entry.getKey() + ": " + entry.getValue() + " paths");
             }
             OUTPUT.println("Evaluation economy because of cache: " + 100*(totalPaths-nodes)/(float)totalPaths + "%");
         } catch (CyclicRdgException e) {
