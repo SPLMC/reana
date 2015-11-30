@@ -4,7 +4,6 @@
 package ui;
 
 import jadd.ADD;
-import jadd.JADD;
 import jadd.UnrecognizedVariableException;
 
 import java.io.File;
@@ -110,7 +109,7 @@ public class CommandLineInterface {
         if (options.hasStatsEnabled()) {
             analyzer.printStats(OUTPUT);
             memoryCollector.printStats(OUTPUT);
-            printEvaluationReuse();
+            printEvaluationReuse(rdgRoot);
             printAddSizeMetrics(familyReliability);
         }
         long totalRunningTime = System.currentTimeMillis() - startTime;
@@ -149,9 +148,9 @@ public class CommandLineInterface {
 		OUTPUT.println("ADD's size in # of bytes: " + numBytesADD);
 	}
 
-	private static void printEvaluationReuse() {
+	private static void printEvaluationReuse(RDGNode rdgRoot) {
         try {
-            Map<RDGNode, Integer> numberOfPaths = RDGNode.getNumberOfPaths();
+            Map<RDGNode, Integer> numberOfPaths = rdgRoot.getNumberOfPaths();
             int nodes = 0;
             int totalPaths = 0;
             for (Map.Entry<RDGNode, Integer> entry: numberOfPaths.entrySet()) {
