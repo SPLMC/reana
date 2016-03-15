@@ -8,6 +8,7 @@ import jadd.UnrecognizedVariableException;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
@@ -52,7 +53,11 @@ public class CommandLineInterface {
     public static void main(String[] args) throws IOException {
         Options options = Options.parseOptions(args);
         LogManager logManager = LogManager.getLogManager();
-        logManager.readConfiguration(new FileInputStream("logging.properties"));
+        try {
+            logManager.readConfiguration(new FileInputStream("logging.properties"));
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         long startTime = System.currentTimeMillis();
 
