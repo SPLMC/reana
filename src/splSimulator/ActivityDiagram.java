@@ -1,5 +1,6 @@
 package splSimulator;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 public class ActivityDiagram {
@@ -21,14 +22,9 @@ public class ActivityDiagram {
 	 * there is already an element equals the element being added. 
 	 */
 	public boolean addElement(ActivityDiagramElement e) {
-		return false;
+		boolean answer = elements.add(e); 
+		return answer;
 	}
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -37,17 +33,43 @@ public class ActivityDiagram {
 				ActivityDiagramElement.START_NODE, 
 				null);
 		elements = new Vector<ActivityDiagramElement>();
+		elements.add(startNode);
 	}
-
-
-
-
-
-
 
 
 
 	public ActivityDiagramElement getStartNode() {
 		return startNode;
+	}
+
+
+
+	public boolean containsElement(String elementName) {
+		Iterator<ActivityDiagramElement> itElements = elements.iterator();
+		ActivityDiagramElement e; 
+		
+		while(itElements.hasNext()) {
+			e = itElements.next(); 
+			if (e.getElementName().equals(elementName))
+				return true; 
+		}
+		return false;
+	}
+
+
+
+	public Activity getActivityByName(String activityName) {
+		ActivityDiagramElement e; 
+		Activity a = null; 
+		Iterator<ActivityDiagramElement> itElements = elements.iterator(); 
+		
+		while (itElements.hasNext()) {
+			e = itElements.next(); 
+			if (e.getClass().getName().equals("splSimulator.Activity")){
+				if (e.getElementName().equals(activityName))
+					a = (Activity) e;
+			}
+		}
+		return a;
 	}
 }
