@@ -3,6 +3,9 @@ package splSimulator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+
+import javax.swing.JOptionPane;
 
 public class Feature {
 
@@ -22,7 +25,7 @@ public class Feature {
 	
 	
 	private String name; 
-	private HashSet<Feature> children;
+	private LinkedList<Feature> children;
 	private int type;
 	private boolean mandatory;
 	private boolean abs;
@@ -39,7 +42,7 @@ public class Feature {
 	
 	
 	public Feature() {
-		children = new HashSet<Feature>();
+		children = new LinkedList<Feature>();
 	}
 	
 	public Feature(String name) {
@@ -70,17 +73,17 @@ public class Feature {
 	}
 
 
-	private void setAbstract(boolean abs) {
+	public void setAbstract(boolean abs) {
 		this.abs = abs; 
 	}
 
 
-	private void setMandatory(boolean mandatory) {
+	void setMandatory(boolean mandatory) {
 		this.mandatory = mandatory; 		
 	}
 
 
-	public HashSet<Feature> getChildren() {
+	public LinkedList<Feature> getChildren() {
 		return children;
 	}
 
@@ -90,7 +93,7 @@ public class Feature {
 	}
 
 	
-	private void setType(int type) {
+	public void setType(int type) {
 		this.type = type;
 	}
 
@@ -137,6 +140,59 @@ public class Feature {
 		boolean delSetFeat = features.remove(f.getName(), f); 
 		
 		return (delFm && delSetFeat);
+	}
+
+
+	public void setName(String name) {
+		this.name = name;		
+	}
+
+
+	public String exportXml() {
+		StringBuilder featXml = new StringBuilder();
+		String featInit, featBody = "", featEnd; 
+		
+		switch (this.type) {
+		case Feature.LEAF:
+			featInit = "<feature ";
+			featInit += (abs ? "abstract=\"true\" " : "");
+			featInit += (mandatory ? "mandatory=\"true\" " : "");
+			featInit += "name=\""
+					+ getName() + 
+					"\" ";
+			featEnd = "/>";
+			break;
+
+		default:
+			featInit = "<"; 
+			featInit += (this.type == Feature.AND ? "and " : "") + 
+					(this.type == Feature.OR ? "or " : "") + 
+					(this.type == Feature.ALTERNATIVE ? "alt " : ""); 
+			featInit += (abs ? "abstract=\"true\" " : "");
+			featInit += (mandatory ? "mandatory=\"true\" " : "");
+			featInit += "name=\""
+					+ getName() + 
+					"\" ";
+			featInit += ">";
+			
+			Iterator<Feature> it = children.iterator(); 
+			while (it.hasNext()) {
+				Feature f = it.next(); 
+				featBody += f.exportXml();
+			}
+			
+			featEnd = "</"
+					+ (this.type == Feature.AND ? "and" : "")  
+					+ (this.type == Feature.OR ? "or" : "")  
+					+ (this.type == Feature.ALTERNATIVE ? "alt" : "") + 
+					">";
+			break;
+		}
+		
+		featXml.append(featInit);
+		featXml.append(featBody);
+		featXml.append(featEnd);
+		return featXml.toString();
 	}
 
 
