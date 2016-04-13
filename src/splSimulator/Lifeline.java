@@ -1,5 +1,8 @@
 package splSimulator;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class Lifeline extends SequenceDiagramElement{
 	
 	//Lifeline's attributes 
@@ -8,6 +11,25 @@ public class Lifeline extends SequenceDiagramElement{
 	
 	public Lifeline(String name) {
 		super(name);
+	}
+	
+	
+	public double getReliability() {
+		return reliability; 
+	}
+	
+	
+	public void setReliability(double reliability) {
+		this.reliability = reliability;
+	}
+
+
+	@Override
+	public Element getDOM(Document doc) {
+		Element e = doc.createElement("Lifeline");
+		e.setAttribute("name", getName());
+		e.setAttribute("reliability", Double.toString(getReliability()));
+		return e;
 	}
 	
 }

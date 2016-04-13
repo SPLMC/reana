@@ -4,6 +4,9 @@ import java.util.HashSet;
 
 import java.util.Iterator;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public abstract class ActivityDiagramElement {
 
 	/**
@@ -38,6 +41,9 @@ public abstract class ActivityDiagramElement {
 		return elementName;
 	}
 	
+	public void setElementName(String elementName) {
+		this.elementName = elementName;
+	}
 	
 
 	/**
@@ -120,7 +126,15 @@ public abstract class ActivityDiagramElement {
 
 	public HashSet<String> getLabels() {
 		return labels;
-	} 
+	}
+
+	
+	public Element getDom(Document doc){
+		Element root = doc.createElement("ActivityDiagramElement"); 
+		root.setAttribute("name", getElementName());
+		root.setAttribute("type", this.getClass().getSimpleName());
+		return root;
+	}
 	
 	
 	

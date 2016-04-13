@@ -3,6 +3,9 @@ package splSimulator;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class Activity extends ActivityDiagramElement{
 
 	LinkedList<SequenceDiagram> sequenceDiagrams; 
@@ -14,6 +17,7 @@ public class Activity extends ActivityDiagramElement{
 	
 	public Activity(String elementName) {
 		super(elementName);
+		sequenceDiagrams = new LinkedList<SequenceDiagram>();
 	}
 
 	public boolean addSequenceDiagram(SequenceDiagram sd) {
@@ -50,4 +54,22 @@ public class Activity extends ActivityDiagramElement{
 	public LinkedList<SequenceDiagram> getSequenceDiagrams() {
 		return sequenceDiagrams;
 	}
+
+
+	public Element getDom(Document doc) {
+		Element e = super.getDom(doc);
+
+		if (sequenceDiagrams.size() > 0) {
+			Iterator<SequenceDiagram> its = sequenceDiagrams.iterator(); 
+			Element seqDiag; 
+			while (its.hasNext()) {
+				SequenceDiagram sd = its.next();
+				seqDiag = doc.createElement("RepresentedBy");
+				seqDiag.setAttribute("seqDiagName", sd.getName());
+				e.appendChild(seqDiag);
+			}
+		}
+		
+		return e;
+	}	
 }

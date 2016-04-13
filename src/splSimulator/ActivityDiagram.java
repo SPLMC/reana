@@ -1,7 +1,17 @@
 package splSimulator;
 
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.Iterator; 
+import java.util.LinkedList;
+import java.util.List;
+//import java.util.Vector;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class ActivityDiagram {
 
@@ -9,9 +19,11 @@ public class ActivityDiagram {
 	 * An activity diagram is composed of a set of ActivityDiagramElements, 
 	 * disposed in a sequential order. 
 	 */
-	private Vector<ActivityDiagramElement> elements;
+//	private Vector<ActivityDiagramElement> elements;
+	private List<ActivityDiagramElement> setOfElements;
 	//There is only one startNode at an ActivityDiagram
-	private ActivityDiagramElement startNode;  
+	private ActivityDiagramElement startNode;
+	private String name;  
 	
 	/**
 	 * Method for adding an element into the Activity Diagram, in an sequential
@@ -22,7 +34,7 @@ public class ActivityDiagram {
 	 * there is already an element equals the element being added. 
 	 */
 	public boolean addElement(ActivityDiagramElement e) {
-		boolean answer = elements.add(e); 
+		boolean answer = setOfElements.add(e); 
 		return answer;
 	}
 	
@@ -32,8 +44,8 @@ public class ActivityDiagram {
 		startNode = ActivityDiagramElement.createElement(
 				ActivityDiagramElement.START_NODE, 
 				null);
-		elements = new Vector<ActivityDiagramElement>();
-		elements.add(startNode);
+		setOfElements = new LinkedList<ActivityDiagramElement>();
+		setOfElements.add(startNode);
 	}
 
 
@@ -45,7 +57,7 @@ public class ActivityDiagram {
 
 
 	public boolean containsElement(String elementName) {
-		Iterator<ActivityDiagramElement> itElements = elements.iterator();
+		Iterator<ActivityDiagramElement> itElements = setOfElements.iterator();
 		ActivityDiagramElement e; 
 		
 		while(itElements.hasNext()) {
@@ -61,7 +73,7 @@ public class ActivityDiagram {
 	public Activity getActivityByName(String activityName) {
 		ActivityDiagramElement e; 
 		Activity a = null; 
-		Iterator<ActivityDiagramElement> itElements = elements.iterator(); 
+		Iterator<ActivityDiagramElement> itElements = setOfElements.iterator(); 
 		
 		while (itElements.hasNext()) {
 			e = itElements.next(); 
@@ -71,5 +83,62 @@ public class ActivityDiagram {
 			}
 		}
 		return a;
+	}
+
+
+
+	public void setName(String name) {
+		this.name = name; 
+	}
+
+
+
+	public String getName() {
+		return name;
+	}
+
+
+
+	public Element getDOM(Document doc) {
+		Element root = null; 
+		root = doc.createElement("ActivityDiagram"); 
+		root.setAttribute("name", name);
+		
+		Element elements = null; 
+		elements = doc.createElement("Elements");
+		
+		Element transitions = null; 
+		transitions = doc.createElement("Transitions");
+		
+		
+		
+		//Create elements for each ActivityDiagramElement in this 
+		//ActivityDiagram object.
+		Iterator <ActivityDiagramElement>it = setOfElements.iterator();
+
+		Element el; 
+		while (it.hasNext()) {
+			ActivityDiagramElement ade = it.next();
+
+			if (ade.getClass().getSimpleName().
+					equals("Transition")) {
+				Transition t = (Transition) ade; 
+				el = doc.createElement(t.getClass().getSimpleName());
+				el.setAttribute("name", t.getElementName());
+				el.setAttribute("probability", Double.toString(t.getProbability()));
+				el.setAttribute("source", t.getSource().getElementName());
+				el.setAttribute("target", t.getTarget().getElementName());
+				transitions.appendChild(el);
+			} else {
+				el = ade.getDom(doc); 
+				elements.appendChild(el);
+			}
+			
+		}
+		
+		root.appendChild(elements);
+		root.appendChild(transitions);
+		
+		return root;
 	}
 }

@@ -1,5 +1,8 @@
 package splSimulator;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class Transition extends ActivityDiagramElement{
 
 	private ActivityDiagramElement source;
@@ -33,5 +36,15 @@ public class Transition extends ActivityDiagramElement{
 	
 	public void setProbability(double probability) {
 		this.probability = probability;
+	}
+	
+	public double getProbability() {
+		return this.probability;
+	}
+
+	@Override
+	public Element getDom(Document d) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

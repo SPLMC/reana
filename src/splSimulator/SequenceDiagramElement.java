@@ -2,7 +2,10 @@ package splSimulator;
 
 import java.util.HashMap;
 
-public class SequenceDiagramElement {
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+public abstract class SequenceDiagramElement {
 
 	public static final int LIFELINE = 1;
 	public static final int MESSAGE = 2;
@@ -48,5 +51,7 @@ public class SequenceDiagramElement {
 	public static SequenceDiagramElement getElementByName(String elementName) {
 		return elements.get(elementName);
 	}
+
+	public abstract Element getDOM(Document doc) ; 
 	
 }

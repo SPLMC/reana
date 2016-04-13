@@ -1,5 +1,8 @@
 package splSimulator;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class Message extends SequenceDiagramElement{
 
 	//Constants representing message types
@@ -49,6 +52,33 @@ public class Message extends SequenceDiagramElement{
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	public Element getDOM(Document doc) {
+		Element e = doc.createElement("Message");
+		e.setAttribute("name", getName());
+		e.setAttribute("probability", Double.toString(getProbability()));
+		e.setAttribute("source", source.getName());
+		e.setAttribute("target", target.getName());
+		switch (type) {
+		case SYNCHRONOUS:
+			e.setAttribute("type", "synchronous");
+			break;
+
+		case ASYNCHRONOUS: 
+			e.setAttribute("type", "asynchronous");
+			break;
+			
+		case REPLY: 
+			e.setAttribute("type", "reply");
+			break;
+			
+		default:
+			break;
+		}
+//		(type == SYNCHRONOUS ? e.setAttribute("type", "synchronous"):);
+//		()
+		return e;
 	}
 	
 }

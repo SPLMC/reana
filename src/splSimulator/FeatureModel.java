@@ -1,5 +1,7 @@
 package splSimulator;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -94,9 +96,29 @@ public class FeatureModel {
 		str.append(featureOrder);
 		//End of <featureOrder> generation
 		
-		
 		str.append(fmEnd);
+		
+		String xml = str.toString();
+		
+		persist(xml); 
+		
 		return str.toString();
+	}
+
+	private void persist(String xml) {
+		//Persist the Feature Model in an XML, in an affordable way. 
+		//The file name is fm_<fmName>.xml
+		String fileName = "fm_" + getName() + ".xml";
+		
+		try {
+			BufferedWriter buffer = new BufferedWriter(new FileWriter(fileName));
+			buffer.write(xml);
+			buffer.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 }
