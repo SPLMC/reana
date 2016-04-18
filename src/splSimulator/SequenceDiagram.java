@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -129,83 +130,135 @@ public class SequenceDiagram {
 	}
 
 	
-	public static Element getDOM(Document doc) {
-		Element root = doc.createElement("SequenceDiagrams"); 
+//	public static Element getDOM(Document doc) {
+//		Element root = doc.createElement("SequenceDiagrams"); 
+//
+//		//1st step: create the elements related to the lifelines used in all sequence diagrams
+//		//Create the DOM object representing the lifelines
+//		Element lifelines = doc.createElement("Lifelines");
+//		Element fragments = doc.createElement("Fragments");
+//		Iterator <SequenceDiagramElement> itl = SequenceDiagramElement.elements.values().iterator(); 
+//		Element life; 
+//		Element fragment; 
+//		while (itl.hasNext()) {
+//			SequenceDiagramElement e = itl.next();
+//			if (e.getClass().getSimpleName().equals("Lifeline")) {
+//				Lifeline l = (Lifeline) e;
+//				life = doc.createElement("Lifeline"); 
+//				life.setAttribute("name", l.getName());
+//				life.setAttribute("reliability", Double.toString(l.getReliability()));
+//				lifelines.appendChild(life);
+//			}
+//			//2nd step: create the elements related to the fragments present a the sequence diagram 
+//			if (e.getClass().getSimpleName().equals("Fragment")) {
+//				Fragment f = (Fragment) e; 
+//				fragment = f.getDOM(doc); 
+//				fragments.appendChild(fragment);
+//			}
+//		}
+//		
+//		
+//		
+//		//3rd step: create the elements related to each sequence diagram created for the software product line
+//		//Create the DOM object representing the set of sequence diagrams
+//		Iterator <SequenceDiagram> its = SequenceDiagram.sequenceDiagrams.values().iterator();
+//		Element sd; 
+//		while (its.hasNext()) {
+//			SequenceDiagram s = its.next(); 
+//			sd = doc.createElement("SequenceDiagram");
+//			sd.setAttribute("name", s.getName());
+//			sd.setAttribute("guard", s.getGuardCondition());
+//			
+//			Iterator<SequenceDiagramElement> ite = s.elements.iterator(); 
+//			while(ite.hasNext()) {
+//				SequenceDiagramElement el = ite.next(); 
+//				Element e = el.getDOM(doc); 
+//				sd.appendChild(e);
+//			}
+//			
+//			root.appendChild(sd);
+//		}
+//		
+//		//Linking the DOM objects to the root element
+//		root.appendChild(lifelines);
+//		root.appendChild(fragments);
+//		return root;
+//	}
+	
+	
+	public Element getDOM(Document doc) {
+		Element root = doc.createElement("SequenceDiagram"); 
+		root.setAttribute("name", getName());
+		root.setAttribute("guard", getGuardCondition());
+		
+		Iterator<SequenceDiagramElement> ite = elements.iterator(); 
+		while(ite.hasNext()) {
+			SequenceDiagramElement el = ite.next(); 
+			Element e = el.getDOM(doc); 
+			root.appendChild(e);
+		}
+		
+		return root; 
+	}
+	
 
-		//1st step: create the elements related to the lifelines used in all sequence diagrams
-		//Create the DOM object representing the lifelines
-		Element lifelines = doc.createElement("Lifelines");
-		Element fragments = doc.createElement("Fragments");
-		Iterator <SequenceDiagramElement> itl = SequenceDiagramElement.elements.values().iterator(); 
-		Element life; 
-		Element fragment; 
-		while (itl.hasNext()) {
-			SequenceDiagramElement e = itl.next();
-			if (e.getClass().getSimpleName().equals("Lifeline")) {
-				Lifeline l = (Lifeline) e;
-				life = doc.createElement("Lifeline"); 
-				life.setAttribute("name", l.getName());
-				life.setAttribute("reliability", Double.toString(l.getReliability()));
-				lifelines.appendChild(life);
-			}
+
+	public HashSet<Lifeline> getLifelines() {
+		return lifelines;
+	}
+
+
+	public HashSet<Fragment> getFragments() {
+		HashSet<Fragment> setOfFragments = new HashSet<Fragment>(); 
+		Iterator<SequenceDiagramElement> it = elements.iterator(); 
+		while (it.hasNext()) {
+			SequenceDiagramElement e = it.next();
+//			System.out.println(e.getClass().getSimpleName());
 			if (e.getClass().getSimpleName().equals("Fragment")) {
 				Fragment f = (Fragment) e; 
-//				fragment = doc.createElement("Fragment");
-				fragment = f.getDOM(doc); 
-//				fragment.setAttribute("name", f.getName());
-//				switch (f.getType()) {
-//				case Fragment.ALTERNATIVE:
-//					fragment.setAttribute("type", "alternative");
-//					break;
-//				
-//				case Fragment.LOOP:
-//					fragment.setAttribute("type", "loop");
-//					break;
-//				
-//				case Fragment.OPTIONAL:
-//					fragment.setAttribute("type", "optional");
-//					break;
-//				
-//				case Fragment.PARALLEL:
-//					fragment.setAttribute("type", "parallel");
-//					break;
-//				
-//				default:
-//					break;
-//				}
-				fragments.appendChild(fragment);
+				setOfFragments.add(f); 
 			}
 		}
+//		System.out.println("setOfFragments's size: " + setOfFragments.size());
+		return setOfFragments;
+	}
+
+
+	public HashSet<SequenceDiagram> getTransitiveSequenceDiagram() {
+		HashSet<SequenceDiagram> answer = new HashSet<SequenceDiagram>(); 
+		HashSet<Fragment> fragments = getFragments(); 
+		Iterator<Fragment> itf = fragments.iterator();
+		while (itf.hasNext()) {
+			Fragment f = itf.next(); 
+			answer.addAll(f.getTransitiveSequenceDiagram());
+		}
+		return answer;
+	}
+
+
+	public HashSet<Lifeline> getTransitiveLifeline() {
+		HashSet<Lifeline> answer = new HashSet<Lifeline>(); 
+		answer.addAll(lifelines);
+		//For each fragment in the sequence diagram, we should get its sequence diagrams.
+		Iterator<Fragment> itFrag = getFragments().iterator();
+		while (itFrag.hasNext()) {
+			Fragment f = itFrag.next(); 
+			answer.addAll(f.getTransitiveLifeline()); 
+		}
+		return answer;
+	}
+
+
+	public HashSet<Fragment> getTransitiveFragments() {
+		HashSet<Fragment> answer = new HashSet<Fragment>();
+		answer.addAll(getFragments());
 		
-		//2nd step: create the elements related to the fragments present a the sequence diagram 
-		
-		
-		//3rd step: create the elements related to each sequence diagram created for the software product line
-		//Create the DOM object representing the set of sequence diagrams
-//		Element sequenceDiagrams = doc.createElement("SequenceDiagrams"); 
-		Iterator <SequenceDiagram> its = SequenceDiagram.sequenceDiagrams.values().iterator();
-		Element sd; 
-		while (its.hasNext()) {
-			SequenceDiagram s = its.next(); 
-			sd = doc.createElement("SequenceDiagram");
-			sd.setAttribute("name", s.getName());
-			sd.setAttribute("guard", s.getGuardCondition());
-			
-			Iterator<SequenceDiagramElement> ite = s.elements.iterator(); 
-			while(ite.hasNext()) {
-				SequenceDiagramElement el = ite.next(); 
-				Element e = el.getDOM(doc); 
-				sd.appendChild(e);
-			}
-			
-//			sequenceDiagrams.appendChild(sd);
-			root.appendChild(sd);
+		Iterator<Fragment> itf = getFragments().iterator(); 
+		while (itf.hasNext()) {
+			Fragment f = itf.next(); 
+			answer.addAll(f.getTransitiveFragments()); 
 		}
 		
-		//Linking the DOM objects to the root element
-		root.appendChild(lifelines);
-		root.appendChild(fragments);
-//		root.appendChild(sequenceDiagrams); 
-		return root;
+		return answer;
 	}
 }

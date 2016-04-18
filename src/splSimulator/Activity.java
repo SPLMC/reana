@@ -1,5 +1,7 @@
 package splSimulator;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -71,5 +73,46 @@ public class Activity extends ActivityDiagramElement{
 		}
 		
 		return e;
+	}
+
+	public HashSet<SequenceDiagram> getTransitiveSequenceDiagram() {
+		HashSet<SequenceDiagram> answer = new HashSet<SequenceDiagram>();
+		Iterator<SequenceDiagram> its = sequenceDiagrams.iterator(); 
+		while (its.hasNext()) {
+			SequenceDiagram s = its.next(); 
+			answer.add(s);
+			HashSet<Fragment> setOfFragments = s.getFragments(); 
+			Iterator<Fragment> itf = setOfFragments.iterator(); 
+			while (itf.hasNext()) {
+				Fragment f = itf.next();
+				answer.addAll(f.getTransitiveSequenceDiagram()); 
+			}
+		}
+		answer.addAll(sequenceDiagrams); 
+		return answer;
+	}
+
+	public HashSet<Lifeline> getTranstiveLifelines() {
+		HashSet<Lifeline> answer = new HashSet<Lifeline>(); 
+		
+		Iterator<SequenceDiagram> it = sequenceDiagrams.iterator(); 
+		while (it.hasNext()) {
+			SequenceDiagram s = it.next(); 
+			answer.addAll(s.getTransitiveLifeline()); 
+		}
+		
+		return answer;
+	}
+
+	public HashSet<Fragment> getTransitiveFragments() {
+		HashSet<Fragment> answer = new HashSet<Fragment>(); 
+		Iterator<SequenceDiagram> itsd = sequenceDiagrams.iterator(); 
+		while (itsd.hasNext()) {
+			SequenceDiagram s = itsd.next();
+			answer.addAll(s.getTransitiveFragments()); 
+		}
+		
+		
+		return answer;
 	}	
 }

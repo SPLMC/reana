@@ -141,4 +141,20 @@ public class ActivityDiagram {
 		
 		return root;
 	}
+
+
+
+	public List<Activity> getSetOfActivities() {
+		List<Activity> l = new LinkedList<Activity>();
+		Iterator<ActivityDiagramElement> it = setOfElements.iterator(); 
+		while (it.hasNext()) {
+			ActivityDiagramElement e = it.next();
+			Activity a = null; 
+			if (e.getClass().getSimpleName().equals("Activity")){
+				a = (Activity)e;
+				l.add(a); 
+			}
+		}
+		return l;
+	}
 }
