@@ -116,3 +116,4 @@ public class Activity extends ActivityDiagramElement{
 		return answer;
 	}	
 }
+

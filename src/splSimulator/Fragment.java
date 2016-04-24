@@ -126,8 +126,8 @@ public class Fragment extends SequenceDiagramElement{
 	}
 
 
-	public HashSet<SequenceDiagram> getTransitiveSequenceDiagram() {
-		HashSet<SequenceDiagram> answer = new HashSet<SequenceDiagram>();
+	public LinkedList<SequenceDiagram> getTransitiveSequenceDiagram() {
+		LinkedList<SequenceDiagram> answer = new LinkedList<SequenceDiagram>();
 		Iterator<SequenceDiagram> its = sequenceDiagrams.iterator(); 
 		while (its.hasNext()) {
 			SequenceDiagram s = its.next();
@@ -161,5 +161,10 @@ public class Fragment extends SequenceDiagramElement{
 			answer.addAll(s.getTransitiveFragments());
 		}
 		return answer; 
+	}
+
+
+	public boolean addSequenceDiagram(SequenceDiagram sd) {
+		return sequenceDiagrams.add(sd);
 	}
 }

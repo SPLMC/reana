@@ -1,6 +1,6 @@
 package splSimulator;
 
-import java.io.StringWriter;
+import java.io.StringWriter; 
 import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,6 +20,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class SPL {
 
@@ -79,34 +81,15 @@ public class SPL {
 			while (ita.hasNext()) {
 				Activity a = ita.next();
 				// get all the sequence diagrams associated to the activity and
-				// add them
-				// to the set of sequence diagrams.
+				// add them to the set of sequence diagrams.
 				setOfSequenceDiagrams.addAll(a.getTransitiveSequenceDiagram());
 				setOfLifelines.addAll(a.getTranstiveLifelines());
 				setOfFragments.addAll(a.getTransitiveFragments()); 
-				// setOfFragments.addAll(a.getTransitiveFragments());
-				// setOfLifelines.addAll(a.getTransitiveLifelines());
-				// As each sequence diagram may have one or more fragments
-				// inside it, and
-				// each fragment is defined by at least one sequence diagram,
-				// next step is
-				// to get all the fragmens and sequence diagrams associated with
-				// it.
 			}
 
 			Iterator<SequenceDiagram> its = setOfSequenceDiagrams.iterator();
-			// while(its.hasNext()) {
-			// SequenceDiagram d = its.next();
-			// setOfFragments.addAll(d.getFragments());
-			// setOfLifelines.addAll(d.getLifelines());
-			// Iterator<Fragment> itf = setOfFragments.iterator();
-			// while (itf.hasNext()) {
-			// Fragment f = itf.next();
-			// setOfSequenceDiagrams.addAll(f.getSequenceDiagrams());
-			// }
-			// }
 
-			Element domSeqDiagram = doc.createElement("SequenceDiagrams");
+			Element domSeqDiagram = doc.createElement("SequenceDiagrams"); 
 			its = setOfSequenceDiagrams.iterator();
 			while (its.hasNext()) {
 				SequenceDiagram d = its.next();
@@ -162,6 +145,45 @@ public class SPL {
 
 	public ActivityDiagram getActivityDiagram() {
 		return ad;
+	}
+
+	
+	public static SPL getSplFromXml(String fileName) {
+		
+		try {
+			File xmlFile = new File(fileName); 
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance(); 
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder(); 
+			Document doc = dBuilder.parse(xmlFile);
+			
+			//get the root element and extract the SPL name from it 
+			Element root = doc.getDocumentElement(); 
+			Node nSplName = root.getAttributeNode("name"); 
+			String splName = nSplName.getNodeValue(); 
+			instance = new SPL(splName);
+			
+			//Call the parser of sequence diagrams elements initially, so it allows to 
+			//create in memory all the objects representing the SPL's sequence diagrams.
+			//Later, such objects will be linked to Activity Diagrams objects. 
+			SequenceDiagramParser.parse(doc);
+			
+			//build the activity diagram from the <ActivityDiagram> tag.
+			NodeList nActivityDiagram = root.getElementsByTagName("ActivityDiagram");
+			ActivityDiagram a = ActivityDiagramParser.parse(doc); 
+			instance.ad = a;
+			
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		
+
+		return instance;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 }

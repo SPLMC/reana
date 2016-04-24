@@ -6,6 +6,7 @@ import java.util.List;
 //import java.util.Vector;
 
 
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,7 +20,6 @@ public class ActivityDiagram {
 	 * An activity diagram is composed of a set of ActivityDiagramElements, 
 	 * disposed in a sequential order. 
 	 */
-//	private Vector<ActivityDiagramElement> elements;
 	private List<ActivityDiagramElement> setOfElements;
 	//There is only one startNode at an ActivityDiagram
 	private ActivityDiagramElement startNode;
@@ -156,5 +156,26 @@ public class ActivityDiagram {
 			}
 		}
 		return l;
+	}
+
+
+
+	public void setStartNode(StartNode sn) {
+		this.startNode = sn;
+	}
+
+
+
+	public ActivityDiagramElement getElementByName(String sourceElementName) {
+		ActivityDiagramElement answer = null;
+		Iterator<ActivityDiagramElement> it = setOfElements.iterator(); 
+		while (it.hasNext()) {
+			ActivityDiagramElement e = it.next();
+			if (e.getElementName().equals(sourceElementName)) {
+				answer = e; 
+				return answer;
+			}
+		}
+		return answer;
 	}
 }

@@ -23,12 +23,24 @@ public class SequenceDiagram {
 	private LinkedList<SequenceDiagramElement> elements;
 
 	public static SequenceDiagram createSequenceDiagram(String name, String guard) {
-		SequenceDiagram temp = new SequenceDiagram(name, guard);
-		sequenceDiagrams.put(name, temp);
-		if (sequenceDiagrams.containsKey(name))
-			return temp; 
-		else 
-			return null;
+		SequenceDiagram answer; 
+		if (sequenceDiagrams.containsKey(name)) { 
+			answer = sequenceDiagrams.get(name);
+//			if (answer.guardCondition != guard) {
+			if (answer.guardCondition == null) {
+				answer.setGuard(guard);
+			}
+		} else {
+			answer = new SequenceDiagram(name, guard);
+			sequenceDiagrams.put(name, answer);
+		}
+		
+		return answer;
+//		SequenceDiagram temp = new SequenceDiagram(name, guard);
+//		sequenceDiagrams.put(name, temp);
+//			return temp; 
+//		else 
+//			return null;
 	}
 
 
@@ -128,62 +140,6 @@ public class SequenceDiagram {
 		else 
 			return null;
 	}
-
-	
-//	public static Element getDOM(Document doc) {
-//		Element root = doc.createElement("SequenceDiagrams"); 
-//
-//		//1st step: create the elements related to the lifelines used in all sequence diagrams
-//		//Create the DOM object representing the lifelines
-//		Element lifelines = doc.createElement("Lifelines");
-//		Element fragments = doc.createElement("Fragments");
-//		Iterator <SequenceDiagramElement> itl = SequenceDiagramElement.elements.values().iterator(); 
-//		Element life; 
-//		Element fragment; 
-//		while (itl.hasNext()) {
-//			SequenceDiagramElement e = itl.next();
-//			if (e.getClass().getSimpleName().equals("Lifeline")) {
-//				Lifeline l = (Lifeline) e;
-//				life = doc.createElement("Lifeline"); 
-//				life.setAttribute("name", l.getName());
-//				life.setAttribute("reliability", Double.toString(l.getReliability()));
-//				lifelines.appendChild(life);
-//			}
-//			//2nd step: create the elements related to the fragments present a the sequence diagram 
-//			if (e.getClass().getSimpleName().equals("Fragment")) {
-//				Fragment f = (Fragment) e; 
-//				fragment = f.getDOM(doc); 
-//				fragments.appendChild(fragment);
-//			}
-//		}
-//		
-//		
-//		
-//		//3rd step: create the elements related to each sequence diagram created for the software product line
-//		//Create the DOM object representing the set of sequence diagrams
-//		Iterator <SequenceDiagram> its = SequenceDiagram.sequenceDiagrams.values().iterator();
-//		Element sd; 
-//		while (its.hasNext()) {
-//			SequenceDiagram s = its.next(); 
-//			sd = doc.createElement("SequenceDiagram");
-//			sd.setAttribute("name", s.getName());
-//			sd.setAttribute("guard", s.getGuardCondition());
-//			
-//			Iterator<SequenceDiagramElement> ite = s.elements.iterator(); 
-//			while(ite.hasNext()) {
-//				SequenceDiagramElement el = ite.next(); 
-//				Element e = el.getDOM(doc); 
-//				sd.appendChild(e);
-//			}
-//			
-//			root.appendChild(sd);
-//		}
-//		
-//		//Linking the DOM objects to the root element
-//		root.appendChild(lifelines);
-//		root.appendChild(fragments);
-//		return root;
-//	}
 	
 	
 	public Element getDOM(Document doc) {
@@ -213,19 +169,18 @@ public class SequenceDiagram {
 		Iterator<SequenceDiagramElement> it = elements.iterator(); 
 		while (it.hasNext()) {
 			SequenceDiagramElement e = it.next();
-//			System.out.println(e.getClass().getSimpleName());
 			if (e.getClass().getSimpleName().equals("Fragment")) {
 				Fragment f = (Fragment) e; 
 				setOfFragments.add(f); 
 			}
 		}
-//		System.out.println("setOfFragments's size: " + setOfFragments.size());
 		return setOfFragments;
 	}
 
 
-	public HashSet<SequenceDiagram> getTransitiveSequenceDiagram() {
-		HashSet<SequenceDiagram> answer = new HashSet<SequenceDiagram>(); 
+	
+	public LinkedList<SequenceDiagram> getTransitiveSequenceDiagram() {
+		LinkedList<SequenceDiagram> answer = new LinkedList<SequenceDiagram>();
 		HashSet<Fragment> fragments = getFragments(); 
 		Iterator<Fragment> itf = fragments.iterator();
 		while (itf.hasNext()) {
@@ -260,5 +215,28 @@ public class SequenceDiagram {
 		}
 		
 		return answer;
+	}
+
+
+	public SequenceDiagramElement getMessageByName(String name) {
+		SequenceDiagramElement answer = null; 
+		Iterator<SequenceDiagramElement> it = elements.iterator(); 
+		while (it.hasNext()) {
+			SequenceDiagramElement e = it.next();
+			if (e.getName().equals(name)){
+				answer = e; 
+				break; 
+			}
+		}
+		return answer;
+	}
+
+
+	public Fragment addFragment(Fragment frag) {
+		boolean answer = elements.add(frag); 
+		if (answer) 
+			return frag;
+		else 
+			return null;		
 	}
 }
