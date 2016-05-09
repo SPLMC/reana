@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<SplBehavioralModel name="spl2">
+	<ActivityDiagram name="ad1">
+		<Elements>
+			<ActivityDiagramElement name="Start node"
+				type="StartNode" />
+			<ActivityDiagramElement name="Activity 1"
+				type="Activity">
+				<RepresentedBy seqDiagName="simpleDiagram" />
+			</ActivityDiagramElement>
+			<ActivityDiagramElement name="End node" type="EndNode" />
+		</Elements>
+		<Transitions>
+			<Transition name="T1" probability="1.0" source="Start node"
+				target="Activity 1" />
+			<Transition name="T2" probability="1.0" source="Activity 1"
+				target="End node" />
+		</Transitions>
+	</ActivityDiagram>
+	<SequenceDiagrams>
+		<SequenceDiagram guard="true" name="simpleDiagram">
+			<Message name="Message1" probability="0.999" source="Lifeline1"
+				target="Lifeline2" type="synchronous" />
+			<Message name="Message2" probability="0.999" source="Lifeline2"
+				target="Lifeline3" type="asynchronous" />
+			<Message name="Message3" probability="0.999" source="Lifeline3"
+				target="Lifeline3" type="synchronous" />
+			<Message name="reply" probability="0.999" source="Lifeline3"
+				target="Lifeline1" type="reply" />
+		</SequenceDiagram>
+		<Lifelines>
+			<Lifeline name="Lifeline3" reliability="0.0" />
+			<Lifeline name="Lifeline2" reliability="0.0" />
+			<Lifeline name="Lifeline1" reliability="0.0" />
+		</Lifelines>
+		<Fragments />
+	</SequenceDiagrams>
+</SplBehavioralModel>

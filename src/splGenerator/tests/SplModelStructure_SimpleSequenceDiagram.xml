@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<SplBehavioralModel name="spl1">
+	<ActivityDiagram name="ad1">
+		<Elements>
+			<ActivityDiagramElement name="Start node 1" type="StartNode" />
+			<ActivityDiagramElement name="Activity 1" type="Activity" />
+			<ActivityDiagramElement name="Activity 2" type="Activity" />
+			<ActivityDiagramElement name="Activity 3" type="Activity" />
+			<ActivityDiagramElement name="Activity 4" type="Activity" />
+			<ActivityDiagramElement name="Activity 5" type="Activity" />
+			<ActivityDiagramElement name="Activity 6" type="Activity" />
+			<ActivityDiagramElement name="Decision Node 1" type="DecisionNode" />
+			<ActivityDiagramElement name="Merge Node 1" type="MergeNode" />
+			<ActivityDiagramElement name="End Node 1" type="EndNode" />
+		</Elements>
+		<Transitions>
+			<Transition name="T1" probability="1.0" source="Start node 1" target="Activity 1" />
+			<Transition name="T2" probability="1.0" source="Activity 1" target="Activity 2" />
+			<Transition name="T3" probability="1.0" source="Activity 2" target="Decision Node 1" />
+			<Transition name="T4" probability="1.0" source="Decision Node 1" target="Activity 3" />
+			<Transition name="T5" probability="1.0" source="Decision Node 1" target="Activity 4" />
+			<Transition name="T6" probability="1.0" source="Decision Node 1" target="Activity 5" />
+			<Transition name="T7" probability="1.0" source="Activity 3" target="Merge Node 1" />
+			<Transition name="T8" probability="1.0" source="Activity 4" target="Merge Node 1" />
+			<Transition name="T9" probability="1.0" source="Activity 5" target="Merge Node 1" />
+			<Transition name="T10" probability="1.0" source="Merge Node 1" target="Activity 6" />
+			<Transition name="T11" probability="1.0" source="Activity 6" target="End Node 1" />
+		</Transitions>
+	</ActivityDiagram>
+	<SequenceDiagrams>
+		<Lifelines>
+			<Lifeline name="Lifeline1" reliability="0.999"/>
+			<Lifeline name="Lifeline2" reliability="0.999"/>
+			<Lifeline name="Lifeline3" reliability="0.999"/>
+			<Lifeline name="Lifeline4" reliability="0.999"/>
+		</Lifelines>
+		<SequenceDiagram name="simpleDiagram" guard="true">
+			<message type="synchronous" source="Lifeline1" target="Lifeline2" probability="0.999" name="Message1"/>
+			<message type="asynchronous" source="Lifeline2" target="Lifeline3" probability="0.999" name="Message2"/>
+			<message type="synchronous" source="Lifeline3" target="Lifeline3" probability="0.999" name="Message3"/>
+			<message type="reply" source="Lifeline3" target="Lifeline1" probability="0.999" name="reply"/>
+		</SequenceDiagram>
+	</SequenceDiagrams>
+</SplBehavioralModel>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<SplBehavioralModel name="spl3">
+	<ActivityDiagram name="ad1">
+		<Elements>
+			<ActivityDiagramElement name="Start node"
+				type="StartNode" />
+			<ActivityDiagramElement name="Activity 1"
+				type="Activity">
+				<RepresentedBy seqDiagName="seqDiagWithOptionalFragment" />
+			</ActivityDiagramElement>
+			<ActivityDiagramElement name="End node" type="EndNode" />
+		</Elements>
+		<Transitions>
+			<Transition name="T1" probability="1.0" source="Start node"
+				target="Activity 1" />
+			<Transition name="T2" probability="1.0" source="Activity 1"
+				target="End node" />
+		</Transitions>
+	</ActivityDiagram>
+	<SequenceDiagrams>
+		<SequenceDiagram guard="true" name="seqDiagWithOptionalFragment">
+			<Message name="Message1" probability="0.999" source="Lifeline1"
+				target="Lifeline2" type="synchronous" />
+			<Fragment name="CombinedFragment1" type="optional">
+				<RepresentedBy seqDiagName="CombinedFragment1 - row1" />
+			</Fragment>
+			<Message name="reply2" probability="0.999" source="Lifeline2"
+				target="Lifeline1" type="reply" />
+		</SequenceDiagram>
+		<SequenceDiagram guard="g" name="CombinedFragment1 - row1">
+			<Message name="Message2" probability="0.999" source="Lifeline2"
+				target="Lifeline3" type="synchronous" />
+			<Message name="reply1" probability="0.999" source="Lifeline3"
+				target="Lifeline2" type="reply" />
+		</SequenceDiagram>
+		<Lifelines>
+			<Lifeline name="Lifeline3" reliability="0.0" />
+			<Lifeline name="Lifeline2" reliability="0.0" />
+			<Lifeline name="Lifeline1" reliability="0.0" />
+		</Lifelines>
+		<Fragments>
+			<Fragment name="CombinedFragment1" type="optional">
+				<RepresentedBy seqDiagName="CombinedFragment1 - row1" />
+			</Fragment>
+		</Fragments>
+	</SequenceDiagrams>
+</SplBehavioralModel>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<SplBehavioralModel name="spl4">
+	<ActivityDiagram name="ad1">
+		<Elements>
+			<ActivityDiagramElement name="Start node"
+				type="StartNode" />
+			<ActivityDiagramElement name="Activity 1"
+				type="Activity">
+				<RepresentedBy seqDiagName="seqDiagWithAlternativeFragment" />
+			</ActivityDiagramElement>
+			<ActivityDiagramElement name="End node" type="EndNode" />
+		</Elements>
+		<Transitions>
+			<Transition name="T1" probability="1.0" source="Start node"
+				target="Activity 1" />
+			<Transition name="T2" probability="1.0" source="Activity 1"
+				target="End node" />
+		</Transitions>
+	</ActivityDiagram>
+	<SequenceDiagrams>
+		<SequenceDiagram guard="g" name="CombinedFragment1 - option 1">
+			<Message name="Message 2" probability="0.999" source="Lifeline2"
+				target="Lifeline3" type="synchronous" />
+			<Message name="reply 1" probability="0.999" source="Lifeline3"
+				target="Lifeline2" type="reply" />
+		</SequenceDiagram>
+		<SequenceDiagram guard="h" name="CombinedFragment1 - option 2">
+			<Message name="Message 3" probability="0.999" source="Lifeline3"
+				target="Lifeline3" type="synchronous" />
+		</SequenceDiagram>
+		<SequenceDiagram guard="true"
+			name="seqDiagWithAlternativeFragment">
+			<Message name="Message 1" probability="0.999" source="Lifeline1"
+				target="Lifeline2" type="synchronous" />
+			<Fragment name="CombinedFragment1" type="alternative">
+				<RepresentedBy seqDiagName="CombinedFragment1 - option 1" />
+				<RepresentedBy seqDiagName="CombinedFragment1 - option 2" />
+			</Fragment>
+			<Message name="reply 2" probability="0.999" source="Lifeline2"
+				target="Lifeline1" type="reply" />
+		</SequenceDiagram>
+		<Lifelines>
+			<Lifeline name="Lifeline1" reliability="0.0" />
+			<Lifeline name="Lifeline2" reliability="0.0" />
+			<Lifeline name="Lifeline3" reliability="0.0" />
+		</Lifelines>
+		<Fragments>
+			<Fragment name="CombinedFragment1" type="alternative">
+				<RepresentedBy seqDiagName="CombinedFragment1 - option 1" />
+				<RepresentedBy seqDiagName="CombinedFragment1 - option 2" />
+			</Fragment>
+		</Fragments>
+	</SequenceDiagrams>
+</SplBehavioralModel>
