@@ -31,6 +31,13 @@ public class Fragment extends SequenceDiagramElement{
 	}
 
 
+	/**
+	 * This method sets the type of the fragment by the value passed to the 
+	 * type parameter. A fragment can be optional, alternative, parallel or 
+	 * loop.
+	 * @param type The values for this parameter are defined by the constants
+	 * OPTIONAL, ALTERNATIVE, PARALLEL or LOOP.
+	 */
 	public void setType(int type) {
 		this.type = type; 
 	}

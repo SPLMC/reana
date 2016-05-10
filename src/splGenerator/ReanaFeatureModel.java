@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class FeatureModel {
+public class ReanaFeatureModel {
 
 	
 	
@@ -15,19 +15,19 @@ public class FeatureModel {
 	private Feature root; 
 
 	
-	private FeatureModel() {
+	private ReanaFeatureModel() {
 		root = new Feature("Root");
 		root.setMandatory(true);
 		crossTreeConstraints = new HashSet<String>(); 
 	}
 	
-	private FeatureModel(String fmName) {
+	private ReanaFeatureModel(String fmName) {
 		this();
 		this.fmName = fmName;
 	}
 
-	public static FeatureModel createFeatureModel(String fmName) {
-		return new FeatureModel(fmName);
+	public static ReanaFeatureModel createFeatureModel(String fmName) {
+		return new ReanaFeatureModel(fmName);
 	}
 
 	public String getName() {

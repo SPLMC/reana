@@ -77,7 +77,7 @@ public class ActivityDiagram {
 		
 		while (itElements.hasNext()) {
 			e = itElements.next(); 
-			if (e.getClass().getName().equals("splSimulator.Activity")){
+			if (e.getClass().getName().equals("splGenerator.Activity")){
 				if (e.getElementName().equals(activityName))
 					a = (Activity) e;
 			}

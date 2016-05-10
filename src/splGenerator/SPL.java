@@ -25,6 +25,12 @@ import org.w3c.dom.NodeList;
 
 public class SPL {
 
+	/**
+	 * This attribute is redundant with SPLGenerator.modelsPath attribute. 
+	 * We should prune it soon.
+	 */
+	private String modelsPath = "/home/andlanna/workspace2/reana/src/splGenerator/generatedModels/";
+	
 	String name;
 	ActivityDiagram ad;
 	ConfigurationKnowledge ck;
@@ -52,9 +58,10 @@ public class SPL {
 		return instance;
 	}
 
+	
 	public String getXmlRepresentation() {
 		StringWriter answer = new StringWriter();
-		File output = new java.io.File(new String(name
+		File output = new java.io.File(new String(modelsPath + name
 				+ "_behavioral_model.xml").replaceAll("\\s+", "_"));
 
 		try {
@@ -194,6 +201,11 @@ public class SPL {
 		return name;
 	}
 
+	/**
+	 * This method is used for defining the activity diagram describing the 
+	 * coarse-grained behavior of the software product line to the SPL object.
+	 * @param ad - the activity diagram that will be assigned to the SPL object.
+	 */
 	public void setActivityDiagram(ActivityDiagram ad) {
 		this.ad = ad;
 	}

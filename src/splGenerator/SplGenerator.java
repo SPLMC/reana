@@ -1,11 +1,16 @@
 package splGenerator;
 
-import java.util.HashMap;
+import java.util.HashMap; 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
+import splar.apps.generator.FMGeneratorEngine;
+import splar.core.fm.FeatureModel;
+import splar.core.fm.FeatureTreeNode;
+
 
 public class SplGenerator {
 
@@ -24,7 +29,8 @@ public class SplGenerator {
 
 	private static SplGenerator instance = null;
 	
-	private FeatureModel fm; 
+	private ReanaFeatureModel reanaFm; 
+	private splar.core.fm.FeatureModel splarFm; 
 	private ConfigurationKnowledge ck; 
 
 	
@@ -45,9 +51,10 @@ public class SplGenerator {
 	 * represent the values of each parameter for a especific model.
 	 */
 	private int numberOfFeatures;
-	private int fragmentSize; 			// =numberOfMessages/fragments
+	private int fragmentSize = 10; 			// =numberOfMessages/fragments
 	private int numberOfActivities;		
 	private int numberOfDecisionNodes;
+	private int numberOfMergeNodes;
 	private int numberOfLifelines; 		
 	
 	
@@ -61,7 +68,7 @@ public class SplGenerator {
 	//Indexes for activity diagram elements
 	private int idxActivity;
 	private int idxActTransition;
-	private int idxDecisionNode; 
+	private int idxDecisionNode;
 	private int idxMergeNode; 
 	//Indexes for sequence diagram elements
 	private int idxSequenceDiagram;
@@ -75,7 +82,7 @@ public class SplGenerator {
 	 */
 	private HashSet<Activity> setOfActivities; 
 	private List<Fragment> listOfPendingFragments; 
-	private List<Feature>  listOfPendingFeatures; 
+	private List<Feature>  listOfPendingFeatures;
 	
 	
 	private SplGenerator() {
@@ -104,25 +111,111 @@ public class SplGenerator {
 	 * the SPL's feature model, an ActivityDiagram object containing representing
 	 * the coarse-grained behavior of a software product line which activities are
 	 * refined into their respective sequence diagrams and ConfigurationKnowledge
-	 * object representing the configuration Knowledge of the software product line.   
-	 * @param generationMethod The parameter value represents the generation method
-	 * which will be employed by the generator. The values it may assume are defi-
-	 * ned by the constants GHEZZIGENERATOR and SPLOTGENERATOR. 
+	 * object representing the configuration Knowledge of the software product line.
+	 *    
+	 * @param fmGenerationMethod The parameter value represents the FM generation 
+	 * method which will be employed by the generator. The values it may assume are 
+	 * defined by the constants GHEZZIGENERATOR and SPLOTGENERATOR.
+	 *  
+	 * @param modelsCorrespondence The parameter value represents the resemblance
+	 * between feature model and behavioral models. The SYMMETRIC value means the 
+	 * FM's topology is used as basis for creating the SPL's behavioral models. 
+	 * 
 	 * @return the SPL object representing the whole software product line, and its
 	 * artifacts.
 	 */
-	public SPL generateSPL(int generationMethod) {
-		SPL spl = null;
-		return spl;
+	public SPL generateSPL(int fmGenerationMethod, int modelsCorrespondence) {
+		SPL spl = SPL.createSPL("SPL_model_" + idxModel++);
+		SequenceDiagram sdRoot = null;
+		ActivityDiagram ad = generateActivityDiagramStructure();
+		spl.setActivityDiagram(ad);
+		
+		//creating the sequence diagrams elements before creating the sequence
+		//diagrams
+		for (int i=0; i<numberOfLifelines; i++) {
+			SequenceDiagramElement.createElement(SequenceDiagramElement.LIFELINE, 
+					"Lifeline" + idxLifeline++);
+		}
+
+		
+		//generate the Sequence Diagram related to the Root feature
+		FeatureModel fm = (FeatureModel) generateFeatureModel(fmGenerationMethod);
+		//generate the Sequence Diagram related to the Root feature
+		FeatureTreeNode root = fm.getRoot(); 
+
+		
+		//creating the fragments of the sequence diagram, one fragment by feature
+		for (int i=0; i<fm.countFeatures(FeatureModel.SOLITAIRE_AND_GROUPED); i++) {
+			Fragment f = (Fragment) Fragment.createElement(
+					SequenceDiagramElement.FRAGMENT, "Fragment_" + idxFragment++);
+			f.setType(Fragment.OPTIONAL);
+			listOfPendingFragments.add(f);
+		}
+		
+		if (modelsCorrespondence == SplGenerator.SYMMETRIC) {
+			Fragment frRoot = symmetricModelsCreation(root);
+			sdRoot = frRoot.getSequenceDiagrams().getFirst(); 
+		}
+		
+		//Respecting the Feature Model's topology, let's assign a sequence diagram 
+		//for each feature. Considering leaf features do not have variability, they
+		//will be represented by a "basic" sequence diagram. Otherwise, features who
+		//have children will be represented by variable sequence diagrams. 
+			
+		Activity a = ad.getActivityByName("Activity_0");
+		a.addSequenceDiagram(sdRoot);
+		
+		return spl;	
 	}
 	
+	/**
+	 * This method creates a sequence diagram whose structure formed by the which
+	 * compose them, resembles to the sub-tree of the feature model for the feature
+	 * passed by parameter. Therefore, if a leaf node is passed by argument, a 
+	 * single and basic sequence diagram inside a fragment is returned. If an 
+	 * intermediate feature of the feature model is passed by parameter, a sequence
+	 * diagram representing the structure of the feature's subtree is returned, 
+	 * such that each feature has an associated fragment that contains its sequence
+	 * diagram (basic in case of leaf features, variable in case of other intermedia
+	 * te features). If the root node is passed by the parameter, the returned
+	 * sequence diagram's structure resembles the topology of the whole feature model.
+	 * 
+	 * @param feature the feature diagram passed by parameter.
+	 * @return the sequence diagram structure randomly generated.
+	 */
+	private Fragment symmetricModelsCreation(FeatureTreeNode feature) {
+		Fragment fr = randomFragment();
+		SequenceDiagram sd = randomSequenceDiagram("SD_" + idxSequenceDiagram++, feature.getName());
+		fr.addSequenceDiagram(sd); 
+		ck.associateArtifact(feature, sd);
+		
+		for (int i=0; i<feature.getChildCount(); i++) {
+			FeatureTreeNode fc = (FeatureTreeNode) feature.getChildAt(i);
+			Fragment frc = symmetricModelsCreation(fc);
+			//	insert it on a random position of root's sequence diagram
+			int position = randomPosition(sd); 
+			sd.getElements().add(position, frc); 
+		}
+		return fr;
+	}
+
 	
+	/**
+	 * This method is a factory method that returns an instance of SplGenerator
+	 * class.
+	 * @return a new instance of SplGenerator class
+	 */
 	public static SplGenerator newInstance() {
 		instance = new SplGenerator(); 
 		return instance;
 	}
 
 
+	/**
+	 * Method for setting the number of feature that will be present at the 
+	 * generated Feature Model
+	 * @param numFeatures - number of features to be created
+	 */
 	public void setNumberOfFeatures(int numFeatures) {
 		this.numberOfFeatures = numFeatures; 
 	}
@@ -133,16 +226,32 @@ public class SplGenerator {
 	}
 
 
+	/**
+	 * Method for setting the number of activities that will be present at 
+	 * the activity diagram describing the coarse-grained behavior of the 
+	 * software product line.
+	 * @param numActivities - number of activities to be created.
+	 */
 	public void setNumberOfActivities(int numActivities) {
 		this.numberOfActivities = numActivities; 		
 	}
 
 
+	/**
+	 * Method for setting the number of decision nodes that will be part of
+	 * the activity diagram describing the coarse-grained behavior of the 
+	 * software product line.
+	 * @param numDecisionNodes - number of decision nodes.
+	 */
 	public void setNumberOfDecisionNodes(int numDecisionNodes) {
 		this.numberOfDecisionNodes = numDecisionNodes; 		
 	}
 
-
+	/**
+	 * Method for setting the number of lifelines that will be used by all 
+	 * sequence diagrams that will be generated for the software product line.
+	 * @param numLifelines - number of lifeline that will be created.
+	 */
 	public void setNumberOfLifelines(int numLifelines) {
 		this.numberOfLifelines = numLifelines; 
 	}
@@ -155,7 +264,7 @@ public class SplGenerator {
 	 * @return spl - the SPL object containing the Feature and Behavioral
 	 * models of the software product line. 
 	 */
-	public SPL generateBehavioralModel(FeatureModel fm) {
+	public SPL generateBehavioralModel(ReanaFeatureModel fm) {
 		
 		SPL spl = SPL.createSPL("SPL_model_" + idxModel++);
 		ActivityDiagram ad = generateActivityDiagramStructure();
@@ -206,8 +315,8 @@ public class SplGenerator {
 	}
 
 
-	private int randomPosition(SequenceDiagram sdRoot) {
-		int tam = sdRoot.getElements().size();
+	private int randomPosition(SequenceDiagram seqDiag) {
+		int tam = seqDiag.getElements().size();
 		Random ran = new Random(); 
 		int position = ran.nextInt(tam); 
 		return position;
@@ -230,7 +339,7 @@ public class SplGenerator {
 			answer = listOfPendingFeatures.remove(i-1); 
 		} else  { 
 			//TODO Alterar depois!!!!
-			fm.getRoot();
+			reanaFm.getRoot();
 		}
 		return answer;
 	}
@@ -247,6 +356,7 @@ public class SplGenerator {
 	private SequenceDiagram randomSequenceDiagram(String name, String guard) {
 		SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(name, guard); 
 		Lifeline source = randomLifeline();
+//		System.out.println("Fragment size = " + fragmentSize);
 		for (int i=0; i<fragmentSize; i++) {
 			Lifeline target = randomLifeline();
 			sd.createMessage(source, target, Message.SYNCHRONOUS, "T" + idxActTransition++, target.getReliability());
@@ -277,22 +387,21 @@ public class SplGenerator {
 		ActivityDiagram ad = new ActivityDiagram();
 		ad.setName("AD_SPL_" + idxModel);
 		
-		setOfActivities = new HashSet<Activity>();
-		for (int i=0; i<numberOfActivities; i++) {
-			Activity a = new Activity("Activity_" + idxActivity++);
-			ad.addElement(a);
-		}
-		
-		Iterator<Activity> it = setOfActivities.iterator();
 		ActivityDiagramElement source = ad.getStartNode(), 
-				               target; 
-		while(it.hasNext()) {
-			target = it.next();
-			source.createTransition(target, "T" + idxActTransition, 1);
+				               target = null;
+		for (int i=0; i<numberOfActivities; i++) {
+			target = ActivityDiagramElement.createElement(
+					ActivityDiagramElement.ACTIVITY, "Activity_" + idxActivity++);
+			Transition t = source.createTransition(target, "T_" + idxActTransition++, 1); 
+			ad.addElement(target);
+			ad.addElement(t);
 			source = target; 
 		}
+		
 		target = ActivityDiagramElement.createElement(ActivityDiagramElement.END_NODE, "EndNode");
-		ad.addElement(target); 
+		Transition t = source.createTransition(target, "T_", idxActTransition++);
+		ad.addElement(target);
+		ad.addElement(t);
 		
 		return ad; 
 	}
@@ -307,40 +416,77 @@ public class SplGenerator {
 	 * @return fm - a Feature Model object representing the whole Feature Model, 
 	 * including its crosstree constraints. 
 	 */
-	public FeatureModel generateFeatureModel(int generatorAlgorithm) { 
+	public Object generateFeatureModel(int generatorAlgorithm) {
+		Object answer = null; 
+		
 		switch (generatorAlgorithm) {
 		case GHEZZIGENERATOR:
-			fm = generateGhezziFeatureModel(); 
+			//TODO change for using the SPLAR engine
+//			reanaFm = generateGhezziFeatureModel();
+			reanaFm = null;
+			answer = reanaFm;  
 			break;
 
 		default:
-			fm = generateSplotFeatureModel(); 
+			splarFm = generateSplotFeatureModel();
+			answer = splarFm;
 			break;
 		}
 		
-//		fm.persistXMLFile();
+		return answer;
+	}
+
+	/**
+	 * This method sets the parameters of the SPLAR feature models generator, 
+	 * and starts the automatic generation of the feature model. 
+	 * @return - the random feature model created by the SPLAR generator engine
+	 */
+	private splar.core.fm.FeatureModel generateSplotFeatureModel() {
+		FMGeneratorEngine engine = FMGeneratorEngine.getInstance();
 		
+		//setting SPLAR Collection's parameters
+		engine.setCollectionName(fmFilePrefix + "myCollection");
+		engine.setCollectionSize(1);
+		engine.setCollectionPath(modelsPath);
+		
+		//setting SPLAR Feature Tree Information's parameters
+		engine.setFeatureModelSize(numberOfFeatures);
+		engine.setMandatoryPercentage(25);
+		engine.setOptionalPercentage(25);
+		engine.setInclusiveORPercentage(25);
+		engine.setExclusiveORPercentage(25);
+		engine.setMinimumBranchingFactor(1);
+		engine.setMaximumBranchingFactor(5);
+		engine.setMaximumGroupSize(5);
+		
+		//setting SPLAR Cross-tree's constraints parameters
+		engine.setCTCR(30);
+		engine.setClauseDensity(0.5f);
+		engine.setModelConsistency(1);
+		
+		
+		List<FeatureModel> featureModels = engine.run2(FMGeneratorEngine.FEATUREIDE_FORMAT);
+		FeatureModel fm = featureModels.get(0);
 		return fm;
 	}
 
 
-	private FeatureModel generateSplotFeatureModel() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	private FeatureModel generateGhezziFeatureModel() {
-		FeatureModel tmp = FeatureModel.createFeatureModel("FeatureModel_" + idxModel++);
+	private ReanaFeatureModel generateGhezziFeatureModel() {
+		ReanaFeatureModel tmp = ReanaFeatureModel.createFeatureModel("FeatureModel_" + idxModel++);
 		Feature root = tmp.getRoot(); 
 		root.setType(Feature.OR);
 		root.setAbstract(Feature.ABSTRACT);
-//		System.out.println("root" + root);
 		for (int i=0; i<numberOfFeatures; i++) {
 			Feature f = root.addChild("Feature_" + idxFeature++, Feature.ALTERNATIVE, Feature.MANDATORY, Feature.ABSTRACT, !Feature.HIDDEN);
 			listOfPendingFeatures.add(f); 
 		}
 		return tmp;
+	}
+
+
+	public splar.core.fm.FeatureModel getSplotFM() {
+		
+		return this.splarFm;
 	}
 
 

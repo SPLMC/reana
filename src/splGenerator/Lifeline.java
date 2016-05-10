@@ -11,6 +11,7 @@ public class Lifeline extends SequenceDiagramElement{
 	
 	public Lifeline(String name) {
 		super(name);
+		reliability = 0.999;
 	}
 	
 	

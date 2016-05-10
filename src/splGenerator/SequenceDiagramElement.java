@@ -16,7 +16,18 @@ public abstract class SequenceDiagramElement {
 	//Sequence Diagram Element's attributes
 	private String name;
 
-	
+	/**
+	 * This method creates all the elements that a sequence diagram can use for
+	 * representing the software behavior. All the objects created by this class
+	 * have type equals to its subclasses, like Lifeline, Message and Fragment. 
+	 * For creating an object of such type, it is necessary to inform which 
+	 * object to instantiate by the parameter type. This method is a factory 
+	 * method. All created elements remains stored in the class. 
+	 * @param type The type of the object that will be created. Its value can be
+	 * LIFELINE, MESSAGE or FRAGMENT. 
+	 * @param name The name of the element that will be created. 
+	 * @return the object just created. 
+	 */
 	public static SequenceDiagramElement createElement(int type, String name) {
 		SequenceDiagramElement e = null; 
 		switch (type) {
