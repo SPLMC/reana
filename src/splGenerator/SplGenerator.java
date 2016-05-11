@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import com.sun.xml.internal.ws.api.pipe.NextAction;
+
 import splar.apps.generator.FMGeneratorEngine;
 import splar.core.fm.FeatureModel;
 import splar.core.fm.FeatureTreeNode;
@@ -125,25 +127,19 @@ public class SplGenerator {
 	 * artifacts.
 	 */
 	public SPL generateSPL(int fmGenerationMethod, int modelsCorrespondence) {
-		SPL spl = SPL.createSPL("SPL_model_" + idxModel++);
-		SequenceDiagram sdRoot = null;
-		ActivityDiagram ad = generateActivityDiagramStructure();
-		spl.setActivityDiagram(ad);
-		
+		//1st step: generate the feature model of the whole Software Product Line, 
+		//as the generation method choosed.
+		FeatureModel fm = (FeatureModel) generateFeatureModel(fmGenerationMethod);
+		FeatureTreeNode root = fm.getRoot();
+
+		//2nd step: create the UML behavioral elements according to the parameters
+		//defined by the user.
 		//creating the sequence diagrams elements before creating the sequence
 		//diagrams
 		for (int i=0; i<numberOfLifelines; i++) {
 			SequenceDiagramElement.createElement(SequenceDiagramElement.LIFELINE, 
 					"Lifeline" + idxLifeline++);
 		}
-
-		
-		//generate the Sequence Diagram related to the Root feature
-		FeatureModel fm = (FeatureModel) generateFeatureModel(fmGenerationMethod);
-		//generate the Sequence Diagram related to the Root feature
-		FeatureTreeNode root = fm.getRoot(); 
-
-		
 		//creating the fragments of the sequence diagram, one fragment by feature
 		for (int i=0; i<fm.countFeatures(FeatureModel.SOLITAIRE_AND_GROUPED); i++) {
 			Fragment f = (Fragment) Fragment.createElement(
@@ -152,19 +148,44 @@ public class SplGenerator {
 			listOfPendingFragments.add(f);
 		}
 		
+		//3rd step: create the activity diagram describing the coarse-grained 
+		//behavior of the software product line. 
+		ActivityDiagram ad = generateActivityDiagramStructure();
+		
+		//4th step: assign the initial elements to the SPL object 
+		SPL spl = SPL.createSPL("SPL_model_" + idxModel++);
+		spl.setFeatureModel(fm); 
+		spl.setActivityDiagram(ad);
+		
+		//5th step: generate the behavioral models. 
+		SequenceDiagram sdRoot = null;
 		if (modelsCorrespondence == SplGenerator.SYMMETRIC) {
-			Fragment frRoot = symmetricModelsCreation(root);
-			sdRoot = frRoot.getSequenceDiagrams().getFirst(); 
+			if (ad.getSetOfActivities().size() == 1) { 
+				//in case there's only one activity in activity diagram, its associated sequence
+				//diagram respects fully the FM's structure
+				Fragment frRoot = symmetricModelsCreation(root);
+				sdRoot = frRoot.getSequenceDiagrams().getFirst(); 
+				Activity a = ad.getActivityByName("Activity_0"); 
+				a.addSequenceDiagram(sdRoot);
+			} else {
+				//in case the number of activities is different of the number of first-level features, 
+				//the first-level features will be assigned randomly for one activity, such as the 
+				//resulting sequence diagram follows Feature Model's topology.
+				List<FeatureTreeNode> remainingFeatures = fm.getNodesAtLevel(1);
+				int actDiag = 0;
+				while (remainingFeatures.size() > 0) {
+					//associating features to "additional" activities
+					Random r = new Random(); 
+					int j = r.nextInt(remainingFeatures.size());
+					FeatureTreeNode f = remainingFeatures.remove(j); 
+					Fragment frFeature = symmetricModelsCreation(f);
+					Activity a = ad.getActivityByName("Activity_" + actDiag); 
+					a.getSequenceDiagrams().getFirst().addFragment(frFeature);
+					actDiag = (actDiag + 1) % ad.getSetOfActivities().size();
+				}				
+				sdRoot = randomSequenceDiagram("SD_" + idxSequenceDiagram++, "true");				
+			}
 		}
-		
-		//Respecting the Feature Model's topology, let's assign a sequence diagram 
-		//for each feature. Considering leaf features do not have variability, they
-		//will be represented by a "basic" sequence diagram. Otherwise, features who
-		//have children will be represented by variable sequence diagrams. 
-			
-		Activity a = ad.getActivityByName("Activity_0");
-		a.addSequenceDiagram(sdRoot);
-		
 		return spl;	
 	}
 	
@@ -324,7 +345,8 @@ public class SplGenerator {
 
 
 	private Fragment randomFragment() {
-		Random ran = new Random(); 
+		Random ran = new Random();
+		System.out.println("|listOfPendingFragments|=" + listOfPendingFragments.size());
 		int i = ran.nextInt(listOfPendingFragments.size()); 
 		Fragment f = listOfPendingFragments.remove(i);
 		return f;
@@ -379,29 +401,57 @@ public class SplGenerator {
 	 * diagram representing the coarse-grained behavior of the software product
 	 * line. Currently it is only creating sequential activity diagrams, but 
 	 * soon it will be changed for creating random and more complex structures.
+	 * If no number of activities is initially informed by the user, the number
+	 * of activities will be equal to the number of features present at 1st 
+	 * level of the feature model. 
 	 * @return The ActivityDiagram object representing the SPL's activity 
 	 * diagram.
 	 */
 	private ActivityDiagram generateActivityDiagramStructure() {
-		//TODO Change the method for creating random and more complex ADs. 
 		ActivityDiagram ad = new ActivityDiagram();
 		ad.setName("AD_SPL_" + idxModel);
+		//1st step: create the number of activities according to the user's choice
+		//number of activities will be equal to the number of features present
+		//at first level of the feature model.
+		if (numberOfActivities == 0) {
+			int num1stLevelFeatures = splarFm.getNodesAtLevel(1).size(); 
+			for (int i=0; i<num1stLevelFeatures; i++) {
+				ActivityDiagramElement e = ActivityDiagramElement.createElement(
+						ActivityDiagramElement.ACTIVITY, "Activity_" + idxActivity++);
+				ad.addElement(e);
+			}
+		}  else { //otherwise the number of generated activities will be equal to 
+			      //the number informed by the user.
+			for (int i=0; i<numberOfActivities; i++) {
+				ActivityDiagramElement e = ActivityDiagramElement.createElement(
+						ActivityDiagramElement.ACTIVITY, "Activity_" + idxActivity++);
+				ad.addElement(e);
+			}
+		}
 		
+		
+		//2nd step: create a linear activity diagram structure. 
 		ActivityDiagramElement source = ad.getStartNode(), 
-				               target = null;
-		for (int i=0; i<numberOfActivities; i++) {
-			target = ActivityDiagramElement.createElement(
-					ActivityDiagramElement.ACTIVITY, "Activity_" + idxActivity++);
-			Transition t = source.createTransition(target, "T_" + idxActTransition++, 1); 
-			ad.addElement(target);
+				target = null;
+		for (int i=0; i<ad.getSetOfActivities().size(); i++) {
+			target = ad.getActivityByName("Activity_" + i);
+			Transition t = source.createTransition(target, "Trans_" + idxActTransition++, 1);
 			ad.addElement(t);
 			source = target; 
 		}
-		
 		target = ActivityDiagramElement.createElement(ActivityDiagramElement.END_NODE, "EndNode");
-		Transition t = source.createTransition(target, "T_", idxActTransition++);
+		Transition t = source.createTransition(target, "Trans_" + idxActTransition++, 1);
 		ad.addElement(target);
 		ad.addElement(t);
+		
+		//3rd step: ensure each activity has an empty sequence diagram associated with it
+		for (Activity a : ad.getSetOfActivities()) {
+//			SequenceDiagram s = SequenceDiagram.createSequenceDiagram(
+//					"SD_" + idxSequenceDiagram++, 
+//					"true");
+			SequenceDiagram s = randomSequenceDiagram("SD_" + idxSequenceDiagram++, "true");
+			a.addSequenceDiagram(s);
+		}
 		
 		return ad; 
 	}
@@ -432,7 +482,6 @@ public class SplGenerator {
 			answer = splarFm;
 			break;
 		}
-		
 		return answer;
 	}
 

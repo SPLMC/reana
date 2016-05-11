@@ -23,6 +23,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import splar.core.fm.FeatureModel;
+
 public class SPL {
 
 	/**
@@ -31,7 +33,9 @@ public class SPL {
 	 */
 	private String modelsPath = "/home/andlanna/workspace2/reana/src/splGenerator/generatedModels/";
 	
+	
 	String name;
+	FeatureModel fm;
 	ActivityDiagram ad;
 	ConfigurationKnowledge ck;
 
@@ -208,6 +212,22 @@ public class SPL {
 	 */
 	public void setActivityDiagram(ActivityDiagram ad) {
 		this.ad = ad;
+	}
+
+	/**
+	 * This method returns the FeatureModel object associated to the SPL.
+	 * @return the FeatureModel associated to the SPL.
+	 */
+	public FeatureModel getFeatureModel() {
+		return fm;
+	}
+	
+	/**
+	 * This method is used for assigning a FeatureModel object to the SPL.
+	 * @param fm
+	 */
+	public void setFeatureModel(FeatureModel fm) {
+		this.fm = fm;
 	}
 
 }
