@@ -64,7 +64,6 @@ public class ActivityDiagramParser {
 								 Element repBy = (Element) children.item(k); 
 								 NamedNodeMap attributes = repBy.getAttributes(); 
 								 String seqDiagName = attributes.getNamedItem("seqDiagName").getNodeValue(); 
-//								 SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(seqDiagName, "");
 								 SequenceDiagram sd = SequenceDiagram.getSequenceDiagramByName(seqDiagName);
 								 Activity a = (Activity) ade; 
 								 a.addSequenceDiagram(sd); 
@@ -123,9 +122,8 @@ public class ActivityDiagramParser {
 				
 				ActivityDiagramElement source = answer.getElementByName(sourceElement);
 				ActivityDiagramElement target = answer.getElementByName(targetElement);
-				source.createTransition(target, transitionName, transitionProbability);
-//				System.out.println(source + " -- " + transitionName + "/" + 
-//						transitionProbability + " --> " + target);
+				Transition t = source.createTransition(target, transitionName, transitionProbability);
+				answer.addElement(t);
 			}
 		}
 		return answer;

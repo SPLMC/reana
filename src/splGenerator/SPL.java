@@ -166,7 +166,12 @@ public class SPL {
 		return ad;
 	}
 
-	
+	/**
+	 * This method's role is to read an XML file representing the behavioral models 
+	 * of a software product line, parse its document and create the models in memory.
+	 * @param fileName the path of the file to be parsed
+	 * @return the SPL object containing the behavioral models. 
+	 */
 	public static SPL getSplFromXml(String fileName) {
 		
 		try {
