@@ -10,6 +10,7 @@ import java.util.Random;
 import com.sun.xml.internal.ws.api.pipe.NextAction;
 
 import splar.apps.generator.FMGeneratorEngine;
+import splar.core.constraints.CNFFormula;
 import splar.core.fm.FeatureModel;
 import splar.core.fm.FeatureTreeNode;
 
@@ -43,7 +44,7 @@ public class SplGenerator {
 	 */
 	private String modelsPath = "/home/andlanna/workspace2/reana/src/splGenerator/generatedModels/";
 	private String fmFilePrefix = "fm_"; 
-	private String umlFilePrefix = "uml_"; 
+	private String umlFilePrefix = "uml_";
 	
 	
 	
@@ -131,6 +132,7 @@ public class SplGenerator {
 		//as the generation method choosed.
 		FeatureModel fm = (FeatureModel) generateFeatureModel(fmGenerationMethod);
 		FeatureTreeNode root = fm.getRoot();
+		SPLFilePersistence.FM2JavaCNF(fm);
 
 		//2nd step: create the UML behavioral elements according to the parameters
 		//defined by the user.
@@ -186,6 +188,7 @@ public class SplGenerator {
 				sdRoot = randomSequenceDiagram("SD_" + idxSequenceDiagram++, "true");				
 			}
 		}
+		
 		return spl;	
 	}
 	
@@ -533,13 +536,10 @@ public class SplGenerator {
 	}
 
 
-	public splar.core.fm.FeatureModel getSplotFM() {
-		
+	public splar.core.fm.FeatureModel getSplotFM() {	
 		return this.splarFm;
 	}
 
-
-	
 
 
 }
