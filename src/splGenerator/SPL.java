@@ -196,8 +196,6 @@ public class SPL {
 			ActivityDiagram a = ActivityDiagramParser.parse(doc); 
 			instance.ad = a;
 			
-			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 

@@ -88,6 +88,7 @@ public class FDTMC {
     public State createSuccessState() {
         State success = createState();
         setSuccessState(success);
+        createTransition(success, success, "", "1.0");
         return success;
     }
 
@@ -103,6 +104,7 @@ public class FDTMC {
     public State createErrorState() {
         State error = createState();
         setErrorState(error);
+        createTransition(error, error, "", "1.0");
         return error;
     }
 
