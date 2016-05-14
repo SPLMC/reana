@@ -35,6 +35,7 @@ public class SPLFilePersistence {
 		} 	
 	}
 	
+	
 	/**
 	 * This function is responsible for creating a DOT representation for an 
 	 * FDTMC passed as an argument. The resulting graph is persisted in a DOT
@@ -46,7 +47,7 @@ public class SPLFilePersistence {
 	public static void fdtmc2Dot(FDTMC f, String name) { 
 		StringBuilder builder = new StringBuilder(); 
 		
-		builder.append("graph graphname {\n"); 
+		builder.append("digraph graphname {\n"); 
 		
 		
 		//creation of states strings
@@ -78,7 +79,7 @@ public class SPLFilePersistence {
 				String targetEntry = target.getVariableName() + target.getIndex();
 				
 				builder.append(sourceEntry); 
-				builder.append(" -- "); 
+				builder.append(" -> "); 
 				builder.append(targetEntry);
 				builder.append(" [label=\"" + t.getActionName() + " / "); 
 				builder.append(t.getProbability() + "\"");
