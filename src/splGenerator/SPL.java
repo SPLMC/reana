@@ -1,6 +1,6 @@
 package splGenerator;
 
-import java.io.StringWriter; 
+import java.io.StringWriter;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,12 +28,11 @@ import splar.core.fm.FeatureModel;
 public class SPL {
 
 	/**
-	 * This attribute is redundant with SPLGenerator.modelsPath attribute. 
-	 * We should prune it soon.
+	 * This attribute is redundant with SPLGenerator.modelsPath attribute. We
+	 * should prune it soon.
 	 */
 	private String modelsPath = "/home/andlanna/workspace2/reana/src/splGenerator/generatedModels/";
-	
-	
+
 	String name;
 	FeatureModel fm;
 	ActivityDiagram ad;
@@ -50,11 +49,12 @@ public class SPL {
 		this.ad = new ActivityDiagram();
 	}
 
-	
 	/**
 	 * This method is a factory method for instantiating a new SPL object
-	 * containing its activity diagram. 
-	 * @param name - the parameter representing the name of the SPL.
+	 * containing its activity diagram.
+	 * 
+	 * @param name
+	 *            - the parameter representing the name of the SPL.
 	 * @return The SPL object created for the SPL.
 	 */
 	public static SPL createSPL(String name) {
@@ -62,7 +62,6 @@ public class SPL {
 		return instance;
 	}
 
-	
 	public String getXmlRepresentation() {
 		StringWriter answer = new StringWriter();
 		File output = new java.io.File(new String(modelsPath + name
@@ -103,12 +102,12 @@ public class SPL {
 				// add them to the set of sequence diagrams.
 				setOfSequenceDiagrams.addAll(a.getTransitiveSequenceDiagram());
 				setOfLifelines.addAll(a.getTranstiveLifelines());
-				setOfFragments.addAll(a.getTransitiveFragments()); 
+				setOfFragments.addAll(a.getTransitiveFragments());
 			}
 
 			Iterator<SequenceDiagram> its = setOfSequenceDiagrams.iterator();
 
-			Element domSeqDiagram = doc.createElement("SequenceDiagrams"); 
+			Element domSeqDiagram = doc.createElement("SequenceDiagrams");
 			its = setOfSequenceDiagrams.iterator();
 			while (its.hasNext()) {
 				SequenceDiagram d = its.next();
@@ -167,39 +166,45 @@ public class SPL {
 	}
 
 	/**
-	 * This method's role is to read an XML file representing the behavioral models 
-	 * of a software product line, parse its document and create the models in memory.
-	 * @param fileName the path of the file to be parsed
-	 * @return the SPL object containing the behavioral models. 
+	 * This method's role is to read an XML file representing the behavioral
+	 * models of a software product line, parse its document and create the
+	 * models in memory.
+	 * 
+	 * @param fileName
+	 *            the path of the file to be parsed
+	 * @return the SPL object containing the behavioral models.
 	 */
 	public static SPL getSplFromXml(String fileName) {
-		
+
 		try {
-			File xmlFile = new File(fileName); 
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance(); 
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder(); 
+			File xmlFile = new File(fileName);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
+					.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(xmlFile);
-			
-			//get the root element and extract the SPL name from it 
-			Element root = doc.getDocumentElement(); 
-			Node nSplName = root.getAttributeNode("name"); 
-			String splName = nSplName.getNodeValue(); 
+
+			// get the root element and extract the SPL name from it
+			Element root = doc.getDocumentElement();
+			Node nSplName = root.getAttributeNode("name");
+			String splName = nSplName.getNodeValue();
 			instance = new SPL(splName);
-			
-			//Call the parser of sequence diagrams elements initially, so it allows to 
-			//create in memory all the objects representing the SPL's sequence diagrams.
-			//Later, such objects will be linked to Activity Diagrams objects. 
+
+			// Call the parser of sequence diagrams elements initially, so it
+			// allows to create in memory all the objects representing the SPL's
+			// sequence diagrams.
+			// Later, such objects will be linked to Activity Diagrams objects.
 			SequenceDiagramParser.parse(doc);
 			
-			//build the activity diagram from the <ActivityDiagram> tag.
-			NodeList nActivityDiagram = root.getElementsByTagName("ActivityDiagram");
-			ActivityDiagram a = ActivityDiagramParser.parse(doc); 
+
+			// build the activity diagram from the <ActivityDiagram> tag.
+			NodeList nActivityDiagram = root
+					.getElementsByTagName("ActivityDiagram");
+			ActivityDiagram a = ActivityDiagramParser.parse(doc);
 			instance.ad = a;
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
-		
+		}
 
 		return instance;
 	}
@@ -209,9 +214,12 @@ public class SPL {
 	}
 
 	/**
-	 * This method is used for defining the activity diagram describing the 
+	 * This method is used for defining the activity diagram describing the
 	 * coarse-grained behavior of the software product line to the SPL object.
-	 * @param ad - the activity diagram that will be assigned to the SPL object.
+	 * 
+	 * @param ad
+	 *            - the activity diagram that will be assigned to the SPL
+	 *            object.
 	 */
 	public void setActivityDiagram(ActivityDiagram ad) {
 		this.ad = ad;
@@ -219,14 +227,16 @@ public class SPL {
 
 	/**
 	 * This method returns the FeatureModel object associated to the SPL.
+	 * 
 	 * @return the FeatureModel associated to the SPL.
 	 */
 	public FeatureModel getFeatureModel() {
 		return fm;
 	}
-	
+
 	/**
 	 * This method is used for assigning a FeatureModel object to the SPL.
+	 * 
 	 * @param fm
 	 */
 	public void setFeatureModel(FeatureModel fm) {

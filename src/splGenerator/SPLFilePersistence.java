@@ -13,6 +13,7 @@ import fdtmc.State;
 import fdtmc.Transition;
 import splar.core.fm.FeatureModel;
 import sun.security.action.GetLongAction;
+import tool.RDGNode;
 
 public class SPLFilePersistence {
 
@@ -73,7 +74,6 @@ public class SPLFilePersistence {
 		//Creation of edges in graph
 		for (State s: f.getStates()) {
 			String sourceEntry = s.getVariableName() + s.getIndex();
-			System.out.println(sourceEntry);
 			for (Transition t : f.getTransitions().get(s)) {
 				State target = t.getTarget(); 
 				String targetEntry = target.getVariableName() + target.getIndex();
@@ -104,9 +104,83 @@ public class SPLFilePersistence {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
-		
 	}
 
+	
+	/**
+	 * This method is responsible to create an RDG representation using the DOT 
+	 * format. It receives an RDG node and the filename as input parameters, 
+	 * creates the DOT structure and persist it at an DOT file at the specified
+	 * folder.   
+	 * @param node the initial RDG node from where the structure will be created
+	 * @param filename the filename where the DOT structure will be persisted.
+	 */
+	public static void rdg2Dot (RDGNode node, String filename) {
+		StringBuilder builder = new StringBuilder(); 
+		
+		builder.append("digraph graphname {\n");
+		
+		String nodesDefinition = createNodeDefinition(node); 
+		builder.append(nodesDefinition);
+		
+		String edgesDefinition = createEdgeDefinition(node); 
+		builder.append(edgesDefinition);
+		
+		builder.append("}");
+		try {
+			FileWriter file = new FileWriter(modelsPath + dotFilePrefix + "RDG_" + filename + ".dot"); 
+			file.write(builder.toString());
+			file.flush();
+			file.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	private static String createEdgeDefinition(RDGNode node) {
+		StringBuilder answer = new StringBuilder();
+		
+		for (RDGNode r : node.getDependencies()) {
+			answer.append(node.getId()); 
+			answer.append(" -> "); 
+			answer.append(r.getId());
+			answer.append(";");
+			answer.append("\n");
+			
+			answer.append(createEdgeDefinition(r));
+		}
+		return answer.toString();
+	}
+
+
+	private static String createNodeDefinition(RDGNode node) {
+		StringBuilder answer = new StringBuilder(); 
+		
+		answer.append(node.getId()); 
+		answer.append("[");
+		
+		answer.append("shape=record"); 
+		answer.append(", ");
+		
+		answer.append("label=\"{");
+		answer.append("{");
+		answer.append(node.getId());
+		answer.append("|");
+		answer.append(node.getPresenceCondition());
+		answer.append("|");
+		answer.append(node.getFDTMC().getVariableName());
+		answer.append("}");
+		answer.append("}\"");
+		
+		answer.append("];");
+		answer.append("\n");
+		
+		for (RDGNode n : node.getDependencies()){
+			answer.append(createNodeDefinition(n)); 
+		}
+		return answer.toString();
+	}
 	
 
 }
