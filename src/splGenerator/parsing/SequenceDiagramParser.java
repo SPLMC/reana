@@ -1,4 +1,4 @@
-package splGenerator;
+package splGenerator.parsing;
 
 import java.util.HashMap;
 
@@ -7,6 +7,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import splGenerator.Fragment;
+import splGenerator.Lifeline;
+import splGenerator.Message;
+import splGenerator.SequenceDiagram;
+import splGenerator.SequenceDiagramElement;
 
 public class SequenceDiagramParser {
 
@@ -26,7 +32,7 @@ public class SequenceDiagramParser {
 		parseAllSequenceDiagrams(doc);
 
 		// parsing the fragments used by the sequence diagrams.
-		parseAllFragments2(doc);
+		parseAllFragments(doc);
 	}
 
 	private static void parseAllSequenceDiagrams(Document doc) {
@@ -88,7 +94,6 @@ public class SequenceDiagramParser {
 
 			// Add the sequence diagram into the set of sequence diagram created
 			// for the SPL
-			
 			seqDiagById.put(sd.getName(), sd);
 		}
 	}
@@ -129,61 +134,8 @@ public class SequenceDiagramParser {
 		sd.addFragment(f);
 	}
 
-	// private static void parseAllFragments(Document doc) {
-	// fragmentById = new HashMap<String, Fragment>();
-	//
-	// Element fragments = (Element) doc.getElementsByTagName("Fragments")
-	// .item(0);
-	// NodeList setOfFragments = fragments.getElementsByTagName("Fragment");
-	// for (int i = 0; i < setOfFragments.getLength(); i++) { // for each
-	// // fragment
-	// // found
-	// Element e = (Element) setOfFragments.item(i);
-	// String fragmentName = e.getAttribute("name");
-	// String fragmentStrType = e.getAttribute("type");
-	// int fragmentType;
-	// switch (fragmentStrType) {
-	// case "optional":
-	// fragmentType = Fragment.OPTIONAL;
-	// break;
-	//
-	// case "alternative":
-	// fragmentType = Fragment.ALTERNATIVE;
-	// break;
-	//
-	// case "parallel":
-	// fragmentType = Fragment.PARALLEL;
-	// break;
-	//
-	// case "loop":
-	// fragmentType = Fragment.LOOP;
-	// break;
-	//
-	// default:
-	// fragmentType = -1;
-	// break;
-	// }
-	//
-	// Fragment f = (Fragment) SequenceDiagramElement.createElement(
-	// SequenceDiagramElement.FRAGMENT, fragmentName);
-	// f.setType(fragmentType);
-	//
-	// fragmentById.put(fragmentName, f);
-	//
-	// NodeList setOfRepresentations = e
-	// .getElementsByTagName("RepresentedBy");
-	// for (int j = 0; j < setOfRepresentations.getLength(); j++) {
-	// Element r = (Element) setOfRepresentations.item(j);
-	// String seqDiagName = r.getAttribute("seqDiagName");
-	//
-	// SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(
-	// seqDiagName, null);
-	// f.addSequenceDiagram(sd);
-	// }
-	// }
-	// }
 
-	private static void parseAllFragments2(Document doc) {
+	private static void parseAllFragments(Document doc) {
 		Element fragments = (Element) doc.getElementsByTagName("Fragments")
 				.item(0);
 		NodeList setOfFragments = fragments.getElementsByTagName("Fragment");

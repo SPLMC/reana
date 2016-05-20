@@ -51,23 +51,29 @@ public class Transformer {
 			FDTMC f) {
 		fdtmc.State answer = null;
 
-		fdtmc.State source;
+		fdtmc.State source = null;
 		fdtmc.State isModeled;
 		String adClass = adElem.getClass().getSimpleName();
 		switch (adClass) {
 		case "StartNode":
-			source = f.createInitialState();
 			fdtmc.State error = f.createErrorState();
-			fdtmcStateById.put(adElem.getElementName(), source);
-			answer = source;
 
+			HashSet<Activity> nextActivities = new HashSet<Activity>(); 
 			for (Transition t : adElem.getTransitions()) {
-				fdtmc.State target = transformAdElement(t.getTarget(), f);
-				f.createTransition(source, target, t.getElementName(),
-						Double.toString(t.getProbability()));
-				f.createTransition(source, error, t.getElementName(),
-						Double.toString(t.getProbability()));
+				ActivityDiagramElement e = t.getTarget(); 
+				Activity a;
+				if (e instanceof Activity) {
+					a = (Activity) e;
+					nextActivities.add(a);
+				}
 			}
+			
+			for (Activity a : nextActivities) {
+				source = transformAdElement(a, f); 
+			}
+			source.setLabel(FDTMC.INITIAL_LABEL);
+			answer = source;
+			
 			break;
 
 		case "Activity":
@@ -84,14 +90,25 @@ public class Transformer {
 				}
 
 				source = f.createState();
+				HashSet<ActivityDiagramElement> nextElement = new HashSet<ActivityDiagramElement>();
 				for (Transition t : adElem.getTransitions()) {
-					fdtmc.State target = transformAdElement(t.getTarget(), f);
-					f.createTransition(source, target, t.getElementName(),
-							Double.toString(t.getProbability()));
-					f.createTransition(source, f.getErrorState(),
-							t.getElementName(),
-							Double.toString(1 - t.getProbability()));
+					ActivityDiagramElement e = t.getTarget(); 
+					nextElement.add(e); 
 				}
+				
+				for (ActivityDiagramElement e : nextElement) {
+					fdtmc.State target = transformAdElement(e, f); 
+					f.createTransition(source, target, a.getElementName(), "r" + a.getElementName()); 
+					f.createTransition(source, f.getErrorState(), a.getElementName(), "1-r" + a.getElementName());
+				}
+//				for (Transition t : adElem.getTransitions()) {
+//					fdtmc.State target = transformAdElement(t.getTarget(), f);
+//					f.createTransition(source, target, t.getElementName(),
+//							Double.toString(t.getProbability()));
+//					f.createTransition(source, f.getErrorState(),
+//							t.getElementName(),
+//							Double.toString(1 - t.getProbability()));
+//				}
 				fdtmcStateById.put(adElem.getElementName(), source);
 				answer = source;
 			} else
@@ -133,7 +150,7 @@ public class Transformer {
 
 		case "MergeNode":
 			// 1st.: Check of the merge node is already modeled and its FDTMC is
-			// already avaialable
+			// already available
 			isModeled = fdtmcStateById.get(adElem.getElementName());
 			if (isModeled == null) {
 				source = f.createState();

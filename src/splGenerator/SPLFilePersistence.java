@@ -12,7 +12,7 @@ import fdtmc.FDTMC;
 import fdtmc.State;
 import fdtmc.Transition;
 import splar.core.fm.FeatureModel;
-import sun.security.action.GetLongAction;
+import splar.core.fm.FeatureTreeNode;
 import tool.RDGNode;
 
 public class SPLFilePersistence {
@@ -59,13 +59,13 @@ public class SPLFilePersistence {
 			
 			if (s.getLabel() != null){
 				if (s.getLabel().equals("initial")) {
-					builder.append(",color=blue");
+					builder.append(",color=blue,shape=doublecircle");
 				}
 				if (s.getLabel().equals("success")) {
-					builder.append(",color=green");
+					builder.append(",color=green,shape=doublecircle");
 				}
 				if (s.getLabel().equals("error")){
-					builder.append(",color=red");
+					builder.append(",color=red,shape=doublecircle");
 				}
 			}
 			builder.append(" ];\n");

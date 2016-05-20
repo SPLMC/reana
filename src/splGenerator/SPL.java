@@ -23,6 +23,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import splGenerator.parsing.ActivityDiagramParser;
+import splGenerator.parsing.SequenceDiagramParser;
 import splar.core.fm.FeatureModel;
 
 public class SPL {
@@ -194,7 +196,6 @@ public class SPL {
 			// sequence diagrams.
 			// Later, such objects will be linked to Activity Diagrams objects.
 			SequenceDiagramParser.parse(doc);
-			
 
 			// build the activity diagram from the <ActivityDiagram> tag.
 			NodeList nActivityDiagram = root
