@@ -74,6 +74,10 @@ public class SPLFilePersistence {
 		//Creation of edges in graph
 		for (State s: f.getStates()) {
 			String sourceEntry = s.getVariableName() + s.getIndex();
+//			System.out.println(sourceEntry);
+//			for (State s1: f.getTransitions().keySet()) {
+//				System.out.println(s1.getLabel() + s.getIndex());
+//			}
 			for (Transition t : f.getTransitions().get(s)) {
 				State target = t.getTarget(); 
 				String targetEntry = target.getVariableName() + target.getIndex();

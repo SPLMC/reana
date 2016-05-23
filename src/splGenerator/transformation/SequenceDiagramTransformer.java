@@ -1,9 +1,11 @@
 package splGenerator.transformation;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import splGenerator.Fragment;
+import splGenerator.Lifeline;
 import splGenerator.Message;
 import splGenerator.SPLFilePersistence;
 import splGenerator.SequenceDiagram;
@@ -55,13 +57,21 @@ public class SequenceDiagramTransformer {
 
 		String sdClass = e.getClass().getSimpleName();
 
+
 		switch (sdClass) {
 		case "Message":
 			Message m = (Message) e;
-			f.createTransition(source, target, m.getName(),
-					Double.toString(m.getProbability()));
-			f.createTransition(source, f.getErrorState(), m.getName(),
-					Double.toString(1 - m.getProbability()));
+			if (m.getType() == Message.SYNCHRONOUS) {
+				f.createTransition(source, target, m.getName(),
+						Double.toString(m.getProbability()));
+				f.createTransition(source, f.getErrorState(), m.getName(),
+						Double.toString(1 - m.getProbability()));
+			} if (m.getType() == Message.ASYNCHRONOUS) {
+				f.createTransition(source, target, m.getName(),
+						Double.toString(m.getProbability()));
+				f.createTransition(source, f.getErrorState(), m.getName(),
+						Double.toString(1 - m.getProbability()));
+			}
 			break;
 
 		case "Fragment":
@@ -82,4 +92,5 @@ public class SequenceDiagramTransformer {
 
 		return source;
 	}
+
 }

@@ -9,6 +9,7 @@ import java.util.Random;
 
 import com.sun.xml.internal.ws.api.pipe.NextAction;
 
+import splGenerator.Util.ValuesGenerator;
 import splar.apps.generator.FMGeneratorEngine;
 import splar.core.constraints.CNFFormula;
 import splar.core.fm.FeatureModel;
@@ -58,7 +59,8 @@ public class SplGenerator {
 	private int numberOfActivities;		
 	private int numberOfDecisionNodes;
 	private int numberOfMergeNodes;
-	private int numberOfLifelines; 		
+	private int numberOfLifelines; 
+	private int numberOfReliabilityValues;
 	
 	
 	
@@ -138,9 +140,13 @@ public class SplGenerator {
 		//defined by the user.
 		//creating the sequence diagrams elements before creating the sequence
 		//diagrams
+		ValuesGenerator.generateRandomReliabilityValues(numberOfLifelines);
+//		ValuesGenerator.generateRandomReliabilityValues(1);
 		for (int i=0; i<numberOfLifelines; i++) {
-			SequenceDiagramElement.createElement(SequenceDiagramElement.LIFELINE, 
+			SequenceDiagramElement e; 
+			e = SequenceDiagramElement.createElement(SequenceDiagramElement.LIFELINE, 
 					"Lifeline" + idxLifeline++);
+			((Lifeline)e).setReliability(ValuesGenerator.getReliabilityValue());
 		}
 		//creating the fragments of the sequence diagram, one fragment by feature
 		for (int i=0; i<fm.countFeatures(FeatureModel.SOLITAIRE_AND_GROUPED); i++) {

@@ -130,7 +130,7 @@ public class Transformer {
 
 		case "DecisionNode":
 			// 1st.: check if the decision node is already modeled and its FDTMC
-			// is already avaialable
+			// is already available
 			isModeled = fdtmcStateById.get(adElem.getElementName());
 			if (isModeled == null) {
 				source = f.createState();
