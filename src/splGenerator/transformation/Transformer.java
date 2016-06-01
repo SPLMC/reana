@@ -11,10 +11,10 @@ import fdtmc.FDTMC;
 import splGenerator.Activity;
 import splGenerator.ActivityDiagram;
 import splGenerator.ActivityDiagramElement;
-import splGenerator.SPLFilePersistence;
 import splGenerator.SequenceDiagram;
 import splGenerator.SplGenerator;
 import splGenerator.Transition;
+import splGenerator.Util.SPLFilePersistence;
 import tool.RDGNode;
 
 public class Transformer {
@@ -34,7 +34,7 @@ public class Transformer {
 	public RDGNode transformAD(ActivityDiagram ad) {
 		FDTMC f = new FDTMC();
 		f.setVariableName(ad.getName() + "_s");
-		RDGNode answer = new RDGNode(ad.getName(), "True", f);
+		RDGNode answer = new RDGNode(ad.getName(), "true", f);
 		root = answer; 
 
 		// Takes the first element (init) and transform it into its FDTMC
@@ -56,6 +56,7 @@ public class Transformer {
 		String adClass = adElem.getClass().getSimpleName();
 		switch (adClass) {
 		case "StartNode":
+			source = f.createInitialState();
 			fdtmc.State error = f.createErrorState();
 
 			HashSet<Activity> nextActivities = new HashSet<Activity>(); 
@@ -69,7 +70,9 @@ public class Transformer {
 			}
 			
 			for (Activity a : nextActivities) {
-				source = transformAdElement(a, f); 
+				fdtmc.State target = transformAdElement(a, f);
+				f.createTransition(source, target, "", Double.toString(1.0));
+//				source = transformAdElement(a, f); 
 			}
 			source.setLabel(FDTMC.INITIAL_LABEL);
 			answer = source;
@@ -98,8 +101,10 @@ public class Transformer {
 				
 				for (ActivityDiagramElement e : nextElement) {
 					fdtmc.State target = transformAdElement(e, f); 
-					f.createTransition(source, target, a.getElementName(), "r" + a.getElementName()); 
-					f.createTransition(source, f.getErrorState(), a.getElementName(), "1-r" + a.getElementName());
+					f.createTransition(source, target, a.getElementName(), a.getSequenceDiagrams().getFirst().getName());
+					f.createTransition(source, f.getErrorState(), a.getElementName(), "1-" + a.getSequenceDiagrams().getFirst().getName());
+//					f.createTransition(source, target, a.getElementName(), "r" + a.getElementName()); 
+//					f.createTransition(source, f.getErrorState(), a.getElementName(), "1-r" + a.getElementName());
 				}
 //				for (Transition t : adElem.getTransitions()) {
 //					fdtmc.State target = transformAdElement(t.getTarget(), f);
