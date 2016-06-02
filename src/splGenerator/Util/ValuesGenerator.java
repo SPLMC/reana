@@ -36,6 +36,8 @@ public class ValuesGenerator {
 			boolean answer = reliabilityValues.add(randomValue);
 			if (answer == true)
 				idxValues++;
+			else if (minReliabibilityValue == maxReliabilityValue)
+				return;
 		}
 	}
 

@@ -139,12 +139,11 @@ public class SplGenerator {
 		SPLFilePersistence.FM2JavaCNF(fm);
 
 		// 2nd step: create the UML behavioral elements according to the
-		// parameters
-		// defined by the user.
+		// parameters defined by the user.
 		// creating the sequence diagrams elements before creating the sequence
 		// diagrams
 		ValuesGenerator.generateRandomReliabilityValues(numberOfLifelines);
-		// ValuesGenerator.generateRandomReliabilityValues(1);
+//		ValuesGenerator.generateRandomReliabilityValues(1);
 		for (int i = 0; i < numberOfLifelines; i++) {
 			SequenceDiagramElement e;
 			e = SequenceDiagramElement
