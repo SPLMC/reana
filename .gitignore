@@ -7,3 +7,4 @@ states
 *~
 *.xml
 *.log
+/src/splGenerator/tests/*.*
