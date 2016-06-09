@@ -74,7 +74,7 @@ public abstract class VariableBehavioralParameters {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.variationStep = variationStep;
-		this.currentValue = this.minValue;
+		this.currentValue = this.maxValue;
 	}
 
 	/**
@@ -120,7 +120,7 @@ public abstract class VariableBehavioralParameters {
 				SPL spl = temp.removeFirst();
 				answer.addAll(employTransformation(spl));
 			}
-			currentValue += variationStep; 
+			currentValue -= variationStep; 
 		}
 		return answer;
 	}

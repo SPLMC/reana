@@ -63,6 +63,10 @@ public abstract class SequenceDiagramElement {
 		return elements.get(elementName);
 	}
 
-	public abstract Element getDOM(Document doc) ; 
+	public abstract Element getDOM(Document doc) ;
+
+	public static void reset() {
+		elements.clear();
+	} 
 	
 }

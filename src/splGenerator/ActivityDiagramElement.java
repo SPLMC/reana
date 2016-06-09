@@ -135,6 +135,11 @@ public abstract class ActivityDiagramElement {
 		root.setAttribute("type", this.getClass().getSimpleName());
 		return root;
 	}
+
+	public static void reset() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 	

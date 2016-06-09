@@ -63,6 +63,9 @@ public class SplGenerator {
 	private int numberOfMergeNodes;
 	private int numberOfLifelines;
 	private int numberOfReliabilityValues;
+	private int numberOfAltFragments;
+	private int numberOfLoopFragments;
+	
 
 	/**
 	 * Indexes used by the behavioral models generator
@@ -143,7 +146,6 @@ public class SplGenerator {
 		// creating the sequence diagrams elements before creating the sequence
 		// diagrams
 		ValuesGenerator.generateRandomReliabilityValues(numberOfLifelines);
-//		ValuesGenerator.generateRandomReliabilityValues(1);
 		for (int i = 0; i < numberOfLifelines; i++) {
 			SequenceDiagramElement e;
 			e = SequenceDiagramElement
@@ -371,8 +373,8 @@ public class SplGenerator {
 
 	private Fragment randomFragment() {
 		Random ran = new Random();
-		System.out.println("|listOfPendingFragments|="
-				+ listOfPendingFragments.size());
+//		System.out.println("|listOfPendingFragments|="
+//				+ listOfPendingFragments.size());
 		int i = ran.nextInt(listOfPendingFragments.size());
 		Fragment f = listOfPendingFragments.remove(i);
 		return f;
@@ -403,6 +405,9 @@ public class SplGenerator {
 	 * @return Sequence Diagram object randomly generated.
 	 */
 	private SequenceDiagram randomSequenceDiagram(String name, String guard) {
+		int idxAltFragments = 0; 
+		int idxLoopFragments = 0;
+		
 		SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(name, guard);
 		Lifeline source = randomLifeline();
 		// System.out.println("Fragment size = " + fragmentSize);
@@ -413,7 +418,57 @@ public class SplGenerator {
 			source = target;
 		}
 
+		//include alt fragments into a random position
+		while (idxAltFragments < numberOfAltFragments) {
+			Random r = new Random(); 
+			int position = r.nextInt(fragmentSize);
+			Fragment f = createAlternativeFragment(name + "_alt_" + idxAltFragments);
+			sd.getElements().add(position, f);
+			idxAltFragments++;
+		}
+		
+		//include loop fragments into a random position
+		while (idxLoopFragments < numberOfLoopFragments) {
+			Random r = new Random(); 
+			int position = r.nextInt(fragmentSize);
+			Fragment f = createLoopFragment(name + "_loop_" + idxAltFragments);
+			sd.getElements().add(position, f);
+			idxLoopFragments++;
+		}
+		
 		return sd;
+	}
+
+	private Fragment createLoopFragment(String name) {
+		Fragment f = (Fragment) SequenceDiagramElement.createElement(SequenceDiagramElement.FRAGMENT, "");
+		f.setType(Fragment.LOOP);
+		
+		SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(name, "true");
+		Lifeline source = randomLifeline();
+		for (int i = 0; i < fragmentSize; i++) {
+			Lifeline target = randomLifeline();
+			sd.createMessage(source, target, Message.SYNCHRONOUS, "T"
+					+ idxActTransition++, target.getReliability());
+			source = target;
+		}
+		f.addSequenceDiagram(sd);
+		return f;
+	}
+
+	private Fragment createAlternativeFragment(String name) {
+		Fragment f = (Fragment) SequenceDiagramElement.createElement(SequenceDiagramElement.FRAGMENT, "");
+		f.setType(Fragment.ALTERNATIVE);
+		
+		SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(name, "true");
+		Lifeline source = randomLifeline();
+		for (int i = 0; i < fragmentSize; i++) {
+			Lifeline target = randomLifeline();
+			sd.createMessage(source, target, Message.SYNCHRONOUS, "T"
+					+ idxActTransition++, target.getReliability());
+			source = target;
+		}
+		f.addSequenceDiagram(sd);
+		return f;
 	}
 
 	private Lifeline randomLifeline() {
@@ -612,6 +667,14 @@ public class SplGenerator {
 
 	public void setFeatureModelParameters(FeatureModelParameters fmParameters) {
 		this.fmParameters = fmParameters;
+	}
+
+	public void setNumberOfAltFragments(int numberOfAltFragments) {
+		this.numberOfAltFragments = numberOfAltFragments;
+	}
+
+	public void setNumberOfLoopsFragments(int numberOfLoopFragments) {
+		this.numberOfLoopFragments = numberOfLoopFragments; 
 	}
 
 }

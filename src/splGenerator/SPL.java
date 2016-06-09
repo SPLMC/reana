@@ -27,7 +27,7 @@ import splGenerator.parsing.ActivityDiagramParser;
 import splGenerator.parsing.SequenceDiagramParser;
 import splar.core.fm.FeatureModel;
 
-public class SPL {
+public class SPL implements Cloneable{
 
 	/**
 	 * This attribute is redundant with SPLGenerator.modelsPath attribute. We
@@ -242,6 +242,14 @@ public class SPL {
 	 */
 	public void setFeatureModel(FeatureModel fm) {
 		this.fm = fm;
+	}
+	
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

@@ -10,12 +10,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import com.sun.org.apache.xpath.internal.operations.And;
 
 import fdtmc.FDTMC;
 import fdtmc.State;
 import fdtmc.Transition;
+import splGenerator.SPL;
+import splGenerator.transformation.Transformer;
 import splar.core.fm.FeatureModel;
 import splar.core.fm.FeatureTreeNode;
 import tool.RDGNode;
@@ -109,7 +114,7 @@ public class SPLFilePersistence {
 				State target = t.getTarget();
 				String targetEntry = target.getVariableName()
 						+ target.getIndex();
-
+				
 				builder.append(sourceEntry);
 				builder.append(" -> ");
 				builder.append(targetEntry);
@@ -223,6 +228,29 @@ public class SPLFilePersistence {
 			answer.append(createNodeDefinition(n));
 		}
 		return answer.toString();
+	}
+
+	public static void persistSPLs(LinkedList<SPL> spls) {
+		String ancientModelsPath = modelsPath; 
+		for (SPL spl : spls) {
+			int index = spls.indexOf(spl); 
+			String path = modelsPath + index + "/";
+			modelsPath = path;
+			File dir = new File(path); 
+			dir.mkdirs(); 
+			
+			FM2JavaCNF(spl.getFeatureModel());
+			Transformer t = new Transformer(); 
+			RDGNode r = t.transformAD(spl.getActivityDiagram());
+			rdg2Dot(r, "rdg");
+			
+			spl.setName(Integer.toString(spls.indexOf(spl)));
+			
+			spl.getXmlRepresentation();
+			
+			modelsPath = ancientModelsPath;
+		}
+		
 	}
 
 }

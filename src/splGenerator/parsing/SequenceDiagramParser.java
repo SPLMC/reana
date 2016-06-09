@@ -173,6 +173,7 @@ public class SequenceDiagramParser {
 			Lifeline l = (Lifeline) SequenceDiagramElement.createElement(
 					SequenceDiagramElement.LIFELINE, name);
 			l.setReliability(reliability);
+//			System.out.println(l.getName() + ": " + l.getReliability());
 			// lifelineById.put(l.getName(), l);
 		}
 	}

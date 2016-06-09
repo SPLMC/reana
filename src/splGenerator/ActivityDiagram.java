@@ -178,4 +178,11 @@ public class ActivityDiagram {
 		}
 		return answer;
 	}
+
+
+
+	public static void reset() {
+		// TODO Auto-generated method stub
+		
+	}
 }

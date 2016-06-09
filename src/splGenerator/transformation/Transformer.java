@@ -35,7 +35,7 @@ public class Transformer {
 		FDTMC f = new FDTMC();
 		f.setVariableName(ad.getName() + "_s");
 		RDGNode answer = new RDGNode(ad.getName(), "true", f);
-		root = answer; 
+		root = answer;
 
 		// Takes the first element (init) and transform it into its FDTMC
 		// representation
@@ -59,24 +59,24 @@ public class Transformer {
 			source = f.createInitialState();
 			fdtmc.State error = f.createErrorState();
 
-			HashSet<Activity> nextActivities = new HashSet<Activity>(); 
+			HashSet<Activity> nextActivities = new HashSet<Activity>();
 			for (Transition t : adElem.getTransitions()) {
-				ActivityDiagramElement e = t.getTarget(); 
+				ActivityDiagramElement e = t.getTarget();
 				Activity a;
 				if (e instanceof Activity) {
 					a = (Activity) e;
 					nextActivities.add(a);
 				}
 			}
-			
+
 			for (Activity a : nextActivities) {
 				fdtmc.State target = transformAdElement(a, f);
 				f.createTransition(source, target, "", Double.toString(1.0));
-//				source = transformAdElement(a, f); 
+				// source = transformAdElement(a, f);
 			}
 			source.setLabel(FDTMC.INITIAL_LABEL);
 			answer = source;
-			
+
 			break;
 
 		case "Activity":
@@ -95,25 +95,31 @@ public class Transformer {
 				source = f.createState();
 				HashSet<ActivityDiagramElement> nextElement = new HashSet<ActivityDiagramElement>();
 				for (Transition t : adElem.getTransitions()) {
-					ActivityDiagramElement e = t.getTarget(); 
-					nextElement.add(e); 
+					ActivityDiagramElement e = t.getTarget();
+					nextElement.add(e);
 				}
-				
+
 				for (ActivityDiagramElement e : nextElement) {
-					fdtmc.State target = transformAdElement(e, f); 
-					f.createTransition(source, target, a.getElementName(), a.getSequenceDiagrams().getFirst().getName());
-					f.createTransition(source, f.getErrorState(), a.getElementName(), "1-" + a.getSequenceDiagrams().getFirst().getName());
-//					f.createTransition(source, target, a.getElementName(), "r" + a.getElementName()); 
-//					f.createTransition(source, f.getErrorState(), a.getElementName(), "1-r" + a.getElementName());
+					fdtmc.State target = transformAdElement(e, f);
+					f.createTransition(source, target, a.getElementName(), a
+							.getSequenceDiagrams().getFirst().getName());
+					f.createTransition(source, f.getErrorState(),
+							a.getElementName(), "1-"
+									+ a.getSequenceDiagrams().getFirst()
+											.getName());
+					// f.createTransition(source, target, a.getElementName(),
+					// "r" + a.getElementName());
+					// f.createTransition(source, f.getErrorState(),
+					// a.getElementName(), "1-r" + a.getElementName());
 				}
-//				for (Transition t : adElem.getTransitions()) {
-//					fdtmc.State target = transformAdElement(t.getTarget(), f);
-//					f.createTransition(source, target, t.getElementName(),
-//							Double.toString(t.getProbability()));
-//					f.createTransition(source, f.getErrorState(),
-//							t.getElementName(),
-//							Double.toString(1 - t.getProbability()));
-//				}
+				// for (Transition t : adElem.getTransitions()) {
+				// fdtmc.State target = transformAdElement(t.getTarget(), f);
+				// f.createTransition(source, target, t.getElementName(),
+				// Double.toString(t.getProbability()));
+				// f.createTransition(source, f.getErrorState(),
+				// t.getElementName(),
+				// Double.toString(1 - t.getProbability()));
+				// }
 				fdtmcStateById.put(adElem.getElementName(), source);
 				answer = source;
 			} else

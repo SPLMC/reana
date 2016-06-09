@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Random;
 
+import com.sun.org.apache.xpath.internal.operations.And;
 import com.sun.xml.internal.ws.api.pipe.NextAction;
 
 public class ValuesGenerator {
@@ -13,6 +14,10 @@ public class ValuesGenerator {
 	private static double maxReliabilityValue;
 	private static int numOfReliabilitiesValues;
 	private static int reliabilityPrecision;
+	
+	private static int idxReliabilityValue = 0;  
+	
+	
 
 	/**
 	 * This method is responsible for creating a given number of different
@@ -28,17 +33,20 @@ public class ValuesGenerator {
 
 		int idxValues = 0;
 		while (idxValues < numberOfValues) {
-			Double value = minReliabibilityValue + (maxReliabilityValue - minReliabibilityValue)
+			double value = minReliabibilityValue + (maxReliabilityValue - minReliabibilityValue)
 					* r.nextDouble();
-			Double randomValue = BigDecimal.valueOf(value)
-					.setScale(reliabilityPrecision, BigDecimal.ROUND_HALF_DOWN)
-					.doubleValue();
-			boolean answer = reliabilityValues.add(randomValue);
+//			Double randomValue = BigDecimal.valueOf(value)
+//					.setScale(reliabilityPrecision, BigDecimal.ROUND_HALF_DOWN)
+//					.doubleValue();
+//			System.out.println(value);
+			boolean answer = reliabilityValues.add(value);
 			if (answer == true)
 				idxValues++;
 			else if (minReliabibilityValue == maxReliabilityValue)
-				return;
+				break;
 		}
+		numOfReliabilitiesValues = reliabilityValues.size();
+		idxReliabilityValue = 0;
 	}
 
 	/**
@@ -48,11 +56,16 @@ public class ValuesGenerator {
 	 * @return a reliability value (double)
 	 */
 	public static double getReliabilityValue() {
-		Random r = new Random();
+		Object[] values = reliabilityValues.toArray();
+		int p = idxReliabilityValue % numOfReliabilitiesValues;
+		idxReliabilityValue++;
+		return (double) values[p]; 
+//		Random r = new Random();
 
-		int idx = r.nextInt(reliabilityValues.size());
-		Object[] answer = reliabilityValues.toArray();
-		return (double) answer[idx];
+//		int idx = r.nextInt(reliabilityValues.size());
+//		System.out.println("INDEX: " + idx);
+//		Object[] answer = reliabilityValues.toArray();
+//		return (double) answer[idx];
 	}
 
 	/**

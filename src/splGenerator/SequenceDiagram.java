@@ -239,4 +239,10 @@ public class SequenceDiagram {
 		else 
 			return null;		
 	}
+
+
+	public static void reset() {
+		// TODO Auto-generated method stub
+		sequenceDiagrams.clear(); 
+	}
 }

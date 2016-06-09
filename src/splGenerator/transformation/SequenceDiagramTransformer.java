@@ -65,12 +65,14 @@ public class SequenceDiagramTransformer {
 		case "Message":
 			Message m = (Message) e;
 			if (m.getType() == Message.SYNCHRONOUS) {
-				Double probability = new BigDecimal(m.getProbability())
-						.setScale(ValuesGenerator.getPrecision(),
-								BigDecimal.ROUND_HALF_UP).doubleValue();
-				Double failure = new BigDecimal(1 - m.getProbability())
-						.setScale(ValuesGenerator.getPrecision(),
-								BigDecimal.ROUND_HALF_UP).doubleValue();
+				// Double probability = new BigDecimal(m.getProbability())
+				// .setScale(ValuesGenerator.getPrecision(),
+				// BigDecimal.ROUND_HALF_UP).doubleValue();
+				// Double failure = new BigDecimal(1 - m.getProbability())
+				// .setScale(ValuesGenerator.getPrecision(),
+				// BigDecimal.ROUND_HALF_UP).doubleValue();
+				Double probability = m.getProbability();
+				Double failure = 1 - m.getProbability();
 				f.createTransition(source, target, m.getName(),
 						probability.toString());
 				f.createTransition(source, f.getErrorState(), m.getName(),
@@ -90,18 +92,22 @@ public class SequenceDiagramTransformer {
 
 		case "Fragment":
 			Fragment fr = (Fragment) e;
-			f.createTransition(source, target, "", fr.getSequenceDiagrams()
-					.getFirst().getName());
-			f.createTransition(source, f.getErrorState(), "", "1-"
-					+ fr.getSequenceDiagrams().getFirst().getName());
-			// f.createTransition(source, target, fr.getName(), "r" +
-			// fr.getName());
-			// f.createTransition(source, f.getErrorState(), fr.getName(), "1-r"
-			// + fr.getName());
-
-			for (SequenceDiagram s : fr.getSequenceDiagrams()) {
-				SequenceDiagramTransformer transformer = new SequenceDiagramTransformer();
-				this.root.addDependency(transformer.transformSD(s));
+//			System.out.println(fr.getName());
+			if (fr.getType() == Fragment.OPTIONAL) {
+				f.createTransition(source, target, "", fr.getSequenceDiagrams()
+						.getFirst().getName());
+				f.createTransition(source, f.getErrorState(), "", "1-"
+						+ fr.getSequenceDiagrams().getFirst().getName());
+				
+				for (SequenceDiagram s : fr.getSequenceDiagrams()) {
+					SequenceDiagramTransformer transformer = new SequenceDiagramTransformer();
+					this.root.addDependency(transformer.transformSD(s));
+				}
+			} else if (fr.getType() == Fragment.ALTERNATIVE) {
+				for (SequenceDiagram s : fr.getSequenceDiagrams()) {
+					target = transformSdElement(s.getElements(), f);
+					f.createTransition(source, target, "alt", Double.toString(1/fr.getSequenceDiagrams().size())); 
+				}
 			}
 			break;
 
