@@ -20,9 +20,10 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 		// The transformation will be applied while the maximum number of
 		// messages is not reached
 		while (currentValue <= maxValue) {
-			SPL temp = createSplDeepCopy(next); 
+			SPL temp = createSplDeepCopy(next);
 
-			// 1st step: check if all sequence diagrams have the number of messages
+			// 1st step: check if all sequence diagrams have the number of
+			// messages
 			// equals to the number of minimum messages defined by the attribute
 			// minValue of this class's superclass.
 			LinkedList<SequenceDiagram> seqDiags = new LinkedList<SequenceDiagram>();
@@ -36,10 +37,12 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 					}
 				}
 			}
-			
-			// 2nd step: in case it is possible to create random messages, for each
+
+			// 2nd step: in case it is possible to create random messages, for
+			// each
 			// sequence diagram a set of messages (given by the step value) is
-			// created considering the set of lifelines initially defined for the
+			// created considering the set of lifelines initially defined for
+			// the
 			// "seed" sequence diagram
 			for (SequenceDiagram s : seqDiags) {
 				int size = s.getElements().size();
@@ -48,7 +51,7 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 						variationStep, s.getLifelines());
 				s.getElements().addAll(position, randomMessages);
 			}
-			
+
 			// 3rd step: for each transformation applied, we must create a SPL
 			// object, add it to the set of SPLs created (represented by a
 			// LinkedList) and then return the set of SPLs.
@@ -58,19 +61,29 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 											// step value
 		}
 
-
-
 		return answer;
 	}
 
+	/**
+	 * This method's role is to create a SPL clone for a given SPL. As clone()
+	 * method offered by Java implements a shallow copy of an object we wrote
+	 * this method for creating a copy of all objects related to a SPL. To
+	 * accomplish this task, this method persists the whole SPL at a temporary
+	 * file and read it again in memory, when new and distinct objects are
+	 * created.
+	 * 
+	 * @param spl
+	 *            The software product line that will be cloned
+	 * @return the cloned software product line
+	 */
 	private SPL createSplDeepCopy(SPL spl) {
 		SPL answer = null;
-		
+
 		ActivityDiagram.reset();
 		ActivityDiagramElement.reset();
 		SequenceDiagram.reset();
 		SequenceDiagramElement.reset();
-		
+
 		File f;
 		try {
 			f = File.createTempFile("spl", ".xml");
@@ -78,10 +91,11 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 			FileOutputStream stream = new FileOutputStream(f);
 			stream.write(spl.getXmlRepresentation().getBytes());
 			stream.flush();
-			SPL t = SPL.getSplFromXml(f.getAbsolutePath()); //its "deep copy" is produced
+			SPL t = SPL.getSplFromXml(f.getAbsolutePath()); // its "deep copy"
+															// is produced
 			t.setName("model_" + currentValue);
 			t.setFeatureModel(spl.getFeatureModel());
-			answer = t; 
+			answer = t;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -89,6 +103,19 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 		return answer;
 	}
 
+	/**
+	 * This method is responsible for creating a set of messages (whose size is
+	 * given by the variationStep parameter), comprising the lifelines passed by
+	 * the parameter lifelines. It returns a sequence of messages represented by
+	 * a linked list.
+	 * 
+	 * @param variationStep
+	 *            The number of messages to be created
+	 * @param lifelines
+	 *            The set of lifelines which will be used for creating the
+	 *            random messages.
+	 * @return the messages sequence represented by a linked list.
+	 */
 	private LinkedList<SequenceDiagramElement> createRandomMessages(
 			int variationStep, HashSet<Lifeline> lifelines) {
 		LinkedList<SequenceDiagramElement> answer = null;
@@ -117,6 +144,17 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 		return answer;
 	}
 
+	/**
+	 * This method is responsible for ensure a sequence of messages randomly
+	 * generated is consistent. A (piece of) sequence diagram is consistent if
+	 * all synchronous messages have a reply message associated or, if it is
+	 * formed by a single message, such message must be asynchronous.
+	 * 
+	 * @param messages
+	 *            the sequence of messages that will be inspected
+	 * @return true if the set of messages is consistente, otherwise false is
+	 *         returned
+	 */
 	private boolean isSetOfMessagesConsistent(
 			LinkedList<SequenceDiagramElement> messages) {
 		boolean answer = false;
@@ -148,6 +186,13 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 		return answer;
 	}
 
+	/**
+	 * This message is responsible for choosing randomly if a message is
+	 * synchronous, asynchronous or reply
+	 * 
+	 * @return an integer related to the constants Message.SYNCHRONOUS,
+	 *         Message.ASYNCHRONOUS or Message.REPLY
+	 */
 	private int randomMessageType() {
 		int answer = -1;
 		LinkedList<Integer> values = new LinkedList<Integer>();
@@ -159,6 +204,14 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 		return answer;
 	}
 
+	/**
+	 * This method is responsible for randomly choosing a lifeline from a given
+	 * set of lifelines
+	 * 
+	 * @param lifelines
+	 *            the lifelines which will be subject to random choose.
+	 * @return a lifeline randomly choosed.
+	 */
 	private Lifeline randomLifeline(HashSet<Lifeline> lifelines) {
 		Lifeline answer = null;
 		int i = new Random().nextInt(lifelines.size());
@@ -167,6 +220,22 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 		return answer;
 	}
 
+	/**
+	 * This method returns all the sequence diagrams reachable from a given
+	 * sequence diagram. It searches for sequence diagrams, in a recursive
+	 * fashion, considering all the fragments represented at the input sequence
+	 * diagram. As this method is used when the behavioral models of a given SPL
+	 * are being evolved, in case a sequence diagram containing less messages
+	 * than the minimum number of messages defined by the minValue attribute, an
+	 * InsuficientNumberOfMessagesException will be thrown.
+	 * 
+	 * @param seqDiag
+	 *            the input sequence diagram from the others sequence diagrams
+	 *            will be searched.
+	 * @return a linked list of sequence diagram objects.
+	 * @throws InsuficientNumberOfMessagesException
+	 *             in case
+	 */
 	private LinkedList<SequenceDiagram> getTransitiveSequenceDiagrams(
 			SequenceDiagram seqDiag)
 			throws InsuficientNumberOfMessagesException {
@@ -186,6 +255,16 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 		return answer;
 	}
 
+	/**
+	 * Auxiliary method for counting the number of messages of a given Sequence
+	 * Diagram.
+	 * 
+	 * @param seqDiag
+	 *            the given sequence diagram for which the messages will be
+	 *            counted
+	 * @return an integer representing the number of messages contained into the
+	 *         sequence diagram
+	 */
 	private int countMessages(SequenceDiagram seqDiag) {
 		int numMessages = 0;
 		for (SequenceDiagramElement e : seqDiag.getElements()) {
