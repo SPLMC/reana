@@ -36,13 +36,9 @@ public class VariableLifelineReliability extends VariableBehavioralParameters {
 		Iterator<Lifeline> itLifeline = lifelines.iterator();
 		while (itLifeline.hasNext()) {
 			Lifeline l = itLifeline.next();
-			// double d = BigDecimal.valueOf(l.getReliability())
-			// .setScale(getCurrentValue(), BigDecimal.ROUND_FLOOR)
-			// .doubleValue();
-			String s = new Formatter().format(Locale.ENGLISH,
-					"%." + getCurrentValue() + "f", (float) l.getReliability())
-					.toString();
-			double d = Double.parseDouble(s);
+			 double d = BigDecimal.valueOf(l.getReliability())
+			 .setScale(getCurrentValue(), BigDecimal.ROUND_FLOOR)
+			 .doubleValue();
 			l.setReliability(d);
 			System.out.println(getCurrentValue() + ": " + l.getReliability()
 					+ "->" + l);

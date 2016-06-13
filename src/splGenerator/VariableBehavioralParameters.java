@@ -47,6 +47,10 @@ public abstract class VariableBehavioralParameters {
 			answer = new VariableLifelineReliability();
 			break;
 
+		case FRAGMENTSIZE:
+			answer = new VariableFragmentSize();
+			break;
+
 		default:
 			answer = null;
 			break;
@@ -55,10 +59,10 @@ public abstract class VariableBehavioralParameters {
 		return answer;
 	}
 
-	private int minValue;
-	private int maxValue;
-	private int variationStep;
-	private int currentValue;
+	protected int minValue;
+	protected int maxValue;
+	protected int variationStep;
+	protected int currentValue;
 
 	private LinkedList<SPL> changedModels;
 
@@ -74,7 +78,7 @@ public abstract class VariableBehavioralParameters {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.variationStep = variationStep;
-		this.currentValue = this.maxValue;
+		this.currentValue = this.minValue;
 	}
 
 	/**
@@ -94,41 +98,54 @@ public abstract class VariableBehavioralParameters {
 	 *            variations applied at the variable parameter.
 	 * @return The function's return is a set of SPL objects, containing all the
 	 *         variations of the input SPLs according to the variable parameter.
-	 * @throws CloneNotSupportedException 
-	 * @throws IOException 
+	 * @throws CloneNotSupportedException
+	 * @throws IOException
 	 */
-	public LinkedList<SPL> generateSplVariation(LinkedList<SPL> spls) throws CloneNotSupportedException, IOException {
+	public LinkedList<SPL> generateSplVariation(LinkedList<SPL> spls)
+			throws CloneNotSupportedException, IOException {
 		LinkedList<SPL> answer = new LinkedList<SPL>();
+		int turn = 0; 
 		while (currentValue >= minValue && currentValue <= maxValue) {
-			LinkedList<SPL> temp = new LinkedList<SPL>(); 
-			for (SPL s : spls) {
+			LinkedList<SPL> temp = new LinkedList<SPL>();
+			turn++; 
+			System.out.println("turn: " + turn);
+			for (SPL s : spls) { //for each spl to be transformed, 
 				ActivityDiagram.reset();
 				ActivityDiagramElement.reset();
 				SequenceDiagram.reset();
-				SequenceDiagramElement.reset(); 
+				SequenceDiagramElement.reset();
 				File f = File.createTempFile("spl", ".xml");
 				f.deleteOnExit();
 				FileOutputStream stream = new FileOutputStream(f);
 				stream.write(s.getXmlRepresentation().getBytes());
 				stream.flush();
-				SPL t = SPL.getSplFromXml(f.getAbsolutePath());
+				SPL t = SPL.getSplFromXml(f.getAbsolutePath()); //its "deep copy" is produced
 				t.setName("model_" + spls.indexOf(s));
 				t.setFeatureModel(s.getFeatureModel());
 				temp.add(t); 
+				while (!temp.isEmpty()) { //then, the transformation is applied on each copy
+					SPL spl = temp.removeFirst();
+					answer.addAll(employTransformation(spl));
+				}
+				currentValue += variationStep; //The step varies according to its step
 			}
-			while (!temp.isEmpty()) {
-				SPL spl = temp.removeFirst();
-				answer.addAll(employTransformation(spl));
-			}
-			currentValue -= variationStep; 
 		}
 		return answer;
 	}
 
-	protected abstract LinkedList<SPL> employTransformation(SPL spl) throws CloneNotSupportedException;
-	
+	protected abstract LinkedList<SPL> employTransformation(SPL spl)
+			throws CloneNotSupportedException;
+
 	public int getCurrentValue() {
 		return currentValue;
 	}
-	
+
+	public int getMaximumValue() {
+		return maxValue;
+	}
+
+	public int getVariationStep() {
+		return variationStep;
+	}
+
 }
