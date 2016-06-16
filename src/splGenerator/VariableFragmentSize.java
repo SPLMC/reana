@@ -1,8 +1,5 @@
 package splGenerator;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
@@ -23,8 +20,7 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 			SPL temp = createSplDeepCopy(next);
 
 			// 1st step: check if all sequence diagrams have the number of
-			// messages
-			// equals to the number of minimum messages defined by the attribute
+			// messages equals to the number of minimum messages defined by the attribute
 			// minValue of this class's superclass.
 			LinkedList<SequenceDiagram> seqDiags = new LinkedList<SequenceDiagram>();
 			for (Activity a : temp.getActivityDiagram().getSetOfActivities()) {
@@ -39,11 +35,9 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 			}
 
 			// 2nd step: in case it is possible to create random messages, for
-			// each
-			// sequence diagram a set of messages (given by the step value) is
+			// each sequence diagram a set of messages (given by the step value) is
 			// created considering the set of lifelines initially defined for
-			// the
-			// "seed" sequence diagram
+			// the "seed" sequence diagram
 			for (SequenceDiagram s : seqDiags) {
 				int size = s.getElements().size();
 				int position = new Random().nextInt(size);
@@ -61,45 +55,6 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 											// step value
 		}
 
-		return answer;
-	}
-
-	/**
-	 * This method's role is to create a SPL clone for a given SPL. As clone()
-	 * method offered by Java implements a shallow copy of an object we wrote
-	 * this method for creating a copy of all objects related to a SPL. To
-	 * accomplish this task, this method persists the whole SPL at a temporary
-	 * file and read it again in memory, when new and distinct objects are
-	 * created.
-	 * 
-	 * @param spl
-	 *            The software product line that will be cloned
-	 * @return the cloned software product line
-	 */
-	private SPL createSplDeepCopy(SPL spl) {
-		SPL answer = null;
-
-		ActivityDiagram.reset();
-		ActivityDiagramElement.reset();
-		SequenceDiagram.reset();
-		SequenceDiagramElement.reset();
-
-		File f;
-		try {
-			f = File.createTempFile("spl", ".xml");
-			f.deleteOnExit();
-			FileOutputStream stream = new FileOutputStream(f);
-			stream.write(spl.getXmlRepresentation().getBytes());
-			stream.flush();
-			SPL t = SPL.getSplFromXml(f.getAbsolutePath()); // its "deep copy"
-															// is produced
-			t.setName("model_" + currentValue);
-			t.setFeatureModel(spl.getFeatureModel());
-			answer = t;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return answer;
 	}
 
@@ -141,48 +96,6 @@ public class VariableFragmentSize extends VariableBehavioralParameters {
 			consistentSetOfMessages = isSetOfMessagesConsistent(answer);
 		}
 
-		return answer;
-	}
-
-	/**
-	 * This method is responsible for ensure a sequence of messages randomly
-	 * generated is consistent. A (piece of) sequence diagram is consistent if
-	 * all synchronous messages have a reply message associated or, if it is
-	 * formed by a single message, such message must be asynchronous.
-	 * 
-	 * @param messages
-	 *            the sequence of messages that will be inspected
-	 * @return true if the set of messages is consistente, otherwise false is
-	 *         returned
-	 */
-	private boolean isSetOfMessagesConsistent(
-			LinkedList<SequenceDiagramElement> messages) {
-		boolean answer = false;
-		if (messages.size() == 1) { // if it is a singleton set of messages, the
-									// message must be asynchronous
-			Message m = (Message) messages.get(0);
-			if (m.getType() == Message.ASYNCHRONOUS)
-				answer = true;
-			else
-				answer = false;
-		} else { // if the set of new messages has more than one message, we
-					// must ensure no synchronous message remains without a
-					// reply message (it is not mandatory asynchronous messages
-					// have reply messages associated)
-			int pendingSyncMessages = 0;
-			for (SequenceDiagramElement sde : messages) {
-				Message m = (Message) sde;
-				if (m.getType() == Message.SYNCHRONOUS) {
-					pendingSyncMessages++;
-				} else if (m.getType() == Message.REPLY) {
-					pendingSyncMessages--;
-				}
-			}
-			if (pendingSyncMessages == 0)
-				answer = true;
-			else
-				answer = false;
-		}
 		return answer;
 	}
 

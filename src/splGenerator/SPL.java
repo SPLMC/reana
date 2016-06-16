@@ -252,4 +252,8 @@ public class SPL implements Cloneable{
 		this.name = name;
 	}
 
+	public ConfigurationKnowledge getCk() {
+		return ck;
+	}
+
 }

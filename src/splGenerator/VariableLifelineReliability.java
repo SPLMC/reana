@@ -1,15 +1,11 @@
 package splGenerator;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
-
-import splGenerator.Util.ValuesGenerator;
 
 public class VariableLifelineReliability extends VariableBehavioralParameters {
 
@@ -21,48 +17,47 @@ public class VariableLifelineReliability extends VariableBehavioralParameters {
 			throws CloneNotSupportedException {
 		LinkedList<SPL> answer = new LinkedList<SPL>();
 
-		// 1st step: recover all lifelines of all sequence diagrams used by the
-		// SPL's behavioral model.
-		HashSet<Lifeline> lifelines = new HashSet<Lifeline>();
-		Iterator<Activity> itActivity = spl.getActivityDiagram()
-				.getSetOfActivities().iterator();
-		while (itActivity.hasNext()) {
-			Activity a = itActivity.next();
-			lifelines.addAll(a.getTranstiveLifelines());
-		}
+		SPL seed = spl;
+		while (currentValue <= maxValue) {
+			SPL temp = createSplDeepCopy(seed);
 
-		// 2nd step: change the reliability values of all lifelines used by the
-		// SPL's behavioral model.
-		Iterator<Lifeline> itLifeline = lifelines.iterator();
-		while (itLifeline.hasNext()) {
-			Lifeline l = itLifeline.next();
-			 double d = BigDecimal.valueOf(l.getReliability())
-			 .setScale(getCurrentValue(), BigDecimal.ROUND_FLOOR)
-			 .doubleValue();
-			l.setReliability(d);
-			System.out.println(getCurrentValue() + ": " + l.getReliability()
-					+ "->" + l);
-		}
-
-		// 3rd step: change the reliability values of messages used by all the
-		// sequence diagrams.
-		// TODO we should refactor the code in order to allow the reuse of
-		// lifelines' reliability values when setting the message's value
-		// (instead of copying it).
-
-		itActivity = spl.getActivityDiagram().getSetOfActivities().iterator();
-		LinkedList<SequenceDiagram> sequenceDiagrams = new LinkedList<SequenceDiagram>();
-		while (itActivity.hasNext()) {
-			Activity a = itActivity.next();
-			for (SequenceDiagram s : a.getSequenceDiagrams()) {
-				sequenceDiagrams.addAll(getTransitiveSequenceDiagrams(s));
+			// 1st step: recover all lifelines of all sequence diagrams used by
+			// the SPL's behavioral model.
+			HashSet<Lifeline> lifelines = new HashSet<Lifeline>();
+			List<Activity> activities = temp.getActivityDiagram()
+					.getSetOfActivities();
+			for (Activity a : activities) {
+				lifelines.addAll(a.getTranstiveLifelines());
 			}
-			for (SequenceDiagram s : sequenceDiagrams) {
-				transformMessageReliability(s);
-			}
-		}
 
-		answer.add(spl);
+			// 2nd step: change the reliability values of all lifelines used by
+			// the SPL's behavioral model.
+			for (Lifeline l : lifelines) {
+				double d = BigDecimal.valueOf(l.getReliability())
+						.setScale(currentValue, BigDecimal.ROUND_FLOOR)
+						.doubleValue();
+				l.setReliability(d);
+			}
+
+			// 3rd step: change the reliability values of messages used by all
+			// the sequence diagrams.
+			// TODO we should refactor the code in order to allow the reuse of
+			// lifelines' reliability values when setting the message's value
+			// (instead of copying it).
+
+			LinkedList<SequenceDiagram> sequenceDiagrams = new LinkedList<SequenceDiagram>();
+			for (Activity a : temp.getActivityDiagram().getSetOfActivities()) {
+				for (SequenceDiagram s : a.getSequenceDiagrams()) {
+					sequenceDiagrams.addAll(getTransitiveSequenceDiagrams(s));
+				}
+				for (SequenceDiagram s : sequenceDiagrams) {
+					transformMessageReliability(s);
+				}
+			}
+			answer.add(temp);
+			seed = temp;
+			currentValue += variationStep;
+		}
 		return answer;
 	}
 
@@ -80,8 +75,8 @@ public class VariableLifelineReliability extends VariableBehavioralParameters {
 			if (e instanceof Message) {
 				Message m = (Message) e;
 				String probability = new Formatter().format(Locale.ENGLISH,
-						"%." + getCurrentValue() + "f",
-						(float) m.getProbability()).toString();
+						"%." + currentValue + "f", (float) m.getProbability())
+						.toString();
 				m.setProbability(Double.parseDouble(probability));
 			}
 		}

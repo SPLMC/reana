@@ -185,4 +185,13 @@ public class ActivityDiagram {
 		// TODO Auto-generated method stub
 		
 	}
+
+
+
+	public void removeElement(ActivityDiagramElement element) {
+		if (setOfElements.contains(element)){
+			setOfElements.remove(element);
+		}
+		
+	}
 }

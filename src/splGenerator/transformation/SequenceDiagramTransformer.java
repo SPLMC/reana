@@ -40,6 +40,7 @@ public class SequenceDiagramTransformer {
 		// State s0 = transformSdElement(sde, f);
 		// s0.setLabel(FDTMC.INITIAL_LABEL);
 
+//		System.out.println(f);
 		SPLFilePersistence.fdtmc2Dot(f, s.getName());
 
 		return answer;
@@ -50,16 +51,21 @@ public class SequenceDiagramTransformer {
 		State source;
 		State target;
 
-		SequenceDiagramElement e = sde.removeFirst();
+//		SequenceDiagramElement e = sde.removeFirst();
+		SequenceDiagramElement e = null;
+		String sdClass;
 		if (sde.isEmpty()) {
 			target = f.createSuccessState();
+			return target;
 		} else {
+			e = sde.removeFirst();
+			sdClass = e.getClass().getSimpleName();
 			target = transformSdElement(sde, f);
 		}
 
 		source = f.createState();
 
-		String sdClass = e.getClass().getSimpleName();
+//		String sdClass = e.getClass().getSimpleName();
 
 		switch (sdClass) {
 		case "Message":
