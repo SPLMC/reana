@@ -2,8 +2,11 @@ package splGenerator.Util;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -248,6 +251,30 @@ public class SPLFilePersistence {
 			
 			spl.getXmlRepresentation();
 			
+			
+			
+			//print the featureIDE files
+			PrintStream oldOut = java.lang.System.out;
+			String filePath = dir.getAbsolutePath() + "_fmIDE_" + index + ".xml";
+			File fOut = new File(filePath);
+			
+			try {
+				PrintStream p = new PrintStream(fOut);
+				java.lang.System.setOut(p);
+				System.out.println(spl.getFeatureModel().dumpFeatureIdeXML());
+				p.flush();
+				p.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			
+			
+			
+//			System.out.println(spl.getFeatureModel().dumpFeatureIdeXML());
+			
+			
+			java.lang.System.setOut(oldOut);
 			modelsPath = ancientModelsPath;
 		}
 		

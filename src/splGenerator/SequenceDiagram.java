@@ -26,12 +26,15 @@ public class SequenceDiagram {
 		SequenceDiagram answer; 
 		if (sequenceDiagrams.containsKey(name)) { 
 			answer = sequenceDiagrams.get(name);
+//			System.out.println("Achei SD " + answer.getName() + " " + answer.getGuardCondition());
 //			if (answer.guardCondition != guard) {
 			if (answer.guardCondition == null) {
+				System.out.println("Setei guarda");
 				answer.setGuard(guard);
 			}
 		} else {
 			answer = new SequenceDiagram(name, guard);
+//			System.out.println("Criei SD " + answer.getName() + " " + answer.getGuardCondition());
 			sequenceDiagrams.put(name, answer);
 		}
 		

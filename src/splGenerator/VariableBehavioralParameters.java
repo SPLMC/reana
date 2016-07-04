@@ -30,6 +30,7 @@ public abstract class VariableBehavioralParameters {
 	public static final int REPLICATEDFRAGMENTS = 5; // per presence condition
 	public static final int LIFELINERELIABILITY = 6;
 	public static final int CONFIGURATIONS = 7;
+	public static final int NUMBEROFFEATURES = 8;
 
 	/**
 	 * Factory method for getting an instance of a VariableBehavioralParameters
@@ -59,6 +60,10 @@ public abstract class VariableBehavioralParameters {
 			answer = new VariableReplicatedFragments();
 			break;
 
+		case NUMBEROFFEATURES:
+			answer = new VariableNumberOfFeatures(); 
+			break; 
+			
 		default:
 			answer = null;
 			break;
@@ -71,6 +76,7 @@ public abstract class VariableBehavioralParameters {
 	protected int maxValue;
 	protected int variationStep;
 	protected int currentValue;
+	protected SPLGeneratorParameters generatorParameters;
 
 
 	public VariableBehavioralParameters() {
@@ -214,5 +220,6 @@ public abstract class VariableBehavioralParameters {
 		}
 		return answer;
 	}
+
 
 }

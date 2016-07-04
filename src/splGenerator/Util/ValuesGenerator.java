@@ -35,10 +35,6 @@ public class ValuesGenerator {
 		while (idxValues < numberOfValues) {
 			double value = minReliabibilityValue + (maxReliabilityValue - minReliabibilityValue)
 					* r.nextDouble();
-//			Double randomValue = BigDecimal.valueOf(value)
-//					.setScale(reliabilityPrecision, BigDecimal.ROUND_HALF_DOWN)
-//					.doubleValue();
-//			System.out.println(value);
 			boolean answer = reliabilityValues.add(value);
 			if (answer == true)
 				idxValues++;
@@ -47,6 +43,8 @@ public class ValuesGenerator {
 		}
 		numOfReliabilitiesValues = reliabilityValues.size();
 		idxReliabilityValue = 0;
+//		System.out.println("numOfReliabilitiesValues= " + numOfReliabilitiesValues);
+//		System.out.println("idxReliabilityValue= " + idxReliabilityValue);
 	}
 
 	/**
@@ -59,13 +57,8 @@ public class ValuesGenerator {
 		Object[] values = reliabilityValues.toArray();
 		int p = idxReliabilityValue % numOfReliabilitiesValues;
 		idxReliabilityValue++;
+//		System.out.println("idxReliabilityValue= " + idxReliabilityValue);
 		return (double) values[p]; 
-//		Random r = new Random();
-
-//		int idx = r.nextInt(reliabilityValues.size());
-//		System.out.println("INDEX: " + idx);
-//		Object[] answer = reliabilityValues.toArray();
-//		return (double) answer[idx];
 	}
 
 	/**

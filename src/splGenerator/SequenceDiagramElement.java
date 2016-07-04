@@ -32,8 +32,11 @@ public abstract class SequenceDiagramElement {
 		SequenceDiagramElement e = null; 
 		switch (type) {
 		case LIFELINE:
-			e = new Lifeline(name); 
-			elements.put(name, e);
+			e = elements.get(name); 
+			if (e == null) {
+				e = new Lifeline(name); 
+				elements.put(name, e);
+			}
 			break;
 
 		case MESSAGE:
@@ -67,6 +70,19 @@ public abstract class SequenceDiagramElement {
 
 	public static void reset() {
 		elements.clear();
+	}
+
+	public static int countLifelines() {
+		int answer = 0;
+		for (String key : elements.keySet()) {
+			SequenceDiagramElement sde = elements.get(key); 
+			if (sde instanceof Lifeline) {
+				Lifeline l = (Lifeline) sde;
+				System.out.println(l.getName() + ":" + l.getReliability());
+				answer++; 
+			}
+		}
+		return answer;
 	} 
 	
 }

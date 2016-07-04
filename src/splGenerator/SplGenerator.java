@@ -65,7 +65,6 @@ public class SplGenerator {
 	private int numberOfReliabilityValues;
 	private int numberOfAltFragments;
 	private int numberOfLoopFragments;
-	
 
 	/**
 	 * Indexes used by the behavioral models generator
@@ -78,7 +77,7 @@ public class SplGenerator {
 	private int idxDecisionNode;
 	private int idxMergeNode;
 	// Indexes for sequence diagram elements
-	private int idxSequenceDiagram;
+	private static int idxSequenceDiagram = 0;
 	private int idxLifeline;
 	private int idxFragment;
 	private int idxMessage;
@@ -99,7 +98,7 @@ public class SplGenerator {
 		idxActTransition = 0;
 		idxDecisionNode = 0;
 		idxMergeNode = 0;
-		idxSequenceDiagram = 0;
+//		idxSequenceDiagram = 0;
 		idxLifeline = 0;
 		idxFragment = 0;
 		idxMessage = 0;
@@ -135,8 +134,7 @@ public class SplGenerator {
 	 */
 	public SPL generateSPL(int fmGenerationMethod, int modelsCorrespondence) {
 		// 1st step: generate the feature model of the whole Software Product
-		// Line,
-		// as the generation method choosed.
+		// Line, as the generation method choosed.
 		FeatureModel fm = (FeatureModel) generateFeatureModel(fmGenerationMethod);
 		FeatureTreeNode root = fm.getRoot();
 		SPLFilePersistence.FM2JavaCNF(fm);
@@ -154,8 +152,10 @@ public class SplGenerator {
 			((Lifeline) e)
 					.setReliability(ValuesGenerator.getReliabilityValue());
 		}
+
 		// creating the fragments of the sequence diagram, one fragment by
 		// feature
+//		System.out.println("|listOfPendingFragments| = " + listOfPendingFragments.size());
 		for (int i = 0; i < fm
 				.countFeatures(FeatureModel.SOLITAIRE_AND_GROUPED); i++) {
 			Fragment f = (Fragment) Fragment.createElement(
@@ -164,6 +164,7 @@ public class SplGenerator {
 			f.setType(Fragment.OPTIONAL);
 			listOfPendingFragments.add(f);
 		}
+//		System.out.println("|listOfPendingFragments| = " + listOfPendingFragments.size());
 
 		// 3rd step: create the activity diagram describing the coarse-grained
 		// behavior of the software product line.
@@ -207,7 +208,7 @@ public class SplGenerator {
 						"true");
 			}
 		}
-
+		spl.setSplGenerator(this);
 		return spl;
 	}
 
@@ -373,8 +374,8 @@ public class SplGenerator {
 
 	private Fragment randomFragment() {
 		Random ran = new Random();
-//		System.out.println("|listOfPendingFragments|="
-//				+ listOfPendingFragments.size());
+		// System.out.println("|listOfPendingFragments|="
+		// + listOfPendingFragments.size());
 		int i = ran.nextInt(listOfPendingFragments.size());
 		Fragment f = listOfPendingFragments.remove(i);
 		return f;
@@ -405,9 +406,9 @@ public class SplGenerator {
 	 * @return Sequence Diagram object randomly generated.
 	 */
 	private SequenceDiagram randomSequenceDiagram(String name, String guard) {
-		int idxAltFragments = 0; 
+		int idxAltFragments = 0;
 		int idxLoopFragments = 0;
-		
+
 		SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(name, guard);
 		Lifeline source = randomLifeline();
 		// System.out.println("Fragment size = " + fragmentSize);
@@ -418,32 +419,35 @@ public class SplGenerator {
 			source = target;
 		}
 
-		//include alt fragments into a random position
+		// include alt fragments into a random position
 		while (idxAltFragments < numberOfAltFragments) {
-			Random r = new Random(); 
+			Random r = new Random();
 			int position = r.nextInt(fragmentSize);
-			Fragment f = createAlternativeFragment(name + "_alt_" + idxAltFragments);
+			Fragment f = createAlternativeFragment(name + "_alt_"
+					+ idxAltFragments);
 			sd.getElements().add(position, f);
 			idxAltFragments++;
 		}
-		
-		//include loop fragments into a random position
+
+		// include loop fragments into a random position
 		while (idxLoopFragments < numberOfLoopFragments) {
-			Random r = new Random(); 
+			Random r = new Random();
 			int position = r.nextInt(fragmentSize);
 			Fragment f = createLoopFragment(name + "_loop_" + idxAltFragments);
 			sd.getElements().add(position, f);
 			idxLoopFragments++;
 		}
-		
+
 		return sd;
 	}
 
 	private Fragment createLoopFragment(String name) {
-		Fragment f = (Fragment) SequenceDiagramElement.createElement(SequenceDiagramElement.FRAGMENT, "");
+		Fragment f = (Fragment) SequenceDiagramElement.createElement(
+				SequenceDiagramElement.FRAGMENT, "");
 		f.setType(Fragment.LOOP);
-		
-		SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(name, "true");
+
+		SequenceDiagram sd = SequenceDiagram
+				.createSequenceDiagram(name, "true");
 		Lifeline source = randomLifeline();
 		for (int i = 0; i < fragmentSize; i++) {
 			Lifeline target = randomLifeline();
@@ -456,10 +460,12 @@ public class SplGenerator {
 	}
 
 	private Fragment createAlternativeFragment(String name) {
-		Fragment f = (Fragment) SequenceDiagramElement.createElement(SequenceDiagramElement.FRAGMENT, "");
+		Fragment f = (Fragment) SequenceDiagramElement.createElement(
+				SequenceDiagramElement.FRAGMENT, "");
 		f.setType(Fragment.ALTERNATIVE);
-		
-		SequenceDiagram sd = SequenceDiagram.createSequenceDiagram(name, "true");
+
+		SequenceDiagram sd = SequenceDiagram
+				.createSequenceDiagram(name, "true");
 		Lifeline source = randomLifeline();
 		for (int i = 0; i < fragmentSize; i++) {
 			Lifeline target = randomLifeline();
@@ -596,7 +602,7 @@ public class SplGenerator {
 			fmParameters = FeatureModelParameters
 					.getConfiguration(FeatureModelParameters.STANDARD_FEATURE_MODEL);
 		}
-		
+
 		engine.setFeatureModelSize(numberOfFeatures);
 		engine.setMandatoryPercentage(fmParameters.getMandatoryFeatures());
 		engine.setOptionalPercentage(fmParameters.getOptionalFeatures());
@@ -608,14 +614,13 @@ public class SplGenerator {
 				.getMaximumBranchingFeatures());
 		engine.setMaximumGroupSize(fmParameters.getMaximumGroupSize());
 
-
 		// setting SPLAR Cross-tree's constraints parameters
 		engine.setCTCR(fmParameters.getNumCrossTreeConstraints());
 		engine.setClauseDensity(fmParameters.getClauseDensity());
 		engine.setModelConsistency(fmParameters.getModelConsistency());
 
 		List<FeatureModel> featureModels = engine
-				.run2(FMGeneratorEngine.FEATUREIDE_FORMAT);
+				.run2(FMGeneratorEngine.BOTH_FORMAT);
 		FeatureModel fm = featureModels.get(0);
 		return fm;
 	}
@@ -674,7 +679,23 @@ public class SplGenerator {
 	}
 
 	public void setNumberOfLoopsFragments(int numberOfLoopFragments) {
-		this.numberOfLoopFragments = numberOfLoopFragments; 
+		this.numberOfLoopFragments = numberOfLoopFragments;
+	}
+
+	public FeatureModelParameters getFeatureModelParameters() {
+		return fmParameters;
+	}
+
+	public int getFragmentSize() {
+		return this.fragmentSize;
+	}
+
+	public int getNumberOfAltFragments() {
+		return this.numberOfAltFragments;
+	}
+
+	public int getNumberOfLoopFragments() {
+		return this.numberOfLoopFragments;
 	}
 
 }

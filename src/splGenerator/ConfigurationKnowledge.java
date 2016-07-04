@@ -60,4 +60,27 @@ public class ConfigurationKnowledge {
 		
 		return answer; 
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder str = new StringBuilder();
+		str.append("MAPPING: \n" ); 
+		for (Feature f : mapping.keySet()) {
+			str.append(f.getName() + ": ");
+			for (SequenceDiagram s : mapping.get(f)) {
+				str.append(s.getName() + " [" + s.getGuardCondition() + "], " ); 
+				str.append("\n");
+			}
+		}
+		str.append("\n\n");
+		str.append("MAPPINGSPLAR: \n" ); 
+		for (FeatureTreeNode f : mappingSplar.keySet()) {
+			str.append(f.getName() + ": ");
+			for (SequenceDiagram s : mappingSplar.get(f)) {
+				str.append(s.getName() + " [" + s.getGuardCondition() + "], " ); 
+				str.append("\n");
+			}
+		}
+		return str.toString();
+	}
 }

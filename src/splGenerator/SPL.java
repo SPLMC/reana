@@ -40,6 +40,8 @@ public class SPL implements Cloneable{
 	ActivityDiagram ad;
 	ConfigurationKnowledge ck;
 
+	private SplGenerator splGenerator;
+
 	private static SPL instance;
 
 	public SPL(String name) {
@@ -255,5 +257,14 @@ public class SPL implements Cloneable{
 	public ConfigurationKnowledge getCk() {
 		return ck;
 	}
+
+	public void setSplGenerator(SplGenerator splGenerator) {
+		this.splGenerator = splGenerator; 
+	}
+	
+	public SplGenerator getSplGenerator() { 
+		return splGenerator;
+	}
+
 
 }
