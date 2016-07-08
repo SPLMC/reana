@@ -19,6 +19,7 @@ import java.util.Random;
 import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
+import splGenerator.Util.SPLFilePersistence;
 import splGenerator.tests.SDTransformationsTest;
 import splar.core.fm.FeatureModel;
 import splar.core.fm.FeatureTreeNode;
@@ -79,7 +80,7 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 			answer.add(temp);
 
 			currentVersion = createSplDeepCopy(temp);
-
+			System.out.println(currentVersion.getFeatureModel().FM2JavaCNF());
 			currentValue += variationStep;
 		}
 		return answer;
@@ -105,27 +106,29 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 	private SPL appendSPL (SPL temp, SPL currentVersion) {
 		SPL answer = null;
 		//1st step: create a deep copy of the current version of the spl to be changed. 
-		answer = createSplDeepCopy(currentVersion); 
+		answer = createSplDeepCopy(currentVersion);
 
 		createFeatureIDEFile(answer, "beforeAppend");
+		System.out.println("I created the featureIDE file before appending the new feature model");
+		
 		//2nd step: obtain all features to be added in the current version of the spl.
 		Enumeration<?> children = temp.getFeatureModel().getRoot().children();
-		int elements = 0;
 		LinkedList<FeatureTreeNode> childrenToAdd = new LinkedList<FeatureTreeNode>();
 		
 		while (children.hasMoreElements()) {
 			FeatureTreeNode a = (FeatureTreeNode)children.nextElement();
 			childrenToAdd.add(a);
-			elements++; 
 		}
 		
 		LinkedList<Fragment> fragmentsToAdd = new LinkedList<Fragment>();
+		
 		for (FeatureTreeNode node : childrenToAdd) {
 			fragmentsToAdd.addAll(getFragmentsByGuardCondition(node.getName(), temp));
 			answer.getFeatureModel().getRoot().add(node);
 		}
 		
 		createFeatureIDEFile(answer, "afterAppend");
+		System.out.println("I created the featureIDE file after appending the new feature model");
 		
 		//3rd step: get the fragments associated to features which will be add at new feature model
 		SequenceDiagram sdRoot = getSequenceDiagramByGuardCondition("R", answer);
@@ -233,13 +236,18 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 				strs[2] = Integer.toString(nextIndex);
 				for (int i = 0; i < strs.length; i++) {
 					if (strs[i].equals("")) {
-						strBldrName.append("");
-					} else {
-						strBldrName.append(strs[i]);
 						strBldrName.append("_");
+					} else {
+						strBldrName.append("__");
+						strBldrName.append(strs[i]);
 					}
 				}
-				strBldrName.deleteCharAt(strBldrName.length() - 1);
+				strBldrName = strBldrName.deleteCharAt(strBldrName.length() - 1);
+				strBldrName = strBldrName.deleteCharAt(strBldrName.length() - 1);
+				if (strBldrName.charAt(0) == '_'){
+//					System.out.println("achei");
+					strBldrName = strBldrName.deleteCharAt(0);
+				}
 				if (!renamedFeatures.containsKey(node.getName())) {
 					renamedFeatures.put(node.getName(), strBldrName.toString());
 					renameSequenceDiagram(node.getName(), strBldrName.toString(), spl);
@@ -310,7 +318,7 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 	private HashSet<Lifeline> getLifelines(SPL spl) {
 		HashSet<Lifeline> answer = new HashSet<Lifeline>();
 		for (Activity a : spl.getActivityDiagram().getSetOfActivities()) {
-			answer.addAll(a.getTranstiveLifelines());
+			answer.addAll(a.getTransitiveLifelines());
 		}
 		return answer;
 	}

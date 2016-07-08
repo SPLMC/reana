@@ -27,7 +27,7 @@ public class VariableLifelineReliability extends VariableBehavioralParameters {
 			List<Activity> activities = temp.getActivityDiagram()
 					.getSetOfActivities();
 			for (Activity a : activities) {
-				lifelines.addAll(a.getTranstiveLifelines());
+				lifelines.addAll(a.getTransitiveLifelines());
 			}
 
 			// 2nd step: change the reliability values of all lifelines used by

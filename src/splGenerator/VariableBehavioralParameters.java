@@ -195,7 +195,6 @@ public abstract class VariableBehavioralParameters {
 	 */
 	protected SPL createSplDeepCopy(SPL spl) {
 		SPL answer = null;
-
 		ActivityDiagram.reset();
 		ActivityDiagramElement.reset();
 		SequenceDiagram.reset();

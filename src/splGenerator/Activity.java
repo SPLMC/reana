@@ -8,15 +8,15 @@ import java.util.LinkedList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class Activity extends ActivityDiagramElement{
+public class Activity extends ActivityDiagramElement {
 
-	LinkedList<SequenceDiagram> sequenceDiagrams; 
-	
+	LinkedList<SequenceDiagram> sequenceDiagrams;
+
 	public Activity() {
 		super();
 		sequenceDiagrams = new LinkedList<SequenceDiagram>();
 	}
-	
+
 	public Activity(String elementName) {
 		super(elementName);
 		sequenceDiagrams = new LinkedList<SequenceDiagram>();
@@ -25,45 +25,44 @@ public class Activity extends ActivityDiagramElement{
 	public boolean addSequenceDiagram(SequenceDiagram sd) {
 		if (sequenceDiagrams == null)
 			sequenceDiagrams = new LinkedList<SequenceDiagram>();
-		
-		boolean answer = sequenceDiagrams.add(sd); 
+
+		boolean answer = sequenceDiagrams.add(sd);
 		return answer;
 	}
 
-	public boolean containsSequenceDiagram(String seqDiagName) { 
+	public boolean containsSequenceDiagram(String seqDiagName) {
 		Iterator<SequenceDiagram> itSeqDiag = sequenceDiagrams.iterator();
-		SequenceDiagram s; 
+		SequenceDiagram s;
 		while (itSeqDiag.hasNext()) {
-			s = itSeqDiag.next(); 
+			s = itSeqDiag.next();
 			if (s.getName().equals(seqDiagName))
-				return true; 
+				return true;
 		}
 		return false;
 	}
 
 	public SequenceDiagram getSeqDiagByName(String seqDiagName) {
-		Iterator <SequenceDiagram> itSeqDiag = sequenceDiagrams.iterator();
-		SequenceDiagram s; 
-		
+		Iterator<SequenceDiagram> itSeqDiag = sequenceDiagrams.iterator();
+		SequenceDiagram s;
+
 		while (itSeqDiag.hasNext()) {
 			s = itSeqDiag.next();
 			if (s.getName().equals(seqDiagName))
-				return s; 
+				return s;
 		}
 		return null;
 	}
-	
+
 	public LinkedList<SequenceDiagram> getSequenceDiagrams() {
 		return sequenceDiagrams;
 	}
-
 
 	public Element getDom(Document doc) {
 		Element e = super.getDom(doc);
 
 		if (sequenceDiagrams.size() > 0) {
-			Iterator<SequenceDiagram> its = sequenceDiagrams.iterator(); 
-			Element seqDiag; 
+			Iterator<SequenceDiagram> its = sequenceDiagrams.iterator();
+			Element seqDiag;
 			while (its.hasNext()) {
 				SequenceDiagram sd = its.next();
 				seqDiag = doc.createElement("RepresentedBy");
@@ -71,49 +70,92 @@ public class Activity extends ActivityDiagramElement{
 				e.appendChild(seqDiag);
 			}
 		}
-		
+
 		return e;
 	}
 
+	/**
+	 * This method implements a non-recursive version of the method for getting
+	 * all sequence diagrams which can be reached from an activity.
+	 * 
+	 * @return a hashset containing all sequence diagrams gathered
+	 */
 	public HashSet<SequenceDiagram> getTransitiveSequenceDiagram() {
 		HashSet<SequenceDiagram> answer = new HashSet<SequenceDiagram>();
-		Iterator<SequenceDiagram> its = sequenceDiagrams.iterator(); 
-		while (its.hasNext()) {
-			SequenceDiagram s = its.next(); 
+		LinkedList<SequenceDiagram> pendingSDs = new LinkedList<SequenceDiagram>();
+		LinkedList<Fragment> pendingFragments = new LinkedList<Fragment>();
+
+		pendingSDs.addAll(getSequenceDiagrams());
+
+		while (!pendingSDs.isEmpty()) {
+			SequenceDiagram s = pendingSDs.removeFirst();
+			pendingFragments.addAll(s.getFragments());
+			for (Fragment fr : s.getFragments()) {
+				if (!pendingFragments.contains(fr)) {
+					pendingFragments.add(fr);
+				}
+			}
 			answer.add(s);
-			HashSet<Fragment> setOfFragments = s.getFragments(); 
-			Iterator<Fragment> itf = setOfFragments.iterator(); 
-			while (itf.hasNext()) {
-				Fragment f = itf.next();
-				answer.addAll(f.getTransitiveSequenceDiagram()); 
+			while (!pendingFragments.isEmpty()) {
+				Fragment fr = pendingFragments.removeFirst();
+				for (SequenceDiagram sd : fr.getSequenceDiagrams()) {
+					if (!pendingSDs.contains(sd)) {
+						pendingSDs.add(sd);
+					}
+				}
 			}
 		}
-		answer.addAll(sequenceDiagrams); 
 		return answer;
 	}
 
-	public HashSet<Lifeline> getTranstiveLifelines() {
-		HashSet<Lifeline> answer = new HashSet<Lifeline>(); 
-		
-		Iterator<SequenceDiagram> it = sequenceDiagrams.iterator(); 
-		while (it.hasNext()) {
-			SequenceDiagram s = it.next(); 
-			answer.addAll(s.getTransitiveLifeline()); 
+	/**
+	 * This method implements a non-recursive version of the method for getting
+	 * all lifelines enrolled at an activity's execution. All lifelines are
+	 * returned by an HashSet.
+	 * 
+	 * @return a hashset containing all sequence diagrams gathered.
+	 */
+	public HashSet<Lifeline> getTransitiveLifelines() {
+		HashSet<Lifeline> answer = new HashSet<Lifeline>();
+		LinkedList<SequenceDiagram> pendingSDs = new LinkedList<SequenceDiagram>();
+		LinkedList<Fragment> pendingFragments = new LinkedList<Fragment>();
+
+		pendingSDs.addAll(getSequenceDiagrams());
+		while (!pendingSDs.isEmpty()) {
+			SequenceDiagram s = pendingSDs.removeFirst();
+			answer.addAll(s.getLifelines());
+			pendingFragments.addAll(s.getFragments());
+			while (!pendingFragments.isEmpty()) {
+				Fragment fr = pendingFragments.removeFirst();
+				pendingSDs.addAll(fr.getSequenceDiagrams());
+			}
 		}
-		
 		return answer;
 	}
 
+	/**
+	 * This method implements a non-recursive version of the method for getting
+	 * all the fragments reachable from an activity, i.e., those fragments
+	 * enrolled into activity's execution.
+	 * 
+	 * @return a hashset containing all fragments reachable from the activity
+	 */
 	public HashSet<Fragment> getTransitiveFragments() {
-		HashSet<Fragment> answer = new HashSet<Fragment>(); 
-		Iterator<SequenceDiagram> itsd = sequenceDiagrams.iterator(); 
-		while (itsd.hasNext()) {
-			SequenceDiagram s = itsd.next();
-			answer.addAll(s.getTransitiveFragments()); 
-		}
-		
-		
-		return answer;
-	}	
-}
+		HashSet<Fragment> answer = new HashSet<Fragment>();
+		LinkedList<SequenceDiagram> pendingSDs = new LinkedList<SequenceDiagram>();
+		LinkedList<Fragment> pendingFragments = new LinkedList<Fragment>();
 
+		pendingSDs.addAll(getSequenceDiagrams());
+		while (!pendingSDs.isEmpty()) {
+			SequenceDiagram s = pendingSDs.removeFirst();
+			pendingFragments.addAll(s.getFragments());
+			while (!pendingFragments.isEmpty()) {
+				Fragment fr = pendingFragments.removeFirst();
+				answer.add(fr);
+				pendingSDs.addAll(fr.getSequenceDiagrams());
+			}
+		}
+
+		return answer;
+	}
+}
