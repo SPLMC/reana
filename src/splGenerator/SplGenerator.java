@@ -72,15 +72,16 @@ public class SplGenerator {
 	private int idxModel;
 	private int idxFeature;
 	// Indexes for activity diagram elements
-	private int idxActivity;
 	private int idxActTransition;
 	private int idxDecisionNode;
 	private int idxMergeNode;
 	// Indexes for sequence diagram elements
-	private static int idxSequenceDiagram = 0;
 	private int idxLifeline;
-	private int idxFragment;
 	private int idxMessage;
+
+	private static int idxActivity = 0;
+	private static int idxSequenceDiagram = 0;
+	private static int idxFragment = 0;
 
 	/**
 	 * Lists of elements created during the behavioral models generation
@@ -94,13 +95,13 @@ public class SplGenerator {
 
 		idxModel = 0;
 		idxFeature = 0;
-		idxActivity = 0;
+//		idxActivity = 0;
 		idxActTransition = 0;
 		idxDecisionNode = 0;
 		idxMergeNode = 0;
 //		idxSequenceDiagram = 0;
 		idxLifeline = 0;
-		idxFragment = 0;
+//		idxFragment = 0;
 		idxMessage = 0;
 
 		listOfPendingFragments = new LinkedList<Fragment>();
@@ -184,7 +185,7 @@ public class SplGenerator {
 				// diagram respects fully the FM's structure
 				Fragment frRoot = symmetricModelsCreation(root);
 				sdRoot = frRoot.getSequenceDiagrams().getFirst();
-				Activity a = ad.getActivityByName("Activity_0");
+				Activity a = ad.getSetOfActivities().get(0);
 				a.addSequenceDiagram(sdRoot);
 			} else {
 				// in case the number of activities is different of the number
@@ -221,7 +222,7 @@ public class SplGenerator {
 	 * parameter, a sequence diagram representing the structure of the feature's
 	 * subtree is returned, such that each feature has an associated fragment
 	 * that contains its sequence diagram (basic in case of leaf features,
-	 * variable in case of other intermedia te features). If the root node is
+	 * variable in case of other intermediate features). If the root node is
 	 * passed by the parameter, the returned sequence diagram's structure
 	 * resembles the topology of the whole feature model.
 	 * 
@@ -524,8 +525,8 @@ public class SplGenerator {
 
 		// 2nd step: create a linear activity diagram structure.
 		ActivityDiagramElement source = ad.getStartNode(), target = null;
-		for (int i = 0; i < ad.getSetOfActivities().size(); i++) {
-			target = ad.getActivityByName("Activity_" + i);
+		for (Activity a: ad.getSetOfActivities()) {
+			target = a;
 			Transition t = source.createTransition(target, "Trans_"
 					+ idxActTransition++, 1);
 			ad.addElement(t);

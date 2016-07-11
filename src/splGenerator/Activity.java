@@ -89,6 +89,7 @@ public class Activity extends ActivityDiagramElement {
 
 		while (!pendingSDs.isEmpty()) {
 			SequenceDiagram s = pendingSDs.removeFirst();
+//			System.out.println("$$$$$$$$ "+s.getName() + " -> "+ s.getGuardCondition());
 			pendingFragments.addAll(s.getFragments());
 			for (Fragment fr : s.getFragments()) {
 				if (!pendingFragments.contains(fr)) {
@@ -98,8 +99,10 @@ public class Activity extends ActivityDiagramElement {
 			answer.add(s);
 			while (!pendingFragments.isEmpty()) {
 				Fragment fr = pendingFragments.removeFirst();
+//				System.out.println(">>> Fragment: " + fr.getName());
 				for (SequenceDiagram sd : fr.getSequenceDiagrams()) {
 					if (!pendingSDs.contains(sd)) {
+//						System.out.println(">>>>>> Adicionando "+sd.getName() + " -> "+ sd.getGuardCondition());
 						pendingSDs.add(sd);
 					}
 				}

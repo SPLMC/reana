@@ -104,9 +104,9 @@ public class SPL implements Cloneable{
 				Activity a = ita.next();
 				// get all the sequence diagrams associated to the activity and
 				// add them to the set of sequence diagrams.
-				System.out.println("----->");
+//				System.out.println("----->");
 				setOfSequenceDiagrams.addAll(a.getTransitiveSequenceDiagram());
-				System.out.println("=====>");
+//				System.out.println("=====>");
 				setOfLifelines.addAll(a.getTransitiveLifelines());
 				setOfFragments.addAll(a.getTransitiveFragments());
 			}

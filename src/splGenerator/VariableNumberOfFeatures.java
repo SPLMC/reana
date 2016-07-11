@@ -48,11 +48,10 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 		LinkedList<SPL> answer = new LinkedList<SPL>();
 		SPL currentVersion = createSplDeepCopy(spl);
 
-
 		while (currentValue <= maxValue) {
 			renamedFeatures = new HashMap<String, String>();
-			int lastFeatureIndex = lastFeatureIndex(currentVersion.getFeatureModel()
-					.getRoot());
+			int lastFeatureIndex = lastFeatureIndex(currentVersion
+					.getFeatureModel().getRoot());
 
 			// 3rd step: from each seed SPL, we will create a new SPL having the
 			// same feature and behavioral models' characteristics than its seed
@@ -69,27 +68,51 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 
 			SPL temp = generator.generateSPL(SplGenerator.SPLOT,
 					SplGenerator.SYMMETRIC);
+			
+			System.out.println(currentValue + ") \n" + printFeatureModel(temp.getFeatureModel().getRoot()));
 
 			int nextIndex = lastFeatureIndex;
 
 			renameFeatures(temp.getFeatureModel().getRoot(), temp, nextIndex);
 			createFeatureIDEFile(temp, "");
-			
+
 			temp = appendSPL(temp, currentVersion);
 			
+			System.out.println(printFeatureModel(temp.getFeatureModel().getRoot()));
+
 			answer.add(temp);
 
 			currentVersion = createSplDeepCopy(temp);
-			System.out.println(currentVersion.getFeatureModel().FM2JavaCNF());
+//			System.out.println(currentVersion.getFeatureModel().FM2JavaCNF());
 			currentValue += variationStep;
 		}
 		return answer;
 	}
 
+	private String printFeatureModel(FeatureTreeNode feature) {
+		StringBuilder answer = new StringBuilder();
+		for (int i = 0; i < feature.getLevel(); i++){
+			answer.append("    "); 
+		}
+		answer.append(feature.getName() + " (" + feature.getChildCount() + ")" + '\n');
+
+		int childrenCount = feature.getChildCount();
+		Enumeration<FeatureTreeNode> children = feature.children();
+		while (childrenCount > 0) {
+			FeatureTreeNode f = (FeatureTreeNode) children.nextElement();
+			answer.append(printFeatureModel(f));
+			childrenCount--;
+		}
+		
+		return answer.toString();
+	}
+
 	private void createFeatureIDEFile(SPL temp, String obs) {
 		String x = temp.getFeatureModel().dumpFeatureIdeXML();
 		try {
-			File f = new File("/home/andlanna/workspace2/reana/src/splGenerator/generatedModels/" + currentValue + "_" + obs + ".xml");
+			File f = new File(
+					"/home/andlanna/workspace2/reana/src/splGenerator/generatedModels/"
+							+ currentValue + "_" + obs + ".xml");
 			PrintStream p = new PrintStream(f);
 			PrintStream oldOut = java.lang.System.out;
 			java.lang.System.setOut(p);
@@ -103,53 +126,60 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 		}
 	}
 
-	private SPL appendSPL (SPL temp, SPL currentVersion) {
+	private SPL appendSPL(SPL temp, SPL currentVersion) {
 		SPL answer = null;
-		//1st step: create a deep copy of the current version of the spl to be changed. 
+		// 1st step: create a deep copy of the current version of the spl to be
+		// changed.
 		answer = createSplDeepCopy(currentVersion);
 
 		createFeatureIDEFile(answer, "beforeAppend");
-		System.out.println("I created the featureIDE file before appending the new feature model");
-		
-		//2nd step: obtain all features to be added in the current version of the spl.
+
+		// 2nd step: obtain all features to be added in the current version of
+		// the spl.
 		Enumeration<?> children = temp.getFeatureModel().getRoot().children();
 		LinkedList<FeatureTreeNode> childrenToAdd = new LinkedList<FeatureTreeNode>();
-		
+
 		while (children.hasMoreElements()) {
-			FeatureTreeNode a = (FeatureTreeNode)children.nextElement();
+			FeatureTreeNode a = (FeatureTreeNode) children.nextElement();
 			childrenToAdd.add(a);
 		}
-		
+
 		LinkedList<Fragment> fragmentsToAdd = new LinkedList<Fragment>();
-		
+		System.out.println("|childrenToAdd|= " + childrenToAdd.size());
+		int countChildrenToAdd = childrenToAdd.size();
+
 		for (FeatureTreeNode node : childrenToAdd) {
-			fragmentsToAdd.addAll(getFragmentsByGuardCondition(node.getName(), temp));
+			fragmentsToAdd.addAll(getFragmentsByGuardCondition(node.getName(),
+					temp));
 			answer.getFeatureModel().getRoot().add(node);
+			answer.getFeatureModel().getRoot().attachData(new Integer(countChildrenToAdd-1));
 		}
-		
+
+		System.out.println("|R|= " + answer.getFeatureModel().getRoot().getChildCount());
 		createFeatureIDEFile(answer, "afterAppend");
-		System.out.println("I created the featureIDE file after appending the new feature model");
+
+		System.out.println(answer.getFeatureModel().FM2CNF());
+		System.out.println(answer.getFeatureModel().FM2JavaCNF());
 		
-		//3rd step: get the fragments associated to features which will be add at new feature model
+		// 3rd step: get the fragments associated to features which will be add
+		// at new feature model
 		SequenceDiagram sdRoot = getSequenceDiagramByGuardCondition("R", answer);
-		
+
 		for (Fragment fr : fragmentsToAdd) {
 			int pos = new Random().nextInt(sdRoot.getElements().size());
 			sdRoot.getElements().add(pos, fr);
 		}
-		
+
 		return answer;
 	}
-	
-	
 
 	private SequenceDiagram getSequenceDiagramByGuardCondition(String string,
 			SPL spl) {
-		SequenceDiagram answer = null; 
+		SequenceDiagram answer = null;
 		for (Activity a : spl.getActivityDiagram().getSetOfActivities()) {
 			for (SequenceDiagram sd : a.getTransitiveSequenceDiagram()) {
 				if (sd.getGuardCondition().equals(string)) {
-					answer = sd; 
+					answer = sd;
 				}
 			}
 		}
@@ -162,7 +192,7 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 		for (Activity a : temp.getActivityDiagram().getSetOfActivities()) {
 			for (SequenceDiagram sd : a.getSequenceDiagrams()) {
 				for (Fragment fr : sd.getFragments()) {
-					for (SequenceDiagram s: fr.getSequenceDiagrams()) {
+					for (SequenceDiagram s : fr.getSequenceDiagrams()) {
 						if (s.getGuardCondition().equals(name)) {
 							answer.add(fr);
 						} else {
@@ -171,7 +201,7 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 				}
 			}
 		}
-		
+
 		return answer;
 	}
 
@@ -193,7 +223,6 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 	}
 
 	private void renameFeatures(FeatureTreeNode node, SPL spl, int nextIndex) {
-
 		if (node.isRoot()) {
 			Enumeration<?> children = node.children();
 			while (children.hasMoreElements()) {
@@ -202,76 +231,145 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 				renameFeatures(f, spl, nextIndex);
 			}
 		} else {
-			StringBuilder strBldrName = new StringBuilder();
+			StringBuilder strNewName = new StringBuilder();
 			if (node.getName().startsWith("o_")
 					|| node.getName().startsWith("m_")
 					|| node.getName().startsWith("g_")) {
+				
 				String[] strs = node.getName().split("_");
 				strs[1] = Integer.toString(nextIndex);
+				
 				for (int i = 0; i < strs.length; i++) {
-					if (strs[i].equals("")) {
-						strBldrName.append("");
-					} else
-						strBldrName.append(strs[i]);
-					strBldrName.append("_");
+					strNewName.append(strs[i]);
+					if (i != (strs.length-1)) {
+						strNewName.append("_");
+					}
 				}
-				strBldrName.deleteCharAt(strBldrName.length() - 1);
-				if (!renamedFeatures.containsKey(node.getName())) {
-					renamedFeatures.put(node.getName(), strBldrName.toString());
-					renameSequenceDiagram(node.getName(), strBldrName.toString(), spl); 
-					node.setName(strBldrName.toString());
-				}
-				Enumeration<?> children = node.children();
-				while (children.hasMoreElements()) {
-					FeatureTreeNode f = (FeatureTreeNode) children
-							.nextElement();
+				renameSequenceDiagram(node.getName(), strNewName.toString(), spl);
+				node.setName(strNewName.toString());
+				for (int i = 0; i< node.getChildCount(); i++) {
+					FeatureTreeNode f = (FeatureTreeNode) node.getChildAt(i);
 					nextIndex++;
-					renameFeatures(f, spl, nextIndex);
+					renameFeatures(f, spl, nextIndex); 
 				}
 			}
 
 			if (node.getName().startsWith("_Ge")
 					|| node.getName().startsWith("_Gi")) {
 				String[] strs = node.getName().split("_");
-				strs[2] = Integer.toString(nextIndex);
+				
 				for (int i = 0; i < strs.length; i++) {
-					if (strs[i].equals("")) {
-						strBldrName.append("_");
+					System.out.println("strs["+i+"]: " + strs[i] );
+				}
+				strNewName.append("_");
+				for (int i=1; i<strs.length; i++) {
+					if (i == 3) {
+						strNewName.append(nextIndex);
 					} else {
-						strBldrName.append("__");
-						strBldrName.append(strs[i]);
+						strNewName.append(strs[i]);
+					}
+					if (i != (strs.length-1)) {
+						strNewName.append("_");
 					}
 				}
-				strBldrName = strBldrName.deleteCharAt(strBldrName.length() - 1);
-				strBldrName = strBldrName.deleteCharAt(strBldrName.length() - 1);
-				if (strBldrName.charAt(0) == '_'){
-//					System.out.println("achei");
-					strBldrName = strBldrName.deleteCharAt(0);
-				}
-				if (!renamedFeatures.containsKey(node.getName())) {
-					renamedFeatures.put(node.getName(), strBldrName.toString());
-					renameSequenceDiagram(node.getName(), strBldrName.toString(), spl);
-					node.setName(strBldrName.toString());
-				}
-				Enumeration<?> children = node.children();
-				while (children.hasMoreElements()) {
-					FeatureTreeNode f = (FeatureTreeNode) children
-							.nextElement();
-					renameFeatures(f, spl, nextIndex);
+				System.out.println("OLD: " + node.getName() + " ---> NEW: " + strNewName.toString());
+				renameSequenceDiagram(node.getName(), strNewName.toString(), spl);
+				node.setName(strNewName.toString());
+				for (int i = 0; i< node.getChildCount(); i++) {
+					FeatureTreeNode f = (FeatureTreeNode) node.getChildAt(i);
+					renameFeatures(f, spl, nextIndex); 
 				}
 			}
 		}
 	}
+	
+//	private void renameFeatures(FeatureTreeNode node, SPL spl, int nextIndex) {
+//		if (node.isRoot()) {
+//			Enumeration<?> children = node.children();
+//			while (children.hasMoreElements()) {
+//				FeatureTreeNode f = (FeatureTreeNode) children.nextElement();
+//				nextIndex++;
+//				renameFeatures(f, spl, nextIndex);
+//			}
+//		} else {
+//			StringBuilder strBldrName = new StringBuilder();
+//			if (node.getName().startsWith("o_")
+//					|| node.getName().startsWith("m_")
+//					|| node.getName().startsWith("g_")) {
+//				String[] strs = node.getName().split("_");
+//				strs[1] = Integer.toString(nextIndex);
+//				for (int i = 0; i < strs.length; i++) {
+//					if (strs[i].equals("")) {
+//						strBldrName.append("");
+//					} else
+//						strBldrName.append(strs[i]);
+//					strBldrName.append("_");
+//				}
+//				strBldrName.deleteCharAt(strBldrName.length() - 1);
+//				if (!renamedFeatures.containsKey(node.getName())) {
+//					renamedFeatures.put(node.getName(), strBldrName.toString());
+//					renameSequenceDiagram(node.getName(),
+//							strBldrName.toString(), spl);
+//					node.setName(strBldrName.toString());
+//				}
+//				Enumeration<?> children = node.children();
+//				while (children.hasMoreElements()) {
+//					FeatureTreeNode f = (FeatureTreeNode) children
+//							.nextElement();
+//					nextIndex++;
+//					renameFeatures(f, spl, nextIndex);
+//				}
+//			}
+//
+//			if (node.getName().startsWith("_Ge")
+//					|| node.getName().startsWith("_Gi")) {
+//				System.out.println("ACHEI >>>>> " + node.getName());
+//				for (int i = 0; i<=node.getName().length(); i++) {
+//					System.out.println(i + ") " + node.getName().substring(i));
+//				}
+//				String[] strs = node.getName().split("_");
+//				strs[2] = Integer.toString(nextIndex);
+//				for (int i = 0; i < strs.length; i++) {
+//					if (strs[i].equals("")) {
+//						strBldrName.append("_");
+//					} else {
+//						strBldrName.append("__");
+//						strBldrName.append(strs[i]);
+//					}
+//				}
+//				strBldrName = strBldrName
+//						.deleteCharAt(strBldrName.length() - 1);
+//				strBldrName = strBldrName
+//						.deleteCharAt(strBldrName.length() - 1);
+//				if (strBldrName.charAt(0) == '_') {
+//					strBldrName = strBldrName.deleteCharAt(0);
+//				}
+//				if (!renamedFeatures.containsKey(node.getName())) {
+//					renamedFeatures.put(node.getName(), strBldrName.toString());
+//					renameSequenceDiagram(node.getName(),
+//							strBldrName.toString(), spl);
+//					node.setName(strBldrName.toString());
+//				}
+//				Enumeration<?> children = node.children();
+//				while (children.hasMoreElements()) {
+//					FeatureTreeNode f = (FeatureTreeNode) children
+//							.nextElement();
+//					renameFeatures(f, spl, nextIndex);
+//				}
+//			}
+//		}
+//	}
 
 	private void renameSequenceDiagram(String oldName, String newName, SPL spl) {
 		for (Activity a : spl.getActivityDiagram().getSetOfActivities()) {
-			for (SequenceDiagram sd: a.getSequenceDiagrams()) {
+			for (SequenceDiagram sd : a.getSequenceDiagrams()) {
 				if (sd.getGuardCondition().equals(oldName)) {
 					sd.setGuard(newName);
 				}
-				LinkedList<SequenceDiagram> otherSDs = sd.getTransitiveSequenceDiagram();
+				LinkedList<SequenceDiagram> otherSDs = sd
+						.getTransitiveSequenceDiagram();
 				for (SequenceDiagram s : otherSDs) {
-					if (s.getGuardCondition().equals(oldName)){
+					if (s.getGuardCondition().equals(oldName)) {
 						s.setGuard(newName);
 					}
 				}
