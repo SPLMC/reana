@@ -47,7 +47,8 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 		// 2nd step: create the first seed SPL.
 		LinkedList<SPL> answer = new LinkedList<SPL>();
 		SPL currentVersion = createSplDeepCopy(spl);
-
+		renameFeatures(currentVersion.getFeatureModel().getRoot(), currentVersion, 0);
+		
 		while (currentValue <= maxValue) {
 			renamedFeatures = new HashMap<String, String>();
 			int lastFeatureIndex = lastFeatureIndex(currentVersion
@@ -272,6 +273,7 @@ public class VariableNumberOfFeatures extends VariableBehavioralParameters {
 						strNewName.append("_");
 					}
 				}
+				strNewName.deleteCharAt(0);
 				System.out.println("OLD: " + node.getName() + " ---> NEW: " + strNewName.toString());
 				renameSequenceDiagram(node.getName(), strNewName.toString(), spl);
 				node.setName(strNewName.toString());
