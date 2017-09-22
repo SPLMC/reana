@@ -1,6 +1,8 @@
-package fdtmc;
+ package fdtmc;
 
 import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -8,18 +10,18 @@ import org.junit.Test;
 
 public class FDTMCTest {
 
-	FDTMC fdtmc1;
+	FDTMC fdtmc;
 
 	@Before
 	public void setUp() throws Exception {
-		fdtmc1 = new FDTMC();
+		fdtmc = new FDTMC();
 	}
 
 	@Test
 	public void testEmptyFDTMC() {
-		Assert.assertTrue(fdtmc1.getStates().isEmpty());
-		Assert.assertNull(fdtmc1.getInitialState());
-		Assert.assertEquals(0, fdtmc1.getVariableIndex());
+		Assert.assertTrue(fdtmc.getStates().isEmpty());
+		Assert.assertNull(fdtmc.getInitialState());
+		Assert.assertEquals(0, fdtmc.getVariableIndex());
 	}
 
 	/**
@@ -30,13 +32,13 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testCreateState() {
-		fdtmc1.setVariableName("x");
-		State temp = fdtmc1.createState();
+		fdtmc.setVariableName("x");
+		State temp = fdtmc.createState();
 		Assert.assertNotNull(temp);
-		Assert.assertTrue(fdtmc1.getStates().contains(temp));
+		Assert.assertTrue(fdtmc.getStates().contains(temp));
 		Assert.assertEquals(0, temp.getIndex());
 		Assert.assertEquals("x", temp.getVariableName());
-		Assert.assertEquals(temp, fdtmc1.getInitialState());
+		Assert.assertEquals(temp, fdtmc.getInitialState());
 	}
 
 	/**
@@ -45,14 +47,14 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testCreateLotsOfStates() {
-		fdtmc1.setVariableName("x");
+		fdtmc.setVariableName("x");
 		State s0, s1, s2, s3, s4, s5;
-		s0 = fdtmc1.createState();
-		s1 = fdtmc1.createState();
-		s2 = fdtmc1.createState();
-		s3 = fdtmc1.createState();
-		s4 = fdtmc1.createState();
-		s5 = fdtmc1.createState();
+		s0 = fdtmc.createState();
+		s1 = fdtmc.createState();
+		s2 = fdtmc.createState();
+		s3 = fdtmc.createState();
+		s4 = fdtmc.createState();
+		s5 = fdtmc.createState();
 
 		Assert.assertNotNull(s0);
 		Assert.assertNotNull(s1);
@@ -61,12 +63,12 @@ public class FDTMCTest {
 		Assert.assertNotNull(s4);
 		Assert.assertNotNull(s5);
 
-		Assert.assertTrue(fdtmc1.getStates().contains(s0));
-		Assert.assertTrue(fdtmc1.getStates().contains(s1));
-		Assert.assertTrue(fdtmc1.getStates().contains(s2));
-		Assert.assertTrue(fdtmc1.getStates().contains(s3));
-		Assert.assertTrue(fdtmc1.getStates().contains(s4));
-		Assert.assertTrue(fdtmc1.getStates().contains(s5));
+		Assert.assertTrue(fdtmc.getStates().contains(s0));
+		Assert.assertTrue(fdtmc.getStates().contains(s1));
+		Assert.assertTrue(fdtmc.getStates().contains(s2));
+		Assert.assertTrue(fdtmc.getStates().contains(s3));
+		Assert.assertTrue(fdtmc.getStates().contains(s4));
+		Assert.assertTrue(fdtmc.getStates().contains(s5));
 
 		Assert.assertEquals(0, s0.getIndex());
 		Assert.assertEquals(1, s1.getIndex());
@@ -75,7 +77,7 @@ public class FDTMCTest {
 		Assert.assertEquals(4, s4.getIndex());
 		Assert.assertEquals(5, s5.getIndex());
 
-		Assert.assertEquals(s0, fdtmc1.getInitialState());
+		Assert.assertEquals(s0, fdtmc.getInitialState());
 	}
 
 
@@ -85,18 +87,18 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testCreateLabeledState() {
-		fdtmc1.setVariableName("x");
+		fdtmc.setVariableName("x");
 		State s0, s1, s2;
 
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("sucess");
-		s2 = fdtmc1.createState("error");
+		s0 = fdtmc.createState("init");
+		s1 = fdtmc.createState("sucess");
+		s2 = fdtmc.createState("error");
 
 		Assert.assertEquals("init", s0.getLabel());
 		Assert.assertEquals("sucess", s1.getLabel());
 		Assert.assertEquals("error", s2.getLabel());
 
-		Assert.assertEquals(s0, fdtmc1.getInitialState());
+		Assert.assertEquals(s0, fdtmc.getInitialState());
 	}
 
 
@@ -107,12 +109,12 @@ public class FDTMCTest {
 	@Test
 	public void testCreateTransition() {
 		State s0, s1, s2;
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("success");
-		s2 = fdtmc1.createState("error");
+		s0 = fdtmc.createState("init");
+		s1 = fdtmc.createState("success");
+		s2 = fdtmc.createState("error");
 
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s1, "alpha", Double.toString(0.95)));
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s2, "alpha", Double.toString(0.05)));
+		Assert.assertNotNull(fdtmc.createTransition(s0, s1, "alpha", Double.toString(0.95)));
+		Assert.assertNotNull(fdtmc.createTransition(s0, s2, "alpha", Double.toString(0.05)));
 	}
 
 
@@ -123,12 +125,12 @@ public class FDTMCTest {
 	@Test
 	public void testCreateTransitionWithParameter() {
 		State s0, s1, s2;
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("success");
-		s2 = fdtmc1.createState("error");
+		s0 = fdtmc.createState("init");
+		s1 = fdtmc.createState("success");
+		s2 = fdtmc.createState("error");
 
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s1, "alpha", "rAlpha"));
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s2, "alpha", "1-rAlpha"));
+		Assert.assertNotNull(fdtmc.createTransition(s0, s1, "alpha", "rAlpha"));
+		Assert.assertNotNull(fdtmc.createTransition(s0, s2, "alpha", "1-rAlpha"));
 	}
 
 
@@ -138,14 +140,14 @@ public class FDTMCTest {
 	@Test
 	public void testGetStateByLabel() {
 		State s0, s1, s2;
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("success");
-		s2 = fdtmc1.createState("error");
+		s0 = fdtmc.createState("init");
+		s1 = fdtmc.createState("success");
+		s2 = fdtmc.createState("error");
 
 		State t0, t1, t2;
-		t0 = fdtmc1.getStateByLabel("init");
-		t1 = fdtmc1.getStateByLabel("success");
-		t2 = fdtmc1.getStateByLabel("error");
+		t0 = fdtmc.getStateByLabel("init");
+		t1 = fdtmc.getStateByLabel("success");
+		t2 = fdtmc.getStateByLabel("error");
 
 		Assert.assertSame(t0, s0);
 		Assert.assertSame(t1, s1);
@@ -160,16 +162,16 @@ public class FDTMCTest {
 	@Test
 	public void testGetTransitionByActionName() {
 		State s0, s1, s2;
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("sucess");
-		s2 = fdtmc1.createState("error");
+		s0 = fdtmc.createState("init");
+		s1 = fdtmc.createState("sucess");
+		s2 = fdtmc.createState("error");
 
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s1, "alpha", "rAlpha"));
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s2, "alpha_error", "1-rAlpha"));
+		Assert.assertNotNull(fdtmc.createTransition(s0, s1, "alpha", "rAlpha"));
+		Assert.assertNotNull(fdtmc.createTransition(s0, s2, "alpha_error", "1-rAlpha"));
 
 		Transition t1, t2;
-		t1 = fdtmc1.getTransitionByActionName("alpha");
-		t2 = fdtmc1.getTransitionByActionName("alpha_error");
+		t1 = fdtmc.getTransitionByActionName("alpha");
+		t2 = fdtmc.getTransitionByActionName("alpha_error");
 
 		Assert.assertNotNull(t1);
 		Assert.assertEquals("alpha", t1.getActionName());
@@ -237,68 +239,67 @@ public class FDTMCTest {
 
 
 	}
-
-	@Test
-	public void testEquivalentFDTMCs() {
-	    FDTMC fdtmc1 = new FDTMC();
-        fdtmc1.setVariableName("s");
-        State init1 = fdtmc1.createInitialState(),
-              success1 = fdtmc1.createSuccessState(),
-              error1 = fdtmc1.createErrorState(),
+	
+	private ArrayList<State> testingFDTMC(FDTMC fdtmc){
+        State init = fdtmc.createInitialState(),
+              success = fdtmc.createSuccessState(),
+              error = fdtmc.createErrorState(),
               source,
               target,
               interface_error;
 
-        source = init1;
-        target = fdtmc1.createState();
-        fdtmc1.createTransition(source, target, "persist", "0.999");
-        fdtmc1.createTransition(source, error1, "!persist", "0.001");
+        source = init;
+        target = fdtmc.createState();
+        fdtmc.createTransition(source, target, "persist", "0.999");
+        fdtmc.createTransition(source, error, "!persist", "0.001");
 
         source = target;
-        target = fdtmc1.createState();
-        interface_error = fdtmc1.createState();
-        fdtmc1.createInterface("F", source, target, interface_error);
+        target = fdtmc.createState();
+        interface_error = fdtmc.createState();
+        fdtmc.createInterface("F", source, target, interface_error);
 
-        fdtmc1.createTransition(interface_error, error1, "error_ground", "1");
-
-        source = target;
-        target = success1;
-        fdtmc1.createTransition(source, target, "persist_return", "0.999");
-        fdtmc1.createTransition(source, error1, "!persist_return", "0.001");
-
-        FDTMC fdtmc2 = new FDTMC();
-        fdtmc2.setVariableName("v");
-        State init2 = fdtmc2.createInitialState(),
-              success2 = fdtmc2.createSuccessState(),
-              error2 = fdtmc2.createErrorState();
-
-        source = init2;
-        target = fdtmc2.createState();
-        fdtmc2.createTransition(source, target, "msg", "0.999");
-        fdtmc2.createTransition(source, error2, "!msg", "0.001");
+        fdtmc.createTransition(interface_error, error, "error_ground", "1");
 
         source = target;
-        target = fdtmc2.createState();
-        interface_error = fdtmc2.createState();
-        fdtmc2.createInterface("G", source, target, interface_error);
+        target = success;
+        fdtmc.createTransition(source, target, "persist_return", "0.999");
+        fdtmc.createTransition(source, error, "!persist_return", "0.001");
+        
+        ArrayList<State> states = new ArrayList<State>();
+        
+        states.add(init);
+        states.add(success);
+        states.add(error);
+        states.add(source);
+        states.add(target);
+        states.add(interface_error);
+        
+		return states;
+	}
 
-        fdtmc2.createTransition(interface_error, error2, "error_ground", "1");
-
-        source = target;
-        target = success2;
-        fdtmc2.createTransition(source, target, "msg_return", "0.999");
-        fdtmc2.createTransition(source, error2, "!msg_return", "0.001");
+	@Test
+	public void testEquivalentFDTMCs() {
+		
+	    FDTMC firstFdtmc = new FDTMC();
+        firstFdtmc.setVariableName("s");
+        
+        ArrayList<State> firstFdtmcStates = testingFDTMC(firstFdtmc);
+        
+        FDTMC secondFdtmc = new FDTMC();
+        secondFdtmc.setVariableName("v");
+        
+        ArrayList<State> secondFdtmcStates = testingFDTMC(secondFdtmc);
 
         Assert.assertEquals("FDTMCs' states should be compared disregarding variable names",
-                init1, init2);
+                firstFdtmcStates.get(0), secondFdtmcStates.get(0));
         Assert.assertNotEquals("FDTMCs' states should be compared disregarding variable names",
-                success1, error2);
+        		firstFdtmcStates.get(1), secondFdtmcStates.get(2));
 
         Assert.assertEquals("FDTMCs' states should be compared disregarding variable names",
-                fdtmc1.getStates(), fdtmc2.getStates());
+                firstFdtmc.getStates(), secondFdtmc.getStates());
 
         Assert.assertEquals("FDTMCs should be compared disregarding actions' names, interfaces' names and variable names",
-                fdtmc1, fdtmc2);
+                firstFdtmc, secondFdtmc);
 	}
 
 }
