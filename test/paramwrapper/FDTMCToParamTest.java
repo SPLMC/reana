@@ -18,13 +18,25 @@ public class FDTMCToParamTest {
 	public void setUp() throws Exception {
 		paramWrapper = new ParamWrapper(PARAM_PATH);
 	}
-
-	@Test
-	public void testSingletonFDTMC() {
+	
+	/* This function is designed for creating a valid FDTMC for 
+	 * testSingletonFDTMC() method, below.
+	 * Input: None
+	 * Output: A simple singleton FDTMC 
+	 */
+	
+	private FDTMC getNewSingletonFDTMC() {
 		FDTMC singletonFDTMC = new FDTMC();
 		singletonFDTMC.setVariableName("s");
 		State s = singletonFDTMC.createState();
 		singletonFDTMC.createTransition(s, s, null, "1");
+		
+		return singletonFDTMC;
+	}
+
+	@Test
+	public void testSingletonFDTMC() {
+		FDTMC singletonFDTMC = getNewSingletonFDTMC();
 
 		String expectedModule =
 				"dtmc\n"
@@ -36,13 +48,25 @@ public class FDTMCToParamTest {
 
 		assertEquals(expectedModule, paramWrapper.fdtmcToParam(singletonFDTMC));
 	}
-
-	@Test
-	public void testSingletonFDTMCWithLabel() {
+	
+	/* This function is designed for creating a valid FDTMC for 
+	 * testSingletonFDTMCWithLabel() method, below.
+	 * Input: None
+	 * Output: A singleton FDTMC with Labels
+	 */
+	private FDTMC getNewFDTMCLabel() {
 		FDTMC singletonFDTMC = new FDTMC();
+		
 		singletonFDTMC.setVariableName("s");
 		State s = singletonFDTMC.createState("success");
 		singletonFDTMC.createTransition(s, s, null, "1");
+		
+		return singletonFDTMC;
+	}
+
+	@Test
+	public void testSingletonFDTMCWithLabel() {
+		FDTMC singletonFDTMC = this.getNewFDTMCLabel();
 
 		String expectedModule =
 				"dtmc\n"
@@ -56,9 +80,13 @@ public class FDTMCToParamTest {
 
 		assertEquals(expectedModule, paramWrapper.fdtmcToParam(singletonFDTMC));
 	}
-
-	@Test
-	public void testSimpleFDTMCWithParameters() {
+	
+	/* This function is designed for creating a valid FDTMC for 
+	 * testSimpleFDTMCWithParameters() method, below.
+	 * Input: None
+	 * Output: A FDTMC with Parameters
+	 */
+	private FDTMC getNewFDTMCParamters() {
 		FDTMC fdtmc = new FDTMC();
 		fdtmc.setVariableName("s");
 		State s0 = fdtmc.createState();
@@ -66,6 +94,13 @@ public class FDTMCToParamTest {
 		fdtmc.createTransition(s0, s0, null, "rLoop");
 		fdtmc.createTransition(s0, s1, null, "1-rLoop");
 		fdtmc.createTransition(s1, s1, null, "1");
+		
+		return fdtmc;
+	}
+
+	@Test
+	public void testSimpleFDTMCWithParameters() {
+		FDTMC fdtmc = this.getNewFDTMCParamters();
 
 		String expectedModule =
 				"dtmc\n"
@@ -81,21 +116,34 @@ public class FDTMCToParamTest {
 		assertEquals(expectedModule, paramWrapper.fdtmcToParam(fdtmc));
 	}
 
-
-	@Test
-	public void testSimpleFDTMCWithParametersAndLabels() {
+	/* This function is designed for creating a valid FDTMC for 
+	 * testSimpleFDTMCWithParametersAndLabels() method, below.
+	 * Input: None
+	 * Output: A FDTMC with Parameters and Labels
+	 */
+	private FDTMC getNewFDTMCParamtersLabels() {
 		FDTMC fdtmc = new FDTMC();
+		
 		fdtmc.setVariableName("s");
+		
 		State s0 = fdtmc.createState();
 		State s1 = fdtmc.createState("success");
 		State s2 = fdtmc.createState("success");
 		State s3 = fdtmc.createState("error");
+		
 		fdtmc.createTransition(s0, s0, null, "rLoop");
 		fdtmc.createTransition(s0, s1, null, "1-rLoop");
 		fdtmc.createTransition(s1, s2, null, "1-rFail");
 		fdtmc.createTransition(s1, s3, null, "rFail");
 		fdtmc.createTransition(s2, s2, null, "1");
 		fdtmc.createTransition(s3, s3, null, "1");
+		
+		return fdtmc;
+	}
+
+	@Test
+	public void testSimpleFDTMCWithParametersAndLabels() {
+		FDTMC fdtmc = this.getNewFDTMCParamtersLabels();
 
 		String expectedModule =
 				"dtmc\n"
