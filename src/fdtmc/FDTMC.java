@@ -329,7 +329,7 @@ public class FDTMC {
      * @param fdtmc
      * @return
      */
-    private Map<State, State> inlineStates(FDTMC fdtmc) {
+    Map<State, State> inlineStates(FDTMC fdtmc) {
         Map<State, State> statesOldToNew = new HashMap<State, State>();
         for (State state: fdtmc.getStates()) {
             State newState = this.createState();
@@ -344,7 +344,7 @@ public class FDTMC {
      * @param fdtmc
      * @param statesOldToNew
      */
-    private void inlineTransitions(FDTMC fdtmc, Map<State, State> statesOldToNew) {
+    void inlineTransitions(FDTMC fdtmc, Map<State, State> statesOldToNew) {
         Set<Transition> interfaceTransitions = fdtmc.getInterfaceTransitions();
         for (Map.Entry<State, List<Transition>> entry : fdtmc.getTransitions().entrySet()) {
             State newSource = statesOldToNew.get(entry.getKey());
@@ -364,30 +364,8 @@ public class FDTMC {
     }
 
     private void inlineInterface(Interface iface, FDTMC fragment, Map<State, State> statesMapping) {
-        Map<State, State> fragmentStatesMapping = this.inlineStates(fragment);
-        this.inlineTransitions(fragment, fragmentStatesMapping);
-
-        State initialInlined = iface.getInitial();
-        State initialFragment = fragment.getInitialState();
-        State successInlined = iface.getSuccess();
-        State successFragment = fragment.getSuccessState();
-        State errorInlined = iface.getError();
-        State errorFragment = fragment.getErrorState();
-
-        this.createTransition(statesMapping.get(initialInlined),
-                              fragmentStatesMapping.get(initialFragment),
-                              "",
-                              "1");
-        this.createTransition(fragmentStatesMapping.get(successFragment),
-                              statesMapping.get(successInlined),
-                              "",
-                              "1");
-        if (errorFragment != null) {
-            this.createTransition(fragmentStatesMapping.get(errorFragment),
-                                  statesMapping.get(errorInlined),
-                                  "",
-                                  "1");
-        }
+        InlineInterface inlineInterface = new InlineInterface(this, iface, fragment, statesMapping);
+    	inlineInterface.compute();
     }
 
     private void inlineInterfaceWithVariability(Interface iface, FDTMC fragment, Map<State, State> statesMapping) {
