@@ -138,20 +138,31 @@ public class VariableReplicatedFragments extends VariableBehavioralParameters {
 	}
 
 	private void printFragmentsMapping() {
-		for (Integer i : fragmentsBySize.keySet()) {
-			System.out.print(i + ": ");
-			for (Fragment f : fragmentsBySize.get(i)) {
-				StringBuilder str = new StringBuilder();
-				str.append(f.getName());
-				str.append("(");
-				for (SequenceDiagram s : f.getSequenceDiagrams()) {
-					str.append(s.getName());
-					str.append(" ");
-				}
-				str.append(")");
-				System.out.print(str.toString() + " -> ");
-			}
-			System.out.println();
-		}
+    for (Integer i : fragmentsBySize.keySet()) {
+      System.out.print(i + ": ");
+      printFragments(i);
+      System.out.println();
+    }
 	}
+
+  private void printFragments(Integer key){
+    for (Fragment f : fragmentsBySize.get(key)) {
+      StringBuilder str = new StringBuilder();
+      str.append(f.getName());
+      str.append("(");
+      str.append(stringfySequenceDiagrams(f));
+      str.append(")");
+      System.out.print(str.toString() + " -> ");
+    }
+  }
+
+  private StringBuilder stringfySequenceDiagrams(Fragment fragment){
+		StringBuilder str = new StringBuilder();
+    for (SequenceDiagram sequenceDiagram : fragment.getSequenceDiagrams()) {
+      str.append(sequenceDiagram.getName());
+      str.append(" ");
+    }
+
+    return str;
+  }
 }
