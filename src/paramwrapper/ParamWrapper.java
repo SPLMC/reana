@@ -54,13 +54,17 @@ public class ParamWrapper implements ParametricModelChecker {
 
 			String formula;
 			if (usePrism && !model.contains("param")) {
-			    formula = invokeModelChecker(modelFile.getAbsolutePath(),
-			                                 propertyFile.getAbsolutePath(),
-			                                 resultsFile.getAbsolutePath());
+				String command = prismPath + " "
+								 + modelFile.getAbsolutePath() + " "
+								 + propertyFile.getAbsolutePath() + " "
+					 			 + "-exportresults " + resultsFile.getAbsolutePath();
+			    formula = invokeAndGetResult(command, resultsFile.getAbsolutePath());
 			} else {
-			    formula = invokeParametricModelChecker(modelFile.getAbsolutePath(),
-			                                           propertyFile.getAbsolutePath(),
-			                                           resultsFile.getAbsolutePath());
+				String command = paramPath+" "
+								 + modelFile.getAbsolutePath() + " "
+								 + propertyFile.getAbsolutePath() + " "
+								 + "--result-file " + resultsFile.getAbsolutePath() + ".out";
+			    formula = invokeAndGetResult(command, resultsFile.getAbsolutePath());
 			}
 			return formula.trim().replaceAll("\\s+", "");
 		} catch (IOException e) {
@@ -77,27 +81,7 @@ public class ParamWrapper implements ParametricModelChecker {
 		writer.close();
 		return file;
 	}
-
-	private String invokeParametricModelChecker(String modelPath,
-												String propertyPath,
-												String resultsPath) throws IOException {
-		String commandLine = paramPath+" "
-							 +modelPath+" "
-							 +propertyPath+" "
-							 +"--result-file "+resultsPath;
-		return invokeAndGetResult(commandLine, resultsPath+".out");
-	}
-
-	private String invokeModelChecker(String modelPath,
-									  String propertyPath,
-									  String resultsPath) throws IOException {
-		String commandLine = prismPath+" "
-				 			 +modelPath+" "
-				 			 +propertyPath+" "
-				 			 +"-exportresults "+resultsPath;
-		return invokeAndGetResult(commandLine, resultsPath);
-	}
-
+	
 	private String invokeAndGetResult(String commandLine, String resultsPath) throws IOException {
 	    LOGGER.fine(commandLine);
 		Process program = Runtime.getRuntime().exec(commandLine);
