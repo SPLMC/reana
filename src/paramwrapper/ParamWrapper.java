@@ -47,17 +47,8 @@ public class ParamWrapper implements ParametricModelChecker {
 
 	private String evaluate(String model, String property) {
 		try {
-			File modelFile = File.createTempFile("model", "param");
-			FileWriter modelWriter = new FileWriter(modelFile);
-			modelWriter.write(model);
-			modelWriter.flush();
-			modelWriter.close();
-
-			File propertyFile = File.createTempFile("property", "prop");
-			FileWriter propertyWriter = new FileWriter(propertyFile);
-			propertyWriter.write(property);
-			propertyWriter.flush();
-			propertyWriter.close();
+			File modelFile = prepareFile(model, "model", "param");
+			File propertyFile = prepareFile(property, "property", "prop");
 
 			File resultsFile = File.createTempFile("result", null);
 
@@ -76,6 +67,15 @@ public class ParamWrapper implements ParametricModelChecker {
 			LOGGER.log(Level.SEVERE, e.toString(), e);
 		}
 		return "";
+	}
+	
+	private File prepareFile(String io, String tempPrefix, String tempSuffix) throws IOException {
+		File file = File.createTempFile(tempPrefix, tempSuffix);
+		FileWriter writer = new FileWriter(file);
+		writer.write(io);
+		writer.flush();
+		writer.close();
+		return file;
 	}
 
 	private String invokeParametricModelChecker(String modelPath,
