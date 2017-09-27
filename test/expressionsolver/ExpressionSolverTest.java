@@ -41,10 +41,10 @@ public class ExpressionSolverTest {
         ADD result = solver.solveExpression("0.99*rSqlite - 0.5*rMemory",
                                             interpretations);
 
-        ADD expected = jadd.makeConstant(0.99).times(
+        ADD expected = jadd.makeConstant(0.99).operator(
                             presenceCondition.ifThenElse(jadd.makeConstant(0.5),
-                                                         1))
-                        .minus(jadd.makeConstant(0.5).times(jadd.makeConstant(0.2)));
+                                                         1), ADD.TIMES)
+                        .operator(jadd.makeConstant(0.5).operator(jadd.makeConstant(0.2), ADD.TIMES), ADD.MINUS);
 
         assertEquals("Expression evaluation must honor provided interpretations",
                 expected, result);
@@ -147,8 +147,8 @@ public class ExpressionSolverTest {
 
         ADD sqlite = jadd.getVariable("sqlite");
         ADD memory = jadd.getVariable("memory");
-        ADD expected = sqlite.and(memory.complement())
-                    .or(sqlite.complement().and(memory));
+        ADD expected = sqlite.operator(memory.complement(), ADD.TIMES)
+                    .operator(sqlite.complement().operator(memory, ADD.TIMES), ADD.LOGICAL_OR);
 
         assertEquals("Sum of constants should yield an ADD for the result",
                 expected, encoded);
@@ -179,14 +179,14 @@ public class ExpressionSolverTest {
         ADD dummyVar = jadd.getVariable("dummy");
 
         HashMap<String, ADD> interpretations = new HashMap<String, ADD>();
-        interpretations.put("rSqlite", dummyVar.times(jadd.makeConstant(0.5)));
+        interpretations.put("rSqlite", dummyVar.operator(jadd.makeConstant(0.5), ADD.TIMES));
         interpretations.put("rMemory", jadd.makeConstant(0.2));
 
         ADD result = solver.solveExpression("0.99*rSqlite - 0.5*rMemory",
                                             interpretations);
 
-        ADD expected = jadd.makeConstant(0.99).times(dummyVar.times(jadd.makeConstant(0.5)))
-                        .minus(jadd.makeConstant(0.5).times(jadd.makeConstant(0.2)));
+        ADD expected = jadd.makeConstant(0.99).operator(dummyVar.operator(jadd.makeConstant(0.5), ADD.TIMES), ADD.TIMES)
+                        .operator(jadd.makeConstant(0.5).operator(jadd.makeConstant(0.2), ADD.TIMES), ADD.MINUS);
 
         assertEquals("Expression evaluation must honor provided interpretations",
                 expected, result);
@@ -199,11 +199,11 @@ public class ExpressionSolverTest {
                      formula.getVariables());
 
         ADD dummyVar = jadd.getVariable("dummy");
-        ADD dummy = dummyVar.times(jadd.makeConstant(0.9));
+        ADD dummy = dummyVar.operator(jadd.makeConstant(0.9), ADD.TIMES);
         assertEquals(new HashSet<String>(Arrays.asList("dummy")),
                      dummy.getVariables());
 
-        ADD product = formula.times(dummy);
+        ADD product = formula.operator(dummy, ADD.TIMES);
         assertEquals(new HashSet<String>(Arrays.asList("sqlite", "memory", "dummy")),
                      product.getVariables());
     }

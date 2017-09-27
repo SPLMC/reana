@@ -13,7 +13,7 @@ public class ADDDivide extends org.nfunk.jep.function.Divide {
     @Override
     public Object div(Object arg1, Object arg2) throws ParseException {
         if (arg1 instanceof ADD && arg2 instanceof ADD) {
-            return ((ADD)arg1).dividedBy((ADD)arg2);
+            return ((ADD)arg1).operator((ADD)arg2, ADD.DIVIDE);
         }
         throw new ParseException("Invalid parameter type");
     }
