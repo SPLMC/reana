@@ -122,14 +122,18 @@ public class FDTMC {
 	        return null;
 	    }
 
-	    List<Transition> l = transitionSystem.get(source);
-		if (l == null) {
-			l = new LinkedList<Transition>();
+	    final List<Transition> transitionsState = transitionSystem.get(source);
+	    List<Transition> transitionsList = null;
+	    
+		if (transitionsState == null) {
+			transitionsList = new LinkedList<Transition>();
+		} else {
+			transitionsList = transitionsState;
 		}
 
 		Transition newTransition = new Transition(source, target, action, reliability);
-		boolean success = l.add(newTransition);
-		transitionSystem.put(source, l);
+		boolean success = transitionsList.add(newTransition);
+		transitionSystem.put(source, transitionsList);
 		return success ? newTransition : null;
 	}
 
@@ -324,6 +328,9 @@ public class FDTMC {
         return statesMapping;
     }
 
+    
+    public 
+    
     /**
      * Inlines all states from {@code fdtmc} stripped of their labels.
      * @param fdtmc
