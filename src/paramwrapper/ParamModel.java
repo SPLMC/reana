@@ -156,15 +156,17 @@ class Command {
 
 	public String makeString(String stateVariable) {
 		String command = "[] "+stateVariable+"="+initialState+" -> ";
-		boolean needsPlus = false;
 		for (int i = 0; i < updatesProbabilities.size(); i++) {
-		    if (needsPlus) {
-		        command += " + ";
-		    } else {
-		        needsPlus = true;
-		    }
-			command += "("+updatesProbabilities.get(i)+") : ("+stateVariable+"'="+updatesActions.get(i)+")";
+			   command = BuildCommand(command,stateVariable,i);
 		}
 		return command+";";
+	}
+
+	private String BuildCommand(String command, String stateVariable, int i){
+		if (i > 0) {
+			command += " + ";
+		}
+		command += "("+updatesProbabilities.get(i)+") : ("+stateVariable+"'="+updatesActions.get(i)+")";
+		return command;
 	}
 }
