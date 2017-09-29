@@ -99,7 +99,8 @@ public class RDGNode {
     }
 
     public static String getNextId() {
-        return "n" + lastNodeIndex++;
+        String nextId = "n" + lastNodeIndex++;
+        return nextId;
     }
 
     /**
@@ -117,7 +118,6 @@ public class RDGNode {
 
     public boolean compare(Object obj) {
         boolean equal = false;
-
         RDGNode other = (RDGNode) obj;
 
         boolean comparesPresence = this.getPresenceCondition().equals(other.getPresenceCondition());
@@ -136,7 +136,8 @@ public class RDGNode {
 
     @Override
     public String toString() {
-        return getId() + " (" + getPresenceCondition() + ")";
+        String resultantString = getId() + " (" + getPresenceCondition() + ")";
+        return resultantString;
     }
 
     /**
