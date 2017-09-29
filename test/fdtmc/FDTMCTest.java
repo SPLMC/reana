@@ -1,7 +1,5 @@
 package fdtmc;
 
-import static org.junit.Assert.fail;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -222,20 +220,6 @@ public class FDTMCTest {
 				+ "sSqlite=3 --- persist_return / 0.001 ---> sSqlite=1(success)" + '\n';
 
 		Assert.assertEquals(expectedAnswer, fdtmc.toString());
-	}
-
-
-
-
-
-	/**
-	 * This test aims to ensure if the DOT file for a specific RDG node is being created accordingly.
-	 */
-	@Test
-	public void testCreateDotFile() {
-		fail("Not yet implemented");
-
-
 	}
 
 	@Test
