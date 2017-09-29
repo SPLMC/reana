@@ -213,14 +213,19 @@ public class RDGNode {
     private static Map<RDGNode, Integer> sumPaths(Map<RDGNode, Integer> pathsCountA, Map<RDGNode, Integer> pathsCountB) {
         Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>(pathsCountA);
         for (Map.Entry<RDGNode, Integer> entry: pathsCountB.entrySet()) {
-            RDGNode node = entry.getKey();
-            Integer count = entry.getValue();
-            if (numberOfPaths.containsKey(node)) {
-                count += numberOfPaths.get(node);
-            }
-            numberOfPaths.put(node, count);
+            numberOfPathsForNode(numberOfPaths, entry);
         }
         return numberOfPaths;
+    }
+
+    private static void numberOfPathsForNode(Map<RDGNode, Integer> numberOfPaths,
+                                             Map.Entry<RDGNode, Integer> entry) {
+        RDGNode node = entry.getKey();
+        Integer count = entry.getValue();
+        if (numberOfPaths.containsKey(node)) {
+            count += numberOfPaths.get(node);
+        }
+        numberOfPaths.put(node, count);
     }
 
     /**
