@@ -348,6 +348,18 @@ public class FDTMC {
         return statesOldToNew;
     }
 
+    private void performTransition(List<Transition> transitions, FDTMC fdtmc, Map<State, State> statesOldToNew, State newSource) {
+    	Set<Transition> interfaceTransitions = fdtmc.getInterfaceTransitions();
+    	for (Transition transition : transitions) {
+            if (!interfaceTransitions.contains(transition)) {
+                State newTarget = statesOldToNew.get(transition.getTarget());
+                createTransition(newSource,
+                                 newTarget,
+                                 transition.getActionName(),
+                                 transition.getProbability());
+            }
+        }
+    }
     /**
      * Inlines all transitions from {@code fdtmc} that are not part of an interface.
      *
@@ -355,20 +367,11 @@ public class FDTMC {
      * @param statesOldToNew
      */
     private void inlineTransitions(FDTMC fdtmc, Map<State, State> statesOldToNew) {
-        Set<Transition> interfaceTransitions = fdtmc.getInterfaceTransitions();
         for (Map.Entry<State, List<Transition>> entry : fdtmc.getTransitions().entrySet()) {
             State newSource = statesOldToNew.get(entry.getKey());
             List<Transition> transitions = entry.getValue();
             if (transitions != null) {
-                for (Transition transition : transitions) {
-                    if (!interfaceTransitions.contains(transition)) {
-                        State newTarget = statesOldToNew.get(transition.getTarget());
-                        createTransition(newSource,
-                                         newTarget,
-                                         transition.getActionName(),
-                                         transition.getProbability());
-                    }
-                }
+            	performTransition(transitions, fdtmc, statesOldToNew, newSource);
             }
         }
     }
