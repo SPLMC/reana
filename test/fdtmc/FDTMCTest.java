@@ -10,7 +10,14 @@ public class FDTMCTest {
 	FDTMC fdtmc1;
 	private final int MAX_STATE_AMOUNT = 6;
 	private State[] states = new State[MAX_STATE_AMOUNT];
+	private String[] messages = {"init", "sucess", "error"};
 
+	private void createStateWithMessage(int aux) {
+		for (int i = 0; i < aux; i++) {
+			states[i] = fdtmc1.createState(messages[i]);
+		}
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 		fdtmc1 = new FDTMC();
