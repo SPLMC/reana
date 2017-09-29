@@ -26,7 +26,10 @@ public class FDTMCToParamTest {
 		String[] labels = {null};
 		State[] s = getStates(labels, singletonFDTMC);
 
-		singletonFDTMC.createTransition(s[0], s[0], null, "1");
+		String[] reliabilities = {"1"};
+		singletonFDTMC = getFDTMCWithTransitions(s,
+												reliabilities,
+												singletonFDTMC);
 
 		String expectedModule =
 				"dtmc\n"
@@ -46,7 +49,10 @@ public class FDTMCToParamTest {
 		String[] labels = {"success"};
 		State[] s = getStates(labels, singletonFDTMC);
 
-		singletonFDTMC.createTransition(s[0], s[0], null, "1");
+		String[] reliabilities = {"1"};
+		singletonFDTMC = getFDTMCWithTransitions(s,
+												reliabilities,
+												singletonFDTMC);
 
 
 		String expectedModule =
@@ -69,9 +75,13 @@ public class FDTMCToParamTest {
 		String[] labels = {null, null};
 		State[] s = getStates(labels, fdtmc);
 
-		fdtmc.createTransition(s[0], s[0], null, "rLoop");
-		fdtmc.createTransition(s[0], s[1], null, "1-rLoop");
-		fdtmc.createTransition(s[1], s[1], null, "1");
+		String[] reliabilities = {"rLoop", "1-rLoop", "1"};
+		fdtmc = getFDTMCWithTransitions(s,
+										reliabilities,
+										fdtmc);
+//		fdtmc.createTransition(s[0], s[0], null, "rLoop");
+//		fdtmc.createTransition(s[0], s[1], null, "1-rLoop");
+//		fdtmc.createTransition(s[1], s[1], null, "1");
 
 		String expectedModule =
 				"dtmc\n"
@@ -140,6 +150,27 @@ public class FDTMCToParamTest {
 		}
 		
 		return states;
+	}
+	
+	private FDTMC getFDTMCWithTransitions(State[] states, String[] reliabilities, FDTMC fdtmc) {
+		int reliabilityCount = 0;
+		
+		for (int i = 0; i < states.length; i++) {
+			fdtmc.createTransition(states[i],
+									states[i],
+									null,
+									reliabilities[reliabilityCount]);
+			reliabilityCount++;
+			if (i < states.length - 1) {
+				fdtmc.createTransition(states[i],
+						states[i+1],
+						null,
+						reliabilities[reliabilityCount]);
+				reliabilityCount++;
+			}
+		}
+		
+		return fdtmc;
 	}
 
 }
