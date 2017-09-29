@@ -5,7 +5,10 @@ import static org.junit.Assert.fail;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
+//import org.junit.runner.RunWith;
+//import org.junit.runners.Parameterized;
+//
+//@RunWith(Parameterized.class)
 public class FDTMCTest {
 
 	FDTMC fdtmc1;
@@ -46,50 +49,17 @@ public class FDTMCTest {
 	@Test
 	public void testCreateLotsOfStates() {
 		fdtmc1.setVariableName("x");
-		State s0, s1, s2, s3, s4, s5;
-		s0 = fdtmc1.createState();
-		s1 = fdtmc1.createState();
-		s2 = fdtmc1.createState();
-		s3 = fdtmc1.createState();
-		s4 = fdtmc1.createState();
-		s5 = fdtmc1.createState();
-
-		assertNotNullTestCreateLotsOfStates(s0, s1, s2, s3, s4, s5);
-		assertTrueTestCreateLotsOfStates(s0, s1, s2, s3, s4, s5);
-		assertEqualsTestCreateLotsOfStates(s0, s1, s2, s3, s4, s5);
-	}
+		State[] states = new State[6];
 	
-	public void assertNotNullTestCreateLotsOfStates(State s0, State s1, State s2, State s3,
-													State s4, State s5) {
-		Assert.assertNotNull(s0);
-		Assert.assertNotNull(s1);
-		Assert.assertNotNull(s2);
-		Assert.assertNotNull(s3);
-		Assert.assertNotNull(s4);
-		Assert.assertNotNull(s5);
-	}
-	
-	public void assertTrueTestCreateLotsOfStates(State s0, State s1, State s2, State s3,
-												 State s4, State s5) {
-		Assert.assertTrue(fdtmc1.getStates().contains(s0));
-		Assert.assertTrue(fdtmc1.getStates().contains(s1));
-		Assert.assertTrue(fdtmc1.getStates().contains(s2));
-		Assert.assertTrue(fdtmc1.getStates().contains(s3));
-		Assert.assertTrue(fdtmc1.getStates().contains(s4));
-		Assert.assertTrue(fdtmc1.getStates().contains(s5));
-	
-	}
-
-	public void assertEqualsTestCreateLotsOfStates(State s0, State s1, State s2, State s3,
-			 									   State s4, State s5) {
-		Assert.assertEquals(0, s0.getIndex());
-		Assert.assertEquals(1, s1.getIndex());
-		Assert.assertEquals(2, s2.getIndex());
-		Assert.assertEquals(3, s3.getIndex());
-		Assert.assertEquals(4, s4.getIndex());
-		Assert.assertEquals(5, s5.getIndex());
-
-		Assert.assertEquals(s0, fdtmc1.getInitialState());
+		for (int i = 0; i < 6; i++) {
+			states[i] = fdtmc1.createState();
+			
+			Assert.assertNotNull(states[i]);
+			Assert.assertTrue(fdtmc1.getStates().contains(states[i]));
+			Assert.assertEquals(i, states[i].getIndex());
+		}
+		
+		Assert.assertEquals(states[0], fdtmc1.getInitialState());
 	}
 	
 	/**
