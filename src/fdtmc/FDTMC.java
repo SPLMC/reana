@@ -177,23 +177,27 @@ public class FDTMC {
 	}
 
 	public Transition getTransitionByActionName(String action) {
-		//para cada Lista de adjacencias de cada nodo
 		Collection<List<Transition>> stateAdjacencies = transitionSystem.values();
 		Iterator<List<Transition>> iteratorStateAdjacencies = stateAdjacencies.iterator();
-		while (iteratorStateAdjacencies.hasNext()) {
-			List<Transition> transitions = iteratorStateAdjacencies.next();
+	    while (iteratorStateAdjacencies.hasNext()) {
+	        List<Transition> transitions = iteratorStateAdjacencies.next();
 
-			//Percorrer a lista de transicoes e comparar os labels das transicoes
-			Iterator <Transition> iteratorTransitions = transitions.iterator();
-			while (iteratorTransitions.hasNext()) {
-				Transition t = iteratorTransitions.next();
-				if (t.getActionName().equals(action))
-					return t;
-			}
-		}
-		return null;
+	        Transition temporaryTransition = compareTransitionsLabels(transitions,action);
+	        return temporaryTransition;
+	    }
+	    return null;
+
 	}
 
+	private Transition compareTransitionsLabels(List<Transition> transitions, String action){
+        Iterator <Transition> iteratorTransitions = transitions.iterator();
+        while (iteratorTransitions.hasNext()) {
+            Transition temporaryTransition = iteratorTransitions.next();
+            if (temporaryTransition.getActionName().equals(action))
+                return temporaryTransition;
+        }
+        return null;
+	}
 
 	@Override
 	public String toString() {
