@@ -194,6 +194,17 @@ public class FDTMC {
 		return null;
 	}
 
+	private String transitionToNextState(List<Transition> transitionList, State temp) {
+		String msg = new String();
+		Iterator <Transition> itTransitions = transitionList.iterator();
+		while (itTransitions.hasNext()) {
+			Transition t = itTransitions.next();
+			msg += temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
+					" --- " + t.getActionName() + " / " + t.getProbability() +
+					" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
+		}
+		return msg;
+	}
 
 	@Override
 	public String toString() {
@@ -205,13 +216,7 @@ public class FDTMC {
 			State temp = itStates.next();
 			List<Transition> transitionList = this.transitionSystem.get(temp);
 			if (transitionList != null) {
-				Iterator <Transition> itTransitions = transitionList.iterator();
-				while (itTransitions.hasNext()) {
-					Transition t = itTransitions.next();
-					msg += temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
-							" --- " + t.getActionName() + " / " + t.getProbability() +
-							" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
-				}
+				msg += transitionToNextState(transitionList, temp);
 			}
 		}
 		return msg;
