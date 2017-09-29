@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import fdtmc.FDTMC;
 
 
@@ -231,12 +232,13 @@ public class RDGNode {
      * @return a similar RDG node or null in case there is none.
      */
     public static RDGNode getSimilarNode(RDGNode target) {
+        RDGNode rdgNode = null;
         for (RDGNode candidate: nodesInCreationOrder) {
             if (candidate != target && candidate.equals(target)) {
-                return candidate;
+                rdgNode = candidate;
             }
         }
-        return null;
+        return rdgNode;
     }
 
 }
