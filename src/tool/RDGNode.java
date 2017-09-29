@@ -100,13 +100,14 @@ public class RDGNode {
      */
     @Override
     public boolean equals(Object obj) {
+        boolean isEqual = false;
         if (obj != null && obj instanceof RDGNode) {
             RDGNode other = (RDGNode) obj;
-            return this.getPresenceCondition().equals(other.getPresenceCondition())
+            isEqual = this.getPresenceCondition().equals(other.getPresenceCondition())
                     && this.getFDTMC().equals(other.getFDTMC())
                     && this.getDependencies().equals(other.getDependencies());
         }
-        return false;
+        return isEqual;
     }
 
     @Override
