@@ -54,20 +54,34 @@ public class FDTMCTest {
 		s4 = fdtmc1.createState();
 		s5 = fdtmc1.createState();
 
+		assertNotNullTestCreateLotsOfStates(s0, s1, s2, s3, s4, s5);
+		assertTrueTestCreateLotsOfStates(s0, s1, s2, s3, s4, s5);
+		assertEqualsTestCreateLotsOfStates(s0, s1, s2, s3, s4, s5);
+	}
+	
+	public void assertNotNullTestCreateLotsOfStates(State s0, State s1, State s2, State s3,
+													State s4, State s5) {
 		Assert.assertNotNull(s0);
 		Assert.assertNotNull(s1);
 		Assert.assertNotNull(s2);
 		Assert.assertNotNull(s3);
 		Assert.assertNotNull(s4);
 		Assert.assertNotNull(s5);
-
+	}
+	
+	public void assertTrueTestCreateLotsOfStates(State s0, State s1, State s2, State s3,
+												 State s4, State s5) {
 		Assert.assertTrue(fdtmc1.getStates().contains(s0));
 		Assert.assertTrue(fdtmc1.getStates().contains(s1));
 		Assert.assertTrue(fdtmc1.getStates().contains(s2));
 		Assert.assertTrue(fdtmc1.getStates().contains(s3));
 		Assert.assertTrue(fdtmc1.getStates().contains(s4));
 		Assert.assertTrue(fdtmc1.getStates().contains(s5));
+	
+	}
 
+	public void assertEqualsTestCreateLotsOfStates(State s0, State s1, State s2, State s3,
+			 									   State s4, State s5) {
 		Assert.assertEquals(0, s0.getIndex());
 		Assert.assertEquals(1, s1.getIndex());
 		Assert.assertEquals(2, s2.getIndex());
@@ -77,8 +91,7 @@ public class FDTMCTest {
 
 		Assert.assertEquals(s0, fdtmc1.getInitialState());
 	}
-
-
+	
 	/**
 	 * This test ensures we can set a label to a state. It doesn't do too much,
 	 * but it was useful to create the labeling function for states.
@@ -115,11 +128,14 @@ public class FDTMCTest {
 		s1 = fdtmc1.createState("success");
 		s2 = fdtmc1.createState("error");
 
+		assertNotNulltestCreateTransition(s0, s1, s2);
+	}
+
+	public void assertNotNulltestCreateTransition(State s0, State s1, State s2) {
 		Assert.assertNotNull(fdtmc1.createTransition(s0, s1, "alpha", Double.toString(0.95)));
 		Assert.assertNotNull(fdtmc1.createTransition(s0, s2, "alpha", Double.toString(0.05)));
 	}
-
-
+	
 	/**
 	 * This test is similar to the test above (testCreateTransition), however it test if the
 	 * creation of transitions with parameters instead of real values works accordingly.
@@ -130,12 +146,15 @@ public class FDTMCTest {
 		s0 = fdtmc1.createState("init");
 		s1 = fdtmc1.createState("success");
 		s2 = fdtmc1.createState("error");
+		
+		assertNotNulltestCreateTransitionWithParameter(s0, s1, s2);
+	}
 
+	public void assertNotNulltestCreateTransitionWithParameter(State s0, State s1, State s2) {
 		Assert.assertNotNull(fdtmc1.createTransition(s0, s1, "alpha", "rAlpha"));
 		Assert.assertNotNull(fdtmc1.createTransition(s0, s2, "alpha", "1-rAlpha"));
 	}
-
-
+	
 	/**
 	 * This test ensures a created state can be recovered by its label.
 	 */
@@ -150,12 +169,16 @@ public class FDTMCTest {
 		t0 = fdtmc1.getStateByLabel("init");
 		t1 = fdtmc1.getStateByLabel("success");
 		t2 = fdtmc1.getStateByLabel("error");
-
+		
+		assertSametestGetStateByLabel(s0, s1, s2, t0, t1, t2);
+	}
+	
+	public void assertSametestGetStateByLabel(State s0,State s1, State s2,
+											  State t0, State t1, State t2) {
 		Assert.assertSame(t0, s0);
 		Assert.assertSame(t1, s1);
 		Assert.assertSame(t2, s2);
 	}
-
 
 	/**
 	 * This test ensures it is possible to recover a transition (and all of its information like
