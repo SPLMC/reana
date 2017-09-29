@@ -367,24 +367,19 @@ public class FDTMC {
         Map<State, State> fragmentStatesMapping = this.inlineStates(fragment);
         this.inlineTransitions(fragment, fragmentStatesMapping);
 
-        State initialInlined = iface.getInitial();
-        State initialFragment = fragment.getInitialState();
-        State successInlined = iface.getSuccess();
-        State successFragment = fragment.getSuccessState();
-        State errorInlined = iface.getError();
-        State errorFragment = fragment.getErrorState();
+        InitialStateInlineInterface intialState = new InitialStateInlineInterface(iface, fragment);
 
-        this.createTransition(statesMapping.get(initialInlined),
-                              fragmentStatesMapping.get(initialFragment),
+        this.createTransition(statesMapping.get(intialState.getInitialInlined()),
+                              fragmentStatesMapping.get(intialState.getInitialFragment(),
                               "",
                               "1");
-        this.createTransition(fragmentStatesMapping.get(successFragment),
-                              statesMapping.get(successInlined),
+        this.createTransition(fragmentStatesMapping.get(intialState.getSuccessFragment(),
+                              statesMapping.get(intialState.getSuccessInlined(),
                               "",
                               "1");
         if (errorFragment != null) {
-            this.createTransition(fragmentStatesMapping.get(errorFragment),
-                                  statesMapping.get(errorInlined),
+            this.createTransition(fragmentStatesMapping.get(intialState.getErrorFragment(),
+                                  statesMapping.get(intialState.getErrorInlined(),
                                   "",
                                   "1");
         }
@@ -394,28 +389,23 @@ public class FDTMC {
         Map<State, State> fragmentStatesMapping = this.inlineStates(fragment);
         this.inlineTransitions(fragment, fragmentStatesMapping);
 
-        State initialInlined = iface.getInitial();
-        State initialFragment = fragment.getInitialState();
-        State successInlined = iface.getSuccess();
-        State successFragment = fragment.getSuccessState();
-        State errorInlined = iface.getError();
-        State errorFragment = fragment.getErrorState();
+        InitialStateInlineInterface intialState = new InitialStateInlineInterface(iface, fragment);
 
-        this.createTransition(statesMapping.get(initialInlined),
-                              fragmentStatesMapping.get(initialFragment),
+        this.createTransition(statesMapping.get(intialState.getInitialInlined()),
+                              fragmentStatesMapping.get(intialState.getInitialFragment()),
                               "",
                               iface.getAbstractedId());
-        this.createTransition(statesMapping.get(initialInlined),
-                              statesMapping.get(successInlined),
+        this.createTransition(statesMapping.get(intialState.getInitialInlined()),
+                              statesMapping.get(intialState.getSuccessInlined()),
                               "",
                               "1 - " + iface.getAbstractedId());
-        this.createTransition(fragmentStatesMapping.get(successFragment),
-                              statesMapping.get(successInlined),
+        this.createTransition(fragmentStatesMapping.get(intialState.getSuccessFragment()),
+                              statesMapping.get(intialState.getSuccessInlined()),
                               "",
                               "1");
         if (errorFragment != null) {
-            this.createTransition(fragmentStatesMapping.get(errorFragment),
-                                  statesMapping.get(errorInlined),
+            this.createTransition(fragmentStatesMapping.get(intialState.getErrorFragment()),
+                                  statesMapping.get(intialState.getErrorInlined()),
                                   "",
                                   "1");
         }
