@@ -49,33 +49,49 @@ public class ParamWrapper implements ParametricModelChecker {
 		try {
 			File modelFile = File.createTempFile("model", "param");
 			FileWriter modelWriter = new FileWriter(modelFile);
-			modelWriter.write(model);
-			modelWriter.flush();
-			modelWriter.close();
+			writeAndFlushFile(modelFile, modelWriter, model);
 
 			File propertyFile = File.createTempFile("property", "prop");
 			FileWriter propertyWriter = new FileWriter(propertyFile);
-			propertyWriter.write(property);
-			propertyWriter.flush();
-			propertyWriter.close();
+			writeAndFlushFile(propertyFile, propertyWriter, property);
 
 			File resultsFile = File.createTempFile("result", null);
 
 			String formula;
-			if (usePrism && !model.contains("param")) {
-			    formula = invokeModelChecker(modelFile.getAbsolutePath(),
-			                                 propertyFile.getAbsolutePath(),
-			                                 resultsFile.getAbsolutePath());
-			} else {
-			    formula = invokeParametricModelChecker(modelFile.getAbsolutePath(),
-			                                           propertyFile.getAbsolutePath(),
-			                                           resultsFile.getAbsolutePath());
-			}
+			formula = invokeTypeModelChecker(model, modelFile, propertyFile, resultsFile);
 			return formula.trim().replaceAll("\\s+", "");
 		} catch (IOException e) {
 			LOGGER.log(Level.SEVERE, e.toString(), e);
 		}
 		return "";
+	}
+
+	private String invokeTypeModelChecker(String model, 
+										  File modelFile, 
+										  File propertyFile, 
+										  File resultsFile)	throws IOException {
+		String formula;
+		if (usePrism && !model.contains("param")) {
+		    formula = invokeModelChecker(modelFile.getAbsolutePath(),
+		                                 propertyFile.getAbsolutePath(),
+		                                 resultsFile.getAbsolutePath());
+		} else {
+		    formula = invokeParametricModelChecker(modelFile.getAbsolutePath(),
+		                                           propertyFile.getAbsolutePath(),
+		                                           resultsFile.getAbsolutePath());
+		}
+		return formula;
+	}
+	
+	private void writeAndFlushFile(File file, FileWriter writer, String model) {
+		try {
+			writer.write(model);
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, e.toString(), e);
+		}
+
 	}
 
 	private String invokeParametricModelChecker(String modelPath,
