@@ -32,38 +32,44 @@ public class RDGNodeTest {
         RDGNode memory = BSNNodes.getMemoryRDGNode();
         RDGNode file = BSNNodes.getFileRDGNode();
 
+        assertSituationDependenciesIndex(sqlite, pulseRate);
+        assertSituationDependenciesIndex(memory, pulseRate);
+        assertSituationDependenciesIndex(file, pulseRate);
 
+        assertSituationDependenciesIndex(sqlite, situation);
+        assertSituationDependenciesIndex(memory, situation);
+        assertSituationDependenciesIndex(file, situation);
+
+        assertSituationDependenciesIndex(pulseRate, situation);
+    }
+
+    public void assertSituationDependenciesIndex(RDGNode nodeA, RDGNode nodeB) throws CyclicRdgException{
+        RDGNode situation = BSNNodes.getSituationRDGNode();
         List<RDGNode> situationDependencies = situation.getDependenciesTransitiveClosure();
-        Assert.assertTrue(situationDependencies.contains(situation));
-
-        Assert.assertTrue(situationDependencies.indexOf(sqlite) < situationDependencies.indexOf(pulseRate));
-        Assert.assertTrue(situationDependencies.indexOf(memory) < situationDependencies.indexOf(pulseRate));
-        Assert.assertTrue(situationDependencies.indexOf(file) < situationDependencies.indexOf(pulseRate));
-
-        Assert.assertTrue(situationDependencies.indexOf(sqlite) < situationDependencies.indexOf(situation));
-        Assert.assertTrue(situationDependencies.indexOf(memory) < situationDependencies.indexOf(situation));
-        Assert.assertTrue(situationDependencies.indexOf(file) < situationDependencies.indexOf(situation));
-
-        Assert.assertTrue(situationDependencies.indexOf(pulseRate) < situationDependencies.indexOf(situation));
+        Assert.assertTrue(situationDependencies.indexOf(nodeA) < situationDependencies.indexOf(nodeB));
     }
 
     @Test
     public void testGetNumberOfPaths() throws CyclicRdgException {
         RDGNode situation = BSNNodes.getSituationRDGNode();
         RDGNode pulseRate = BSNNodes.getPulseRateRDGNode();
-        RDGNode oxygenation = BSNNodes.getOxygenationRDGNode();
         RDGNode sqlite = BSNNodes.getSQLiteRDGNode();
         RDGNode memory = BSNNodes.getMemoryRDGNode();
         RDGNode file = BSNNodes.getFileRDGNode();
+        RDGNode oxygenation = BSNNodes.getOxygenationRDGNode();
 
+        assertNumberOfPaths(2, sqlite);
+        assertNumberOfPaths(2, memory);
+        assertNumberOfPaths(2, file);
+        assertNumberOfPaths(1, oxygenation);
+        assertNumberOfPaths(1, pulseRate);
+        assertNumberOfPaths(1, situation);
+    }
+
+    public void assertNumberOfPaths(int number, RDGNode node) throws CyclicRdgException{
+        RDGNode situation = BSNNodes.getSituationRDGNode();
         Map<RDGNode, Integer> numberOfPaths = situation.getNumberOfPaths();
-
-        Assert.assertEquals(2, numberOfPaths.get(sqlite).intValue());
-        Assert.assertEquals(2, numberOfPaths.get(memory).intValue());
-        Assert.assertEquals(2, numberOfPaths.get(file).intValue());
-        Assert.assertEquals(1, numberOfPaths.get(oxygenation).intValue());
-        Assert.assertEquals(1, numberOfPaths.get(pulseRate).intValue());
-        Assert.assertEquals(1, numberOfPaths.get(situation).intValue());
+        Assert.assertEquals(number, numberOfPaths.get(node).intValue());
     }
 
     @Test
