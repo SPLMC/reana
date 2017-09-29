@@ -136,11 +136,11 @@ public class FDTMC {
 
 	/**
 	 * Creates an explicit interface to another FDTMC.
-	 * 
+	 *
 	 * An interface is an FDTMC fragment with 3 states (initial, success, and
 	 * error) and 2 transitions (initial to success with probability {@code id}
 	 * and initial to error with probability 1 - {@code id}).
-	 * 
+	 *
 	 * @param id
 	 *            Identifier of the FDTMC to be abstracted away.
 	 * @param initial
@@ -293,10 +293,10 @@ public class FDTMC {
 	    return inlined;
 	}
 
-	private FDTMC scrollInterfaceList(FDTMC inlined, 
+	private FDTMC scrollInterfaceList(FDTMC inlined,
 			Map<String, FDTMC> indexedModels,
 			Boolean isInlineInterfaceWithVariability) {
-		
+
 		Map<State, State> statesMapping = copyForInlining(inlined);
 
 		for (Map.Entry<String, List<Interface>> entry : interfaces.entrySet()) {
