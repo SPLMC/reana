@@ -103,14 +103,7 @@ class ParamModel {
 		for (String parameter : parameters) {
 			params += "param double "+parameter+";\n";
 		}
-		String module =
-				"dtmc\n" +
-				"\n" +
-				params +
-				"\n" +
-				"module " + moduleName + "\n" +
-				"	"+stateVariable+ " : ["+stateRangeStart+".."+stateRangeEnd+"] init "+initialState+";" +
-				"\n";
+		String module = moduleString(params);
 		for (Command command : commands.values()) {
 			module += "	"+command.makeString(stateVariable) + "\n";
 		}
@@ -121,16 +114,31 @@ class ParamModel {
 
 			Set<Integer> states = entry.getValue();
 			int count = 1;
-			for (Integer state : states) {
-				module += stateVariable+"="+state;
-				if (count < states.size()) {
-					module += " | ";
-				}
-				count++;
-			}
+			module = changeModuleState(module, states, count);
 			module += ";\n";
 		}
 		return module;
+	}
+
+	private String changeModuleState(String module, Set<Integer> states, int count) {
+		for (Integer state : states) {
+			module += stateVariable+"="+state;
+			if (count < states.size()) {
+				module += " | ";
+			}
+			count++;
+		}
+		return module;
+	}
+	
+	private String moduleString(String params) {
+		return 	"dtmc\n" +
+				"\n" +
+				params +
+				"\n" +
+				"module " + moduleName + "\n" +
+				"	"+stateVariable+ " : ["+stateRangeStart+".."+stateRangeEnd+"] init "+initialState+";" +
+				"\n";
 	}
 }
 
