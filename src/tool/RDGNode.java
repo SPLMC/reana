@@ -105,7 +105,7 @@ public class RDGNode {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof RDGNode) {
+        if (isObjectValid(obj)) {
             RDGNode other = (RDGNode) obj;
             
             final boolean presenceEquals = this.getPresenceCondition().equals(other.getPresenceCondition());
@@ -116,6 +116,10 @@ public class RDGNode {
             return isEquals;
         }
         return false;
+    }
+    
+    private boolean isObjectValid(Object obj){
+    	return obj != null && obj instanceof RDGNode;
     }
 
     @Override
@@ -154,12 +158,16 @@ public class RDGNode {
      * @throws CyclicRdgException
      */
     private void topoSortVisit(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
+        if (isContainsKeyAndMarksFalse(node, marks, sorted)) {
             // Visiting temporarily marked node -- this means a cyclic dependency!
             throw new CyclicRdgException();
         } else if (!marks.containsKey(node)) {
             markNode(node, marks, sorted);
         }
+    }
+    private boolean isContainsKeyAndMarksFalse(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) {
+    	boolean isValid = marks.containsKey(node) && marks.get(node) == false;
+    	return isValid;
     }
     private void markNode(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException{
     	
@@ -256,11 +264,15 @@ public class RDGNode {
      */
     public static RDGNode getSimilarNode(RDGNode target) {
         for (RDGNode candidate: nodesInCreationOrder) {
-            if (candidate != target && candidate.equals(target)) {
+            if (isNotSimilar(candidate, target)) {
                 return candidate;
             }
         }
         return null;
+    }
+    public static boolean isNotSimilar(RDGNode candidate, RDGNode target){
+    	boolean isValid = candidate != target && candidate.equals(target);
+    	return isValid;
     }
 
 }
