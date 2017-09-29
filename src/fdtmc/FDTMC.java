@@ -122,15 +122,15 @@ public class FDTMC {
 			return null;
 		}
 
-		List<Transition> l = transitionSystem.get(source);
-		if (l == null) {
-			l = new LinkedList<Transition>();
+		List<Transition> transitionsList = transitionSystem.get(source);
+		if (transitionsList == null) {
+			transitionsList = new LinkedList<Transition>();
 		}
 
 		Transition newTransition = new Transition(source, target, action,
 				reliability);
-		boolean success = l.add(newTransition);
-		transitionSystem.put(source, l);
+		boolean success = transitionsList.add(newTransition);
+		transitionSystem.put(source, transitionsList);
 		return success ? newTransition : null;
 	}
 
