@@ -325,23 +325,36 @@ public class FDTMC {
 
 		for (Map.Entry<String, List<Interface>> entry : interfaces.entrySet()) {
 			String dependencyId = entry.getKey();
-			if (indexedModels.containsKey(dependencyId)) {
-				FDTMC fragment = indexedModels.get(dependencyId);
-				for (Interface iface : entry.getValue()) {
-					if (isInlineInterfaceWithVariability != true) {
-						inlined.inlineInterface(iface, fragment, statesMapping);
-					} else {
-						inlined.inlineInterfaceWithVariability(iface, fragment,
-								statesMapping);
-					}
-				}
-			}
-		}
+            iterateModelsDependencies(inlined, indexedModels, isInlineInterfaceWithVariability, statesMapping, entry, dependencyId);
+        }
 
 		return inlined;
 	}
 
-	/**
+    private void iterateModelsDependencies(FDTMC inlined, Map<String, FDTMC> indexedModels,
+                                           Boolean isInlineInterfaceWithVariability, Map<State, State> statesMapping,
+                                           Map.Entry<String, List<Interface>> entry, String dependencyId) {
+        if (indexedModels.containsKey(dependencyId)) {
+            FDTMC fragment = indexedModels.get(dependencyId);
+            for (Interface iface : entry.getValue()) {
+                checkForInlineInterfaceType(inlined, isInlineInterfaceWithVariability,
+                statesMapping, fragment, iface);
+            }
+        }
+    }
+
+    private void checkForInlineInterfaceType(FDTMC inlined, Boolean isInlineInterfaceWithVariability,
+                                             Map<State, State> statesMapping,
+                                             FDTMC fragment, Interface iface) {
+        if (!isInlineInterfaceWithVariability) {
+            inlined.inlineInterface(iface, fragment, statesMapping);
+        } else {
+            inlined.inlineInterfaceWithVariability(iface, fragment,
+                    statesMapping);
+        }
+    }
+
+    /**
 	 * Inlines the given FDTMCs whenever there is an interface corresponding to
 	 * the string in the respective index.
 	 *
