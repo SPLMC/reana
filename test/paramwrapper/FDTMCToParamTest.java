@@ -21,8 +21,7 @@ public class FDTMCToParamTest {
 
 	@Test
 	public void testSingletonFDTMC() {
-		FDTMC singletonFDTMC = new FDTMC();
-		singletonFDTMC.setVariableName("s");
+		FDTMC singletonFDTMC = getFDTMCObject();
 		State s = singletonFDTMC.createState();
 		singletonFDTMC.createTransition(s, s, null, "1");
 
@@ -39,8 +38,7 @@ public class FDTMCToParamTest {
 
 	@Test
 	public void testSingletonFDTMCWithLabel() {
-		FDTMC singletonFDTMC = new FDTMC();
-		singletonFDTMC.setVariableName("s");
+		FDTMC singletonFDTMC = getFDTMCObject();
 		State s = singletonFDTMC.createState("success");
 		singletonFDTMC.createTransition(s, s, null, "1");
 
@@ -59,8 +57,7 @@ public class FDTMCToParamTest {
 
 	@Test
 	public void testSimpleFDTMCWithParameters() {
-		FDTMC fdtmc = new FDTMC();
-		fdtmc.setVariableName("s");
+		FDTMC fdtmc = getFDTMCObject();
 		State s0 = fdtmc.createState();
 		State s1 = fdtmc.createState();
 		fdtmc.createTransition(s0, s0, null, "rLoop");
@@ -84,8 +81,7 @@ public class FDTMCToParamTest {
 
 	@Test
 	public void testSimpleFDTMCWithParametersAndLabels() {
-		FDTMC fdtmc = new FDTMC();
-		fdtmc.setVariableName("s");
+		FDTMC fdtmc = getFDTMCObject();
 		State s0 = fdtmc.createState();
 		State s1 = fdtmc.createState("success");
 		State s2 = fdtmc.createState("success");
@@ -115,6 +111,12 @@ public class FDTMCToParamTest {
 				+ "label \"success\" = s=1 | s=2;\n";
 
 		assertEquals(expectedModule, paramWrapper.fdtmcToParam(fdtmc));
+	}
+	
+	private FDTMC getFDTMCObject() {
+		FDTMC fdtmc = new FDTMC();
+		fdtmc.setVariableName("s");
+		return fdtmc;
 	}
 
 	// Many states with one label
