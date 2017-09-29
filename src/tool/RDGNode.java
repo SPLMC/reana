@@ -111,20 +111,23 @@ public class RDGNode {
             final boolean presenceEquals = this.getPresenceCondition().equals(other.getPresenceCondition());
             final boolean FDTMCEquals = this.getFDTMC().equals(other.getFDTMC());
             final boolean dependenciesEquals = this.getDependencies().equals(other.getDependencies());
-                        
-            return presenceEquals && FDTMCEquals && dependenciesEquals; 
+            boolean isEquals; 
+            isEquals = presenceEquals && FDTMCEquals && dependenciesEquals; 
+            return isEquals;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-    	return getId().hashCode() + getPresenceCondition().hashCode() + getFDTMC().hashCode() + getDependencies().hashCode();
+    	int hashCode = getId().hashCode() + getPresenceCondition().hashCode() + getFDTMC().hashCode() + getDependencies().hashCode();
+    	return hashCode;
     }
 
     @Override
     public String toString() {
-        return getId() + " (" + getPresenceCondition() + ")";
+    	String presenceCondition = getId() + " (" + getPresenceCondition() + ")";
+        return presenceCondition;    		
     }
 
     /**
