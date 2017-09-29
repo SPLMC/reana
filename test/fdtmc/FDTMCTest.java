@@ -224,36 +224,41 @@ public class FDTMCTest {
 	@Test
 	public void testCreateDotFile() {
 		fail("Not yet implemented");
-	}
-
+	}	
+	
 	@Test
 	public void testEquivalentFDTMCs() {
 	    FDTMC fdtmc1 = new FDTMC();
         fdtmc1.setVariableName("s");
         
-        State init1 = fdtmc1.createInitialState(),
-              success1 = fdtmc1.createSuccessState(),
-              error1 = fdtmc1.createErrorState(),
-              source,
-              target,
-              interface_error;
+        states[0] = fdtmc1.createInitialState(); // init1
+        states[1] = fdtmc1.createSuccessState(); // success1
+        states[2] = fdtmc1.createErrorState(); // error1
+        
+        /*
+         * Use states[3] = source
+         * Use states[4] = target
+         * Use states[5] = interface_error
+         * */
+   
+//        createTransitionAssist(states[3], states[4], states[2], states[0], "persist");
+        
+        states[3] = states[0];
+        states[4] = fdtmc1.createState();
+        fdtmc1.createTransition(states[3], states[4], "persist", "0.999");
+        fdtmc1.createTransition(states[3], states[2], "!persist", "0.001");
 
-        source = init1;
-        target = fdtmc1.createState();
-        fdtmc1.createTransition(source, target, "persist", "0.999");
-        fdtmc1.createTransition(source, error1, "!persist", "0.001");
+        states[3] = states[4];
+        states[4] = fdtmc1.createState();
+        states[5] = fdtmc1.createState();
+        fdtmc1.createInterface("F", states[3], states[4], states[5]);
 
-        source = target;
-        target = fdtmc1.createState();
-        interface_error = fdtmc1.createState();
-        fdtmc1.createInterface("F", source, target, interface_error);
+        fdtmc1.createTransition(states[5], states[2], "error_ground", "1");
 
-        fdtmc1.createTransition(interface_error, error1, "error_ground", "1");
-
-        source = target;
-        target = success1;
-        fdtmc1.createTransition(source, target, "persist_return", "0.999");
-        fdtmc1.createTransition(source, error1, "!persist_return", "0.001");
+        states[3] = states[4];
+        states[4] = states[1];
+        fdtmc1.createTransition(states[3], states[4], "persist_return", "0.999");
+        fdtmc1.createTransition(states[3], states[2], "!persist_return", "0.001");
 
         FDTMC fdtmc2 = new FDTMC();
         fdtmc2.setVariableName("v");
@@ -261,25 +266,32 @@ public class FDTMCTest {
               success2 = fdtmc2.createSuccessState(),
               error2 = fdtmc2.createErrorState();
 
-        source = init2;
-        target = fdtmc2.createState();
-        fdtmc2.createTransition(source, target, "msg", "0.999");
-        fdtmc2.createTransition(source, error2, "!msg", "0.001");
+        states[3] = init2;
+        states[4] = fdtmc2.createState();
+        fdtmc2.createTransition(states[3], states[4], "msg", "0.999");
+        fdtmc2.createTransition(states[3], error2, "!msg", "0.001");
 
-        source = target;
-        target = fdtmc2.createState();
-        interface_error = fdtmc2.createState();
-        fdtmc2.createInterface("G", source, target, interface_error);
+        states[3] = states[4];
+        states[4] = fdtmc2.createState();
+        states[5] = fdtmc2.createState();
+        fdtmc2.createInterface("G", states[3], states[4], states[5]);
 
-        fdtmc2.createTransition(interface_error, error2, "error_ground", "1");
+        fdtmc2.createTransition(states[5], error2, "error_ground", "1");
 
-        source = target;
-        target = success2;
-        fdtmc2.createTransition(source, target, "msg_return", "0.999");
-        fdtmc2.createTransition(source, error2, "!msg_return", "0.001");
+        states[3] = states[4];
+        states[4] = success2;
+        fdtmc2.createTransition(states[3], states[4], "msg_return", "0.999");
+        fdtmc2.createTransition(states[3], error2, "!msg_return", "0.001");
         
-        assertTestEquivalentFDTMCs(init1, init2, success1, error2, fdtmc1, fdtmc2);
+        assertTestEquivalentFDTMCs(states[0], init2, states[1], error2, fdtmc1, fdtmc2);
 
+	}
+	
+	private void createTransitionAssist(State source, State target, State error, State other, String message) {
+		source = other;
+        target = fdtmc1.createState();
+        fdtmc1.createTransition(source, target, message, "0.999");
+        fdtmc1.createTransition(source, error, "!" + message, "0.001");
 	}
 	
 	public void assertTestEquivalentFDTMCs(State init1, State init2, State success1, 
