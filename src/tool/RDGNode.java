@@ -61,10 +61,15 @@ public class RDGNode {
 
     public void addDependency(RDGNode child) {
         this.dependencies.add(child);
-        height = Math.max(height, child.height + 1);
+        setHeight(Math.max(height, child.height + 1));
     }
 
-    public Collection<RDGNode> getDependencies() {
+    private void setHeight(int height) {
+    	this.height = height;
+		
+	}
+
+	public Collection<RDGNode> getDependencies() {
         return dependencies;
     }
 
@@ -114,7 +119,7 @@ public class RDGNode {
 
     @Override
     public int hashCode() {
-        return id.hashCode() + presenceCondition.hashCode() + fdtmc.hashCode() + dependencies.hashCode();
+    	return getId().hashCode() + getPresenceCondition().hashCode() + getFDTMC().hashCode() + getDependencies().hashCode();
     }
 
     @Override
@@ -150,17 +155,20 @@ public class RDGNode {
             // Visiting temporarily marked node -- this means a cyclic dependency!
             throw new CyclicRdgException();
         } else if (!marks.containsKey(node)) {
-            // Mark node temporarily (cycle detection)
-            marks.put(node, false);
-            for (RDGNode child: node.getDependencies()) {
-                topoSortVisit(child, marks, sorted);
-            }
-            // Mark node permanently (finished sorting branch)
-            marks.put(node, true);
-            sorted.add(node);
+            markNode(node, marks, sorted);
         }
     }
-
+    private void markNode(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException{
+    	
+    	// Mark node temporarily (cycle detection)
+    	marks.put(node, false);
+    	for (RDGNode child: node.getDependencies()) {
+        topoSortVisit(child, marks, sorted);
+    	}
+    	// Mark node permanently (finished sorting branch)
+    	marks.put(node, true);
+    	sorted.add(node);
+    }
     /**
      * Computes the number of paths from source nodes to every known node.
      * @return A map associating an RDGNode to the corresponding number
