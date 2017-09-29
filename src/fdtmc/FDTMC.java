@@ -280,17 +280,29 @@ public class FDTMC {
 			final boolean isTrasitionSystemEqual = transitionSystem.equals(other.transitionSystem);
 			final boolean isInterfaceEqual = thisInterfaces.equals(otherInterfaces);
 
-			return isStateEqual
-				&& isInitialStateEqual
-				&& isSuccessStateEqual
-				&& isErrorStateEqual
-				&& isTrasitionSystemEqual
-				&& isInterfaceEqual;
+			return compareBooleanValuesOfVariables(isStateEqual, 
+					isInitialStateEqual, isSuccessStateEqual, 
+					isErrorStateEqual, isTrasitionSystemEqual, isInterfaceEqual);
 
 		}
 		return false;
 	}
 
+	private Boolean compareBooleanValuesOfVariables(Boolean isStateEqual, 
+			Boolean isInitialStateEqual, 
+			Boolean isSuccessStateEqual,
+			Boolean isErrorStateEqual,
+			Boolean isTrasitionSystemEqual,
+			Boolean isInterfaceEqual){
+		
+		return isStateEqual
+				&& isInitialStateEqual
+				&& isSuccessStateEqual
+				&& isErrorStateEqual
+				&& isTrasitionSystemEqual
+				&& isInterfaceEqual; 
+	}
+	
 	@Override
 	public int hashCode() {
 		return states.hashCode() + transitionSystem.hashCode()
