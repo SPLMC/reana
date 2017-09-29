@@ -159,10 +159,10 @@ public class RDGNode {
      * @throws CyclicRdgException
      */
     private void topoSortVisit(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
+        if (containsKeyAndNotHaveNode(node, marks)) {
             // Visiting temporarily marked node -- this means a cyclic dependency!
             throw new CyclicRdgException();
-        } else if (!marks.containsKey(node)) {
+        } else if (doesNotContainKey(node, marks)) {
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
             getDependenciesForEachChild(node, marks, sorted);
@@ -171,6 +171,10 @@ public class RDGNode {
             sorted.add(node);
         }
     }
+
+	private static boolean doesNotContainKey(RDGNode node, Map<RDGNode, Boolean> marks) {
+		return !marks.containsKey(node);
+	}
 
 	private void getDependenciesForEachChild(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted)
 			throws CyclicRdgException {
@@ -198,10 +202,10 @@ public class RDGNode {
 
     // TODO Parameterize topological sort of RDG.
     private static Map<RDGNode, Integer> numPathsVisit(RDGNode node, Map<RDGNode, Boolean> marks, Map<RDGNode, Map<RDGNode, Integer>> cache) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
+        if (containsKeyAndNotHaveNode(node, marks)) {
             // Visiting temporarily marked node -- this means a cyclic dependency!
             throw new CyclicRdgException();
-        } else if (!marks.containsKey(node)) {
+        } else if (doesNotContainKey(node, marks)) {
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
 
@@ -219,6 +223,10 @@ public class RDGNode {
         // Otherwise, the node has already been visited.
         return cache.get(node);
     }
+
+	private static boolean containsKeyAndNotHaveNode(RDGNode node, Map<RDGNode, Boolean> marks) {
+		return marks.containsKey(node) && marks.get(node) == false;
+	}
 
 	private static Map<RDGNode, Integer> getDependenciesForEachChild(RDGNode node, Map<RDGNode, Boolean> marks,
 			Map<RDGNode, Map<RDGNode, Integer>> cache, Map<RDGNode, Integer> numberOfPaths) throws CyclicRdgException {
