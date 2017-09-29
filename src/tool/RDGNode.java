@@ -239,9 +239,14 @@ public class RDGNode {
     public static RDGNode getSimilarNode(RDGNode target) {
         RDGNode rdgNode = null;
         for (RDGNode candidate: nodesInCreationOrder) {
-            if (candidate != target && candidate.equals(target)) {
-                rdgNode = candidate;
-            }
+            rdgNode = checkSimilarNode(target, rdgNode, candidate);
+        }
+        return rdgNode;
+    }
+
+    private static RDGNode checkSimilarNode(RDGNode target, RDGNode rdgNode, RDGNode candidate) {
+        if (candidate != target && candidate.equals(target)) {
+            rdgNode = candidate;
         }
         return rdgNode;
     }
