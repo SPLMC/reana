@@ -10,7 +10,7 @@ public class FDTMCTest {
 	FDTMC fdtmc1;
 	private final int MAX_STATE_AMOUNT = 6;
 	private State[] states = new State[MAX_STATE_AMOUNT];
-	private String[] messages = {"init", "sucess", "error"};
+	private String[] messages = {"init", "success", "error"};
 
 	private void createStateWithMessage(int aux) {
 		for (int i = 0; i < aux; i++) {
@@ -74,13 +74,11 @@ public class FDTMCTest {
 	public void testCreateLabeledState() {
 		fdtmc1.setVariableName("x");
 
-		states[0] = fdtmc1.createState("init");
-		states[1] = fdtmc1.createState("sucess");
-		states[2] = fdtmc1.createState("error");
+		createStateWithMessage(3);
 		
-		Assert.assertEquals("init", states[0].getLabel());
-		Assert.assertEquals("sucess", states[1].getLabel());
-		Assert.assertEquals("error", states[2].getLabel());
+		for (int i = 0; i < 3; i++) {
+			Assert.assertEquals(messages[i], states[i].getLabel());
+		}
 
 		Assert.assertEquals(states[0], fdtmc1.getInitialState());
 	}
@@ -91,9 +89,7 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testCreateTransition() {
-		states[0] = fdtmc1.createState("init");
-		states[1] = fdtmc1.createState("success");
-		states[2] = fdtmc1.createState("error");
+		createStateWithMessage(3);
 		
 		Assert.assertNotNull(fdtmc1.createTransition(states[0], states[1], "alpha", Double.toString(0.95)));
 		Assert.assertNotNull(fdtmc1.createTransition(states[0], states[2], "alpha", Double.toString(0.05)));
@@ -105,9 +101,7 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testCreateTransitionWithParameter() {
-		states[0] = fdtmc1.createState("init");
-		states[1] = fdtmc1.createState("success");
-		states[2] = fdtmc1.createState("error");
+		createStateWithMessage(3);
 		
 		Assert.assertNotNull(fdtmc1.createTransition(states[0], states[1], "alpha", "rAlpha"));
 		Assert.assertNotNull(fdtmc1.createTransition(states[0], states[2], "alpha", "1-rAlpha"));
@@ -118,9 +112,7 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testGetStateByLabel() {
-		states[0] = fdtmc1.createState("init");
-		states[1] = fdtmc1.createState("success");
-		states[2] = fdtmc1.createState("error");
+		createStateWithMessage(3);
 
 		states[3] = fdtmc1.getStateByLabel("init");
 		states[4] = fdtmc1.getStateByLabel("success");
@@ -136,9 +128,7 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testGetTransitionByActionName() {			
-		states[0] = fdtmc1.createState("init");
-		states[1] = fdtmc1.createState("sucess");
-		states[2] = fdtmc1.createState("error");
+		createStateWithMessage(3);
 
 		assertCreateTransitionByActionName(states[0], states[1], states[2]);
 		assertTransitionByActionName1(states[0], states[1]); 
