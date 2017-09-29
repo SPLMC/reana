@@ -91,14 +91,18 @@ public class FDTMCTest {
 		s0 = fdtmc1.createState("init");
 		s1 = fdtmc1.createState("sucess");
 		s2 = fdtmc1.createState("error");
-
+		
+		assertTestCreateLabeledState(s0, s1, s2);
+	}
+	
+	public void assertTestCreateLabeledState(State s0, State s1, State s2) {
 		Assert.assertEquals("init", s0.getLabel());
 		Assert.assertEquals("sucess", s1.getLabel());
 		Assert.assertEquals("error", s2.getLabel());
 
 		Assert.assertEquals(s0, fdtmc1.getInitialState());
-	}
 
+	}
 
 	/**
 	 * This test ensures we can create transitions between FDTMC's states, passing the states,
@@ -219,18 +223,14 @@ public class FDTMCTest {
 
 		source = init;
 		target = fdtmc.createState();
-		Assert.assertNotNull(fdtmc.createTransition(source, target, "persist", "0.999"));
-		Assert.assertNotNull(fdtmc.createTransition(source, error, "persist", "0.001"));
-
+		
+		assertTestPrintOrderedFDTMC(fdtmc, source, target, error);
+		
 		source = target;
 		target = success;
-		Assert.assertNotNull(fdtmc.createTransition(source, target, "persist_return", "0.999"));
-		Assert.assertNotNull(fdtmc.createTransition(source, target, "persist_return", "0.001"));
-
-		Assert.assertNotNull(fdtmc.createTransition(success, success, "", "1.0"));
-		Assert.assertNotNull(fdtmc.createTransition(error, error, "", "1.0"));
-
-
+				
+		assertTestPrintOrderedFDTMC1(fdtmc, source, target, error, success);
+		
 		String expectedAnswer = "sSqlite=0(init) --- persist / 0.999 ---> sSqlite=3" + '\n'
 				+ "sSqlite=0(init) --- persist / 0.001 ---> sSqlite=2(fail)" + '\n'
 				+ "sSqlite=1(success) ---  / 1.0 ---> sSqlite=1(success)" + '\n'
@@ -241,24 +241,35 @@ public class FDTMCTest {
 		Assert.assertEquals(expectedAnswer, fdtmc.toString());
 	}
 
+	public void assertTestPrintOrderedFDTMC(FDTMC fdtmc, State source, State target, State error) {
+		Assert.assertNotNull(fdtmc.createTransition(source, target, "persist", "0.999"));
+		Assert.assertNotNull(fdtmc.createTransition(source, error, "persist", "0.001"));
 
+	}
+	
+	public void assertTestPrintOrderedFDTMC1(FDTMC fdtmc, State source, State target, 
+											State error, State success) {
+		Assert.assertNotNull(fdtmc.createTransition(source, target, "persist_return", "0.999"));
+		Assert.assertNotNull(fdtmc.createTransition(source, target, "persist_return", "0.001"));
 
+		Assert.assertNotNull(fdtmc.createTransition(success, success, "", "1.0"));
+		Assert.assertNotNull(fdtmc.createTransition(error, error, "", "1.0"));
 
-
+	}
+	
 	/**
 	 * This test aims to ensure if the DOT file for a specific RDG node is being created accordingly.
 	 */
 	@Test
 	public void testCreateDotFile() {
 		fail("Not yet implemented");
-
-
 	}
 
 	@Test
 	public void testEquivalentFDTMCs() {
 	    FDTMC fdtmc1 = new FDTMC();
         fdtmc1.setVariableName("s");
+        
         State init1 = fdtmc1.createInitialState(),
               success1 = fdtmc1.createSuccessState(),
               error1 = fdtmc1.createErrorState(),
@@ -305,8 +316,14 @@ public class FDTMCTest {
         target = success2;
         fdtmc2.createTransition(source, target, "msg_return", "0.999");
         fdtmc2.createTransition(source, error2, "!msg_return", "0.001");
+        
+        assertTestEquivalentFDTMCs(init1, init2, success1, error2, fdtmc1, fdtmc2);
 
-        Assert.assertEquals("FDTMCs' states should be compared disregarding variable names",
+	}
+	
+	public void assertTestEquivalentFDTMCs(State init1, State init2, State success1, 
+										   State error2, FDTMC fdtmc1, FDTMC fdtmc2) {
+		Assert.assertEquals("FDTMCs' states should be compared disregarding variable names",
                 init1, init2);
         Assert.assertNotEquals("FDTMCs' states should be compared disregarding variable names",
                 success1, error2);
