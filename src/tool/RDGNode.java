@@ -11,57 +11,66 @@ import fdtmc.FDTMC;
 
 public class RDGNode {
 
-	//This reference is used to store all the RDGnodes created during the evaluation
-	private static Map<String, RDGNode> rdgNodes = new HashMap<String, RDGNode>();
-	private static List<RDGNode> nodesInCreationOrder = new LinkedList<RDGNode>();
+    //This reference is used to store all the RDGnodes created during the evaluation
+    private static Map<String, RDGNode> rdgNodes = new HashMap<String, RDGNode>();
+    private static List<RDGNode> nodesInCreationOrder = new LinkedList<RDGNode>();
 
     private static int lastNodeIndex = 0;
 
-	// Node identifier
-	private String id;
-	//This attribute is used to store the FDTMC for the RDG node.
-	private FDTMC fdtmc;
-	/**
-	 * The node must have an associated presence condition, which is
-	 * a boolean expression over features.
-	 */
-	private String presenceCondition;
-	// Nodes on which this one depends
-	private Collection<RDGNode> dependencies;
-	/**
-	 * Height of the RDGNode.
-	 */
-	private int height;
+    // Node identifier
+    private String id;
+    //This attribute is used to store the FDTMC for the RDG node.
+    private FDTMC fdtmc;
+    /**
+     * The node must have an associated presence condition, which is
+     * a boolean expression over features.
+     */
+    private String presenceCondition;
+    // Nodes on which this one depends
+    private Collection<RDGNode> dependencies;
+    /**
+     * Height of the RDGNode.
+     */
+    private int height;
 
 
-	/**
-	 * The id, presence condition and model (FDTMC) of an RDG node must
-	 * be immutable, so there must be no setters for them. Hence, they
-	 * must be set at construction-time.
-	 *
-	 * @param id Node's identifier. It is preferably a valid Java identifier.
-	 * @param presenceCondition Boolean expression over features (using Java operators).
-	 * @param fdtmc Stochastic model of the piece of behavioral model represented by
-	 *             this node.
-	 */
-	public RDGNode(String id, String presenceCondition, FDTMC fdtmc) {
-	    this.id = id;
-	    this.presenceCondition = presenceCondition;
-	    this.fdtmc = fdtmc;
-		this.dependencies = new HashSet<RDGNode>();
-		this.height = 0;
+    /**
+     * The id, presence condition and model (FDTMC) of an RDG node must
+     * be immutable, so there must be no setters for them. Hence, they
+     * must be set at construction-time.
+     *
+     * @param id Node's identifier. It is preferably a valid Java identifier.
+     * @param presenceCondition Boolean expression over features (using Java operators).
+     * @param fdtmc Stochastic model of the piece of behavioral model represented by
+     *             this node.
+     */
+    public RDGNode(String id, String presenceCondition, FDTMC fdtmc) {
+        this.id = id;
+        this.presenceCondition = presenceCondition;
+        this.fdtmc = fdtmc;
+        this.dependencies = new HashSet<RDGNode>();
+        this.height = 0;
 
-		rdgNodes.put(id, this);
-		nodesInCreationOrder.add(this);
-	}
+        rdgNodes.put(id, this);
+        nodesInCreationOrder.add(this);
+    }
 
     public FDTMC getFDTMC() {
         return this.fdtmc;
     }
 
-    public void addDependency(RDGNode child) {
+    public boolean addDependency(RDGNode child) {
+        boolean success = false;
+        int oldHeight = height;
+
         this.dependencies.add(child);
         height = Math.max(height, child.height + 1);
+
+        if(height > oldHeight){
+            success = true;
+        }
+        
+        return success;
     }
 
     public Collection<RDGNode> getDependencies() {
@@ -107,7 +116,7 @@ public class RDGNode {
     }
 
     public boolean compare(Object obj) {
-        equal = false;
+        boolean equal = false;
 
         RDGNode other = (RDGNode) obj;
 
