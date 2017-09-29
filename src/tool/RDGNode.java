@@ -151,12 +151,17 @@ public class RDGNode {
         } else if (!marks.containsKey(node)) {
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
-            for (RDGNode child: node.getDependencies()) {
-                topoSortVisit(child, marks, sorted);
-            }
+            visitChildrenNodes(node, marks, sorted);
             // Mark node permanently (finished sorting branch)
             marks.put(node, true);
             sorted.add(node);
+        }
+    }
+
+    private void visitChildrenNodes(RDGNode node, Map<RDGNode, Boolean> marks,
+                                    List<RDGNode> sorted) throws CyclicRdgException {
+        for (RDGNode child: node.getDependencies()) {
+            topoSortVisit(child, marks, sorted);
         }
     }
 
