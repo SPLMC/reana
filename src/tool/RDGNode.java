@@ -100,14 +100,30 @@ public class RDGNode {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof RDGNode) {
+        if (notNullAndSameInstance(obj)) {
             RDGNode other = (RDGNode) obj;
-            return this.getPresenceCondition().equals(other.getPresenceCondition())
-                    && this.getFDTMC().equals(other.getFDTMC())
-                    && this.getDependencies().equals(other.getDependencies());
+            return hasSamePresenceCondition(other)
+                    && hasSameFDTMC(other)
+                    && hasSameDependencies(other);
         }
         return false;
     }
+
+	private boolean notNullAndSameInstance(Object obj) {
+		return obj != null && obj instanceof RDGNode;
+	}
+
+	private boolean hasSameDependencies(RDGNode other) {
+		return this.getDependencies().equals(other.getDependencies());
+	}
+
+	private boolean hasSameFDTMC(RDGNode other) {
+		return this.getFDTMC().equals(other.getFDTMC());
+	}
+
+	private boolean hasSamePresenceCondition(RDGNode other) {
+		return this.getPresenceCondition().equals(other.getPresenceCondition());
+	}
 
     @Override
     public int hashCode() {
