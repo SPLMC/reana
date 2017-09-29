@@ -5,13 +5,11 @@ import static org.junit.Assert.fail;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-//import org.junit.runner.RunWith;
-//import org.junit.runners.Parameterized;
-//
-//@RunWith(Parameterized.class)
 public class FDTMCTest {
 
 	FDTMC fdtmc1;
+	private final int MAX_STATE_AMOUNT = 6;
+	private State[] states = new State[MAX_STATE_AMOUNT];
 
 	@Before
 	public void setUp() throws Exception {
@@ -34,12 +32,12 @@ public class FDTMCTest {
 	@Test
 	public void testCreateState() {
 		fdtmc1.setVariableName("x");
-		State temp = fdtmc1.createState();
-		Assert.assertNotNull(temp);
-		Assert.assertTrue(fdtmc1.getStates().contains(temp));
-		Assert.assertEquals(0, temp.getIndex());
-		Assert.assertEquals("x", temp.getVariableName());
-		Assert.assertEquals(temp, fdtmc1.getInitialState());
+		states[0] = fdtmc1.createState();
+		Assert.assertNotNull(states[0]);
+		Assert.assertTrue(fdtmc1.getStates().contains(states[0]));
+		Assert.assertEquals(0, states[0].getIndex());
+		Assert.assertEquals("x", states[0].getVariableName());
+		Assert.assertEquals(states[0], fdtmc1.getInitialState());
 	}
 
 	/**
@@ -49,7 +47,6 @@ public class FDTMCTest {
 	@Test
 	public void testCreateLotsOfStates() {
 		fdtmc1.setVariableName("x");
-		State[] states = new State[6];
 	
 		for (int i = 0; i < 6; i++) {
 			states[i] = fdtmc1.createState();
@@ -69,22 +66,16 @@ public class FDTMCTest {
 	@Test
 	public void testCreateLabeledState() {
 		fdtmc1.setVariableName("x");
-		State s0, s1, s2;
 
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("sucess");
-		s2 = fdtmc1.createState("error");
+		states[0] = fdtmc1.createState("init");
+		states[1] = fdtmc1.createState("sucess");
+		states[2] = fdtmc1.createState("error");
 		
-		assertTestCreateLabeledState(s0, s1, s2);
-	}
-	
-	public void assertTestCreateLabeledState(State s0, State s1, State s2) {
-		Assert.assertEquals("init", s0.getLabel());
-		Assert.assertEquals("sucess", s1.getLabel());
-		Assert.assertEquals("error", s2.getLabel());
+		Assert.assertEquals("init", states[0].getLabel());
+		Assert.assertEquals("sucess", states[1].getLabel());
+		Assert.assertEquals("error", states[2].getLabel());
 
-		Assert.assertEquals(s0, fdtmc1.getInitialState());
-
+		Assert.assertEquals(states[0], fdtmc1.getInitialState());
 	}
 
 	/**
@@ -93,17 +84,12 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testCreateTransition() {
-		State s0, s1, s2;
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("success");
-		s2 = fdtmc1.createState("error");
-
-		assertNotNulltestCreateTransition(s0, s1, s2);
-	}
-
-	public void assertNotNulltestCreateTransition(State s0, State s1, State s2) {
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s1, "alpha", Double.toString(0.95)));
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s2, "alpha", Double.toString(0.05)));
+		states[0] = fdtmc1.createState("init");
+		states[1] = fdtmc1.createState("success");
+		states[2] = fdtmc1.createState("error");
+		
+		Assert.assertNotNull(fdtmc1.createTransition(states[0], states[1], "alpha", Double.toString(0.95)));
+		Assert.assertNotNull(fdtmc1.createTransition(states[0], states[2], "alpha", Double.toString(0.05)));
 	}
 	
 	/**
@@ -112,17 +98,12 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testCreateTransitionWithParameter() {
-		State s0, s1, s2;
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("success");
-		s2 = fdtmc1.createState("error");
+		states[0] = fdtmc1.createState("init");
+		states[1] = fdtmc1.createState("success");
+		states[2] = fdtmc1.createState("error");
 		
-		assertNotNulltestCreateTransitionWithParameter(s0, s1, s2);
-	}
-
-	public void assertNotNulltestCreateTransitionWithParameter(State s0, State s1, State s2) {
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s1, "alpha", "rAlpha"));
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s2, "alpha", "1-rAlpha"));
+		Assert.assertNotNull(fdtmc1.createTransition(states[0], states[1], "alpha", "rAlpha"));
+		Assert.assertNotNull(fdtmc1.createTransition(states[0], states[2], "alpha", "1-rAlpha"));
 	}
 	
 	/**
@@ -130,41 +111,31 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testGetStateByLabel() {
-		State s0, s1, s2;
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("success");
-		s2 = fdtmc1.createState("error");
+		states[0] = fdtmc1.createState("init");
+		states[1] = fdtmc1.createState("success");
+		states[2] = fdtmc1.createState("error");
 
-		State t0, t1, t2;
-		t0 = fdtmc1.getStateByLabel("init");
-		t1 = fdtmc1.getStateByLabel("success");
-		t2 = fdtmc1.getStateByLabel("error");
+		states[3] = fdtmc1.getStateByLabel("init");
+		states[4] = fdtmc1.getStateByLabel("success");
+		states[5] = fdtmc1.getStateByLabel("error");
 		
-		assertSametestGetStateByLabel(s0, s1, s2, t0, t1, t2);
+		Assert.assertSame(states[3], states[0]);
+		Assert.assertSame(states[4], states[1]);
+		Assert.assertSame(states[5], states[2]);
 	}
-	
-	public void assertSametestGetStateByLabel(State s0,State s1, State s2,
-											  State t0, State t1, State t2) {
-		Assert.assertSame(t0, s0);
-		Assert.assertSame(t1, s1);
-		Assert.assertSame(t2, s2);
-	}
-
 	/**
 	 * This test ensures it is possible to recover a transition (and all of its information like
 	 * probability and source and target states) by using its name.
 	 */
 	@Test
-	public void testGetTransitionByActionName() {
-		State s0, s1, s2;		
-				
-		s0 = fdtmc1.createState("init");
-		s1 = fdtmc1.createState("sucess");
-		s2 = fdtmc1.createState("error");
+	public void testGetTransitionByActionName() {			
+		states[0] = fdtmc1.createState("init");
+		states[1] = fdtmc1.createState("sucess");
+		states[2] = fdtmc1.createState("error");
 
-		assertCreateTransitionByActionName(s0, s1, s2);
-		assertTransitionByActionName1(s0, s1); 
-		assertTransitionByActionName2(s0, s2);		
+		assertCreateTransitionByActionName(states[0], states[1], states[2]);
+		assertTransitionByActionName1(states[0], states[1]); 
+		assertTransitionByActionName2(states[0], states[2]);		
 	}
 
 	public void assertCreateTransitionByActionName(State s0, State s1, State s2) {
