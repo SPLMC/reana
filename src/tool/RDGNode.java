@@ -165,14 +165,19 @@ public class RDGNode {
         } else if (!marks.containsKey(node)) {
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
-            for (RDGNode child: node.getDependencies()) {
-                topoSortVisit(child, marks, sorted);
-            }
+            getDependenciesForEachChild(node, marks, sorted);
             // Mark node permanently (finished sorting branch)
             marks.put(node, true);
             sorted.add(node);
         }
     }
+
+	private void getDependenciesForEachChild(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted)
+			throws CyclicRdgException {
+		for (RDGNode child: node.getDependencies()) {
+		    topoSortVisit(child, marks, sorted);
+		}
+	}
 
     /**
      * Computes the number of paths from source nodes to every known node.
@@ -205,10 +210,7 @@ public class RDGNode {
             numberOfPaths.put(node, 1);
             // The number of paths from a node X to a node Y is equal to the
             // sum of the numbers of paths from each of its descendants to Y.
-            for (RDGNode child: node.getDependencies()) {
-                Map<RDGNode, Integer> tmpNumberOfPaths = numPathsVisit(child, marks, cache);
-                numberOfPaths = sumPaths(numberOfPaths, tmpNumberOfPaths);
-            }
+            numberOfPaths = getDependenciesForEachChild(node, marks, cache, numberOfPaths);
             // Mark node permanently (finished sorting branch)
             marks.put(node, true);
             cache.put(node, numberOfPaths);
@@ -218,6 +220,15 @@ public class RDGNode {
         return cache.get(node);
     }
 
+	private static Map<RDGNode, Integer> getDependenciesForEachChild(RDGNode node, Map<RDGNode, Boolean> marks,
+			Map<RDGNode, Map<RDGNode, Integer>> cache, Map<RDGNode, Integer> numberOfPaths) throws CyclicRdgException {
+		for (RDGNode child: node.getDependencies()) {
+		    Map<RDGNode, Integer> tmpNumberOfPaths = numPathsVisit(child, marks, cache);
+		    numberOfPaths = sumPaths(numberOfPaths, tmpNumberOfPaths);
+		}
+		return numberOfPaths;
+	}
+
     /**
      * Sums two paths-counting maps
      * @param pathsCountA
@@ -226,7 +237,13 @@ public class RDGNode {
      */
     private static Map<RDGNode, Integer> sumPaths(Map<RDGNode, Integer> pathsCountA, Map<RDGNode, Integer> pathsCountB) {
         Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>(pathsCountA);
-        for (Map.Entry<RDGNode, Integer> entry: pathsCountB.entrySet()) {
+        pathsCountBEntrySetForEachEntry(pathsCountB, numberOfPaths);
+        return numberOfPaths;
+    }
+
+	private static void pathsCountBEntrySetForEachEntry(Map<RDGNode, Integer> pathsCountB,
+			Map<RDGNode, Integer> numberOfPaths) {
+		for (Map.Entry<RDGNode, Integer> entry: pathsCountB.entrySet()) {
             RDGNode node = entry.getKey();
             Integer count = entry.getValue();
             if (numberOfPaths.containsKey(node)) {
@@ -234,8 +251,7 @@ public class RDGNode {
             }
             numberOfPaths.put(node, count);
         }
-        return numberOfPaths;
-    }
+	}
 
     /**
      * Returns the first RDG node (in crescent order of creation time) which is similar
