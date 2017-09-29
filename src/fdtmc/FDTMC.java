@@ -257,12 +257,22 @@ public class FDTMC {
 					interfaces.values());
 			LinkedList<List<Interface>> otherInterfaces = new LinkedList<List<Interface>>(
 					other.interfaces.values());
-			return states.equals(other.states)
-					&& getInitialState().equals(other.getInitialState())
-					&& getSuccessState().equals(other.getSuccessState())
-					&& getErrorState().equals(other.getErrorState())
-					&& transitionSystem.equals(other.transitionSystem)
-					&& thisInterfaces.equals(otherInterfaces);
+
+			// Variables to test Equality
+			final boolean isStateEqual = states.equals(other.states);
+			final boolean isInitialStateEqual = getInitialState().equals(other.getInitialState());
+			final boolean isSuccessStateEqual = getSuccessState().equals(other.getSuccessState());
+			final boolean isErrorStateEqual = getErrorState().equals(other.getErrorState());
+			final boolean isTrasitionSystemEqual = transitionSystem.equals(other.transitionSystem);
+			final boolean isInterfaceEqual = thisInterfaces.equals(otherInterfaces);
+
+			return isStateEqual
+				&& isInitialStateEqual
+				&& isSuccessStateEqual
+				&& isErrorStateEqual
+				&& isTrasitionSystemEqual
+				&& isInterfaceEqual;
+
 		}
 		return false;
 	}
@@ -280,7 +290,7 @@ public class FDTMC {
 	/**
 	 * Inlines the given FDTMCs whenever there is an interface corresponding to
 	 * the string in the respective index.
-	 * 
+	 *
 	 * @param indexedModels
 	 * @return a new FDTMC which represents this one with the ones specified in
 	 *         {@code indexedModels} inlined.
@@ -320,11 +330,11 @@ public class FDTMC {
 	/**
 	 * Inlines the given FDTMCs whenever there is an interface corresponding to
 	 * the string in the respective index.
-	 * 
+	 *
 	 * This method maintains the variability notion by using the same
 	 * abstraction id of the interface as an encoding of presence (i.e., a
 	 * "switch" on whether or not to take the transitions of the inlined model).
-	 * 
+	 *
 	 * @param indexedModels
 	 * @return a new FDTMC which represents this one with the ones specified in
 	 *         {@code indexedModels} inlined.
@@ -339,7 +349,7 @@ public class FDTMC {
 
 	/**
 	 * Prepares {@code destination} FDTMC to be an inlined version of this one.
-	 * 
+	 *
 	 * @param destination
 	 * @return a mapping from states in this FDTMC to the corresponding states
 	 *         in the copied one ({@code destination}).
@@ -358,7 +368,7 @@ public class FDTMC {
 
 	/**
 	 * Inlines all states from {@code fdtmc} stripped of their labels.
-	 * 
+	 *
 	 * @param fdtmc
 	 * @return
 	 */
@@ -374,7 +384,7 @@ public class FDTMC {
 	/**
 	 * Inlines all transitions from {@code fdtmc} that are not part of an
 	 * interface.
-	 * 
+	 *
 	 * @param fdtmc
 	 * @param statesOldToNew
 	 */
