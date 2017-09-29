@@ -101,12 +101,23 @@ public class RDGNode {
     @Override
     public boolean equals(Object obj) {
         if (obj != null && obj instanceof RDGNode) {
-            RDGNode other = (RDGNode) obj;
-            return this.getPresenceCondition().equals(other.getPresenceCondition())
-                    && this.getFDTMC().equals(other.getFDTMC())
-                    && this.getDependencies().equals(other.getDependencies());
+            return compare(obj);
         }
         return false;
+    }
+
+    public boolean compare(Object obj) {
+        equal = false;
+
+        RDGNode other = (RDGNode) obj;
+
+        boolean comparesPresence = this.getPresenceCondition().equals(other.getPresenceCondition());
+        boolean comparesFDTMC = this.getFDTMC().equals(other.getFDTMC());
+        boolean comparesDependencies = this.getDependencies().equals(other.getDependencies());
+
+        equal = comparesPresence && comparesFDTMC && comparesDependencies;
+
+        return equal;        
     }
 
     @Override
