@@ -21,10 +21,15 @@ public class FDTMCToParamTest {
 
 	@Test
 	public void testSingletonFDTMC() {
-		FDTMC singletonFDTMC = new FDTMC();
-		singletonFDTMC.setVariableName("s");
-		State s = singletonFDTMC.createState();
-		singletonFDTMC.createTransition(s, s, null, "1");
+		FDTMC singletonFDTMC = getFDTMCObject();
+
+		String[] labels = {null};
+		State[] s = getStates(labels, singletonFDTMC);
+
+		String[] reliabilities = {"1"};
+		singletonFDTMC = getFDTMCWithTransitions(s,
+												reliabilities,
+												singletonFDTMC);
 
 		String expectedModule =
 				"dtmc\n"
@@ -39,10 +44,16 @@ public class FDTMCToParamTest {
 
 	@Test
 	public void testSingletonFDTMCWithLabel() {
-		FDTMC singletonFDTMC = new FDTMC();
-		singletonFDTMC.setVariableName("s");
-		State s = singletonFDTMC.createState("success");
-		singletonFDTMC.createTransition(s, s, null, "1");
+		FDTMC singletonFDTMC = getFDTMCObject();
+
+		String[] labels = {"success"};
+		State[] s = getStates(labels, singletonFDTMC);
+
+		String[] reliabilities = {"1"};
+		singletonFDTMC = getFDTMCWithTransitions(s,
+												reliabilities,
+												singletonFDTMC);
+
 
 		String expectedModule =
 				"dtmc\n"
@@ -59,13 +70,18 @@ public class FDTMCToParamTest {
 
 	@Test
 	public void testSimpleFDTMCWithParameters() {
-		FDTMC fdtmc = new FDTMC();
-		fdtmc.setVariableName("s");
-		State s0 = fdtmc.createState();
-		State s1 = fdtmc.createState();
-		fdtmc.createTransition(s0, s0, null, "rLoop");
-		fdtmc.createTransition(s0, s1, null, "1-rLoop");
-		fdtmc.createTransition(s1, s1, null, "1");
+		FDTMC fdtmc = getFDTMCObject();
+		
+		String[] labels = {null, null};
+		State[] s = getStates(labels, fdtmc);
+
+		String[] reliabilities = {"rLoop", "1-rLoop", "1"};
+		fdtmc = getFDTMCWithTransitions(s,
+										reliabilities,
+										fdtmc);
+//		fdtmc.createTransition(s[0], s[0], null, "rLoop");
+//		fdtmc.createTransition(s[0], s[1], null, "1-rLoop");
+//		fdtmc.createTransition(s[1], s[1], null, "1");
 
 		String expectedModule =
 				"dtmc\n"
@@ -84,18 +100,17 @@ public class FDTMCToParamTest {
 
 	@Test
 	public void testSimpleFDTMCWithParametersAndLabels() {
-		FDTMC fdtmc = new FDTMC();
-		fdtmc.setVariableName("s");
-		State s0 = fdtmc.createState();
-		State s1 = fdtmc.createState("success");
-		State s2 = fdtmc.createState("success");
-		State s3 = fdtmc.createState("error");
-		fdtmc.createTransition(s0, s0, null, "rLoop");
-		fdtmc.createTransition(s0, s1, null, "1-rLoop");
-		fdtmc.createTransition(s1, s2, null, "1-rFail");
-		fdtmc.createTransition(s1, s3, null, "rFail");
-		fdtmc.createTransition(s2, s2, null, "1");
-		fdtmc.createTransition(s3, s3, null, "1");
+		FDTMC fdtmc = getFDTMCObject();
+		
+		String[] labels = {null, "success", "success", "error"};
+		State[] s = getStates(labels, fdtmc);
+
+		fdtmc.createTransition(s[0], s[0], null, "rLoop");
+		fdtmc.createTransition(s[0], s[1], null, "1-rLoop");
+		fdtmc.createTransition(s[1], s[2], null, "1-rFail");
+		fdtmc.createTransition(s[1], s[3], null, "rFail");
+		fdtmc.createTransition(s[2], s[2], null, "1");
+		fdtmc.createTransition(s[3], s[3], null, "1");
 
 		String expectedModule =
 				"dtmc\n"
@@ -116,6 +131,46 @@ public class FDTMCToParamTest {
 
 		assertEquals(expectedModule, paramWrapper.fdtmcToParam(fdtmc));
 	}
+	
+	private FDTMC getFDTMCObject() {
+		FDTMC fdtmc = new FDTMC();
+		fdtmc.setVariableName("s");
+		return fdtmc;
+	}
+	
+	private State[] getStates(String[] labels, FDTMC fdtmc) {
+		State[] states = new State[labels.length];
+		
+		for (int i = 0; i < labels.length; i++) {
+			if (labels[i] == null) {
+				states[i] = fdtmc.createState();
+			} else {
+				states[i] = fdtmc.createState(labels[i]);						
+			}
+		}
+		
+		return states;
+	}
+	
+	private FDTMC getFDTMCWithTransitions(State[] states, String[] reliabilities, FDTMC fdtmc) {
+		int reliabilityCount = 0;
+		
+		for (int i = 0; i < states.length; i++) {
+			fdtmc.createTransition(states[i],
+									states[i],
+									null,
+									reliabilities[reliabilityCount]);
+			reliabilityCount++;
+			if (i < states.length - 1) {
+				fdtmc.createTransition(states[i],
+						states[i+1],
+						null,
+						reliabilities[reliabilityCount]);
+				reliabilityCount++;
+			}
+		}
+		
+		return fdtmc;
+	}
 
-	// Many states with one label
 }
