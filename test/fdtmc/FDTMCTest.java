@@ -241,13 +241,15 @@ public class FDTMCTest {
          * Use states[5] = interface_error
          * */
    
-//        createTransitionAssist(states[3], states[4], states[2], states[0], "persist");
+//      createTransitionAssist(states[3], states[4], states[2], states[0], "persist");
         
         states[3] = states[0];
         states[4] = fdtmc1.createState();
         fdtmc1.createTransition(states[3], states[4], "persist", "0.999");
         fdtmc1.createTransition(states[3], states[2], "!persist", "0.001");
 
+//      createStateAssist("F", fdtmc1, states[2]);
+        
         states[3] = states[4];
         states[4] = fdtmc1.createState();
         states[5] = fdtmc1.createState();
@@ -292,6 +294,15 @@ public class FDTMCTest {
         target = fdtmc1.createState();
         fdtmc1.createTransition(source, target, message, "0.999");
         fdtmc1.createTransition(source, error, "!" + message, "0.001");
+	}
+	
+	private void createStateAssist(String letter, FDTMC fdtmc, State error) {
+		states[3] = states[4];
+        states[4] = fdtmc.createState();
+        states[5] = fdtmc.createState();
+        fdtmc.createInterface(letter, states[3], states[4], states[5]);
+
+        fdtmc.createTransition(states[5], error, "error_ground", "1");
 	}
 	
 	public void assertTestEquivalentFDTMCs(State init1, State init2, State success1, 
