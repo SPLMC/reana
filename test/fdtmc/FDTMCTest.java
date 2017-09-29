@@ -159,33 +159,50 @@ public class FDTMCTest {
 	 */
 	@Test
 	public void testGetTransitionByActionName() {
-		State s0, s1, s2;
+		State s0, s1, s2;		
+				
 		s0 = fdtmc1.createState("init");
 		s1 = fdtmc1.createState("sucess");
 		s2 = fdtmc1.createState("error");
 
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s1, "alpha", "rAlpha"));
-		Assert.assertNotNull(fdtmc1.createTransition(s0, s2, "alpha_error", "1-rAlpha"));
+		assertCreateTransitionByActionName(s0, s1, s2);
+		assertTransitionByActionName1(s0, s1); 
+		assertTransitionByActionName2(s0, s2);		
+	}
 
-		Transition t1, t2;
+	public void assertCreateTransitionByActionName(State s0, State s1, State s2) {
+		Transition createTransition1, createTransition2;
+		
+		createTransition1 = fdtmc1.createTransition(s0, s1, "alpha", "rAlpha");
+		createTransition2 = fdtmc1.createTransition(s0, s2, "alpha_error", "1-rAlpha");
+		
+		Assert.assertNotNull(createTransition1);
+		Assert.assertNotNull(createTransition2);
+	}
+	
+	public void assertTransitionByActionName1(State s0, State s1) {
+		Transition t1;
 		t1 = fdtmc1.getTransitionByActionName("alpha");
-		t2 = fdtmc1.getTransitionByActionName("alpha_error");
-
+		
 		Assert.assertNotNull(t1);
 		Assert.assertEquals("alpha", t1.getActionName());
 		Assert.assertEquals("rAlpha", t1.getProbability());
 		Assert.assertSame(s0, t1.getSource());
 		Assert.assertSame(s1, t1.getTarget());
 
+	}
+
+	public void assertTransitionByActionName2(State s0, State s2) {
+		Transition t2;
+		t2 = fdtmc1.getTransitionByActionName("alpha_error");
+
 		Assert.assertNotNull(t2);
 		Assert.assertEquals("alpha_error", t2.getActionName());
 		Assert.assertEquals("1-rAlpha", t2.getProbability());
 		Assert.assertSame(s0, t2.getSource());
 		Assert.assertSame(s2, t2.getTarget());
+
 	}
-
-
-
 	/**
 	 * This test must ensure that the FDTMC will be printed (or builded) considering the order
 	 * the states and transitions were build.
