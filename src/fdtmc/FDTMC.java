@@ -194,7 +194,7 @@ public class FDTMC {
 		return null;
 	}
 
-	private String transitionToNextState(List<Transition> transitionList, State temp) {
+	private String transitionToNextTransition(List<Transition> transitionList, State temp) {
 		String msg = new String();
 		Iterator <Transition> itTransitions = transitionList.iterator();
 		while (itTransitions.hasNext()) {
@@ -205,20 +205,25 @@ public class FDTMC {
 		}
 		return msg;
 	}
-
-	@Override
-	public String toString() {
+	
+	private String changeToNextState() {
 		String msg = new String();
-
 		Set<State> tmpStates = this.transitionSystem.keySet();
 		Iterator <State> itStates = tmpStates.iterator();
 		while (itStates.hasNext()) {
 			State temp = itStates.next();
 			List<Transition> transitionList = this.transitionSystem.get(temp);
 			if (transitionList != null) {
-				msg += transitionToNextState(transitionList, temp);
+				msg += transitionToNextTransition(transitionList, temp);
 			}
 		}
+		return msg;
+	}
+
+	@Override
+	public String toString() {
+		String msg = new String();
+		msg = changeToNextState();
 		return msg;
 	}
 
