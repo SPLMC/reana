@@ -17,21 +17,7 @@ public class RDGNode {
 
     private static int lastNodeIndex = 0;
 
-	// Node identifier
-	private String id;
-	//This attribute is used to store the FDTMC for the RDG node.
-	private FDTMC fdtmc;
-	/**
-	 * The node must have an associated presence condition, which is
-	 * a boolean expression over features.
-	 */
-	private String presenceCondition;
-	// Nodes on which this one depends
-	private Collection<RDGNode> dependencies;
-	/**
-	 * Height of the RDGNode.
-	 */
-	private int height;
+	private RDGNodeData data = new RDGNodeData();
 
 
 	/**
@@ -45,45 +31,20 @@ public class RDGNode {
 	 *             this node.
 	 */
 	public RDGNode(String id, String presenceCondition, FDTMC fdtmc) {
-	    this.id = id;
-	    this.presenceCondition = presenceCondition;
-	    this.fdtmc = fdtmc;
-		this.dependencies = new HashSet<RDGNode>();
-		this.height = 0;
+	    this.data.setId(id);
+	    this.data.setPresenceCondition(presenceCondition);
+	    this.data.setFdtmc(fdtmc);
+		this.data.setDependencies(new HashSet<RDGNode>());
+		this.data.setHeight(0);
 
 		rdgNodes.put(id, this);
 		nodesInCreationOrder.add(this);
 	}
 
-    public FDTMC getFDTMC() {
-        return this.fdtmc;
-    }
-
-    public void addDependency(RDGNode child) {
-        this.dependencies.add(child);
-        height = Math.max(height, child.height + 1);
-    }
-
-    public Collection<RDGNode> getDependencies() {
-        return dependencies;
-    }
-
-    public String getPresenceCondition() {
-        return presenceCondition;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Height of the RDGNode. This metric is defined in the same way as
-     * the height of a tree node, i.e., the maximum number of nodes in a path
-     * from this one to a leaf (node with no dependencies).
-     */
-    public int getHeight() {
-        return height;
-    }
+	public void addDependency(RDGNode child) {
+        this.data.dependencies.add(child);
+        data.height = Math.max(data.height, child.data.height + 1);
+	}
 
     public static RDGNode getById(String id) {
         return rdgNodes.get(id);
@@ -114,25 +75,25 @@ public class RDGNode {
 	}
 
 	private boolean hasSameDependencies(RDGNode other) {
-		return this.getDependencies().equals(other.getDependencies());
+		return this.data.getDependencies().equals(other.data.getDependencies());
 	}
 
 	private boolean hasSameFDTMC(RDGNode other) {
-		return this.getFDTMC().equals(other.getFDTMC());
+		return this.data.getFdtmc().equals(other.data.getFdtmc());
 	}
 
 	private boolean hasSamePresenceCondition(RDGNode other) {
-		return this.getPresenceCondition().equals(other.getPresenceCondition());
+		return this.data.getPresenceCondition().equals(other.data.getPresenceCondition());
 	}
 
     @Override
     public int hashCode() {
-        return id.hashCode() + presenceCondition.hashCode() + fdtmc.hashCode() + dependencies.hashCode();
+        return data.id.hashCode() + data.presenceCondition.hashCode() + data.fdtmc.hashCode() + data.dependencies.hashCode();
     }
 
     @Override
     public String toString() {
-        return getId() + " (" + getPresenceCondition() + ")";
+        return data.getId() + " (" + data.getPresenceCondition() + ")";
     }
 
     /**
@@ -178,7 +139,7 @@ public class RDGNode {
 
 	private void getDependenciesForEachChild(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted)
 			throws CyclicRdgException {
-		for (RDGNode child: node.getDependencies()) {
+		for (RDGNode child: node.data.getDependencies()) {
 		    topoSortVisit(child, marks, sorted);
 		}
 	}
@@ -230,7 +191,7 @@ public class RDGNode {
 
 	private static Map<RDGNode, Integer> getDependenciesForEachChild(RDGNode node, Map<RDGNode, Boolean> marks,
 			Map<RDGNode, Map<RDGNode, Integer>> cache, Map<RDGNode, Integer> numberOfPaths) throws CyclicRdgException {
-		for (RDGNode child: node.getDependencies()) {
+		for (RDGNode child: node.data.getDependencies()) {
 		    Map<RDGNode, Integer> tmpNumberOfPaths = numPathsVisit(child, marks, cache);
 		    numberOfPaths = sumPaths(numberOfPaths, tmpNumberOfPaths);
 		}
