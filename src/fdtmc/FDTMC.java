@@ -367,19 +367,19 @@ public class FDTMC {
         Map<State, State> fragmentStatesMapping = this.inlineStates(fragment);
         this.inlineTransitions(fragment, fragmentStatesMapping);
         
-        InterfaceInline InitialInline = new InterfaceInline(iface, fragment);
+        Inline InitialInline = new InterfaceInline(iface, fragment);
 
-        this.createTransition(statesMapping.get(InitialInline.getinitialInlined()),
-                              fragmentStatesMapping.get(InitialInline.getinitialFragment()),
+        this.createTransition(statesMapping.get(InitialInline.getInitialInlined()),
+                              fragmentStatesMapping.get(InitialInline.getInitialFragment()),
                               "",
                               "1");
-        this.createTransition(fragmentStatesMapping.get(InitialInline.getsuccessFragment()),
-                              statesMapping.get(InitialInline.getsuccessInlined()),
+        this.createTransition(fragmentStatesMapping.get(InitialInline.getSuccessFragment()),
+                              statesMapping.get(InitialInline.getSuccessInlined()),
                               "",
                               "1");
         if (errorFragment != null) {
-            this.createTransition(fragmentStatesMapping.get(InitialInline.geterrorFragment()),
-                                  statesMapping.get(InitialInline.geterrorInlined()),
+            this.createTransition(fragmentStatesMapping.get(InitialInline.getErrorFragment()),
+                                  statesMapping.get(InitialInline.getErrorInlined()),
                                   "",
                                   "1");
         }
@@ -389,23 +389,23 @@ public class FDTMC {
         Map<State, State> fragmentStatesMapping = this.inlineStates(fragment);
         this.inlineTransitions(fragment, fragmentStatesMapping);
 
-        InterfaceInline InitialInline = new InterfaceInline(iface, fragment);
+        Inline InitialInline = new InterfaceInline(iface, fragment);
 
-        this.createTransition(statesMapping.get(InitialInline.getinitialInlined()),
-                              fragmentStatesMapping.get(InitialInline.getinitialFragment()),
+        this.createTransition(statesMapping.get(InitialInline.getInitialInlined()),
+                              fragmentStatesMapping.get(InitialInline.getInitialFragment()),
                               "",
                               iface.getAbstractedId());
-        this.createTransition(statesMapping.get(InitialInline.getinitialInlined()),
-                              statesMapping.get(InitialInline.getsuccessInlined()),
+        this.createTransition(statesMapping.get(InitialInline.getInitialInlined()),
+                              statesMapping.get(InitialInline.getSuccessInlined()),
                               "",
                               "1 - " + iface.getAbstractedId());
-        this.createTransition(fragmentStatesMapping.get(InitialInline.getsuccessFragment()),
-                              statesMapping.get(InitialInline.getsuccessInlined()),
+        this.createTransition(fragmentStatesMapping.get(InitialInline.getSuccessFragment()),
+                              statesMapping.get(InitialInline.getSuccessInlined()),
                               "",
                               "1");
         if (errorFragment != null) {
-            this.createTransition(fragmentStatesMapping.get(InitialInline.geterrorFragment()),
-                                  statesMapping.get(InitialInline.geterrorInlined()),
+            this.createTransition(fragmentStatesMapping.get(InitialInline.getErrorFragment()),
+                                  statesMapping.get(InitialInline.getErrorInlined()),
                                   "",
                                   "1");
         }
