@@ -23,29 +23,37 @@ public class FDTMCToParamTest {
 	public void testSingletonFDTMC() {
 		FDTMC singletonFDTMC = new FDTMC();
 		singletonFDTMC.setVariableName("s");
-		State s = singletonFDTMC.createState();
-		singletonFDTMC.createTransition(s, s, null, "1");
+		State stateSingleton = singletonFDTMC.createState();
+		singletonFDTMC.createTransition(stateSingleton, stateSingleton, null, "1");
 
-		String expectedModule =
-				"dtmc\n"
+		String expectedModule = stringExpectedModule();
+				
+		assertEquals(expectedModule, paramWrapper.fdtmcToParam(singletonFDTMC));
+	}
+	
+	private String stringExpectedModule() {
+		return "dtmc\n"
 				+ "\n\n"
 				+ "module dummyModule\n"
 				+ "	s : [0..1] init 0;\n"
 				+ "	[] s=0 -> (1) : (s'=0);\n"
 				+ "endmodule\n\n";
-
-		assertEquals(expectedModule, paramWrapper.fdtmcToParam(singletonFDTMC));
 	}
 
 	@Test
 	public void testSingletonFDTMCWithLabel() {
 		FDTMC singletonFDTMC = new FDTMC();
 		singletonFDTMC.setVariableName("s");
-		State s = singletonFDTMC.createState("success");
-		singletonFDTMC.createTransition(s, s, null, "1");
+		State stateSingleton = singletonFDTMC.createState("success");
+		singletonFDTMC.createTransition(stateSingleton, stateSingleton, null, "1");
 
-		String expectedModule =
-				"dtmc\n"
+		String expectedModule = stringExpectedModuleWithLabel();
+				
+		assertEquals(expectedModule, paramWrapper.fdtmcToParam(singletonFDTMC));
+	}
+	
+	private String stringExpectedModuleWithLabel() {
+		return "dtmc\n"
 				+ "\n\n"
 				+ "module dummyModule\n"
 				+ "	s : [0..1] init 0;\n"
@@ -53,8 +61,6 @@ public class FDTMCToParamTest {
 				+ "endmodule\n"
 				+ "\n"
 				+ "label \"success\" = s=0;\n";
-
-		assertEquals(expectedModule, paramWrapper.fdtmcToParam(singletonFDTMC));
 	}
 
 	@Test
@@ -67,8 +73,13 @@ public class FDTMCToParamTest {
 		fdtmc.createTransition(s0, s1, null, "1-rLoop");
 		fdtmc.createTransition(s1, s1, null, "1");
 
-		String expectedModule =
-				"dtmc\n"
+		String expectedModule = stringExpectedModuleWithParams();				
+
+		assertEquals(expectedModule, paramWrapper.fdtmcToParam(fdtmc));
+	}
+	
+	private String stringExpectedModuleWithParams() {
+		return "dtmc\n"
 				+ "\n"
 				+ "param double rLoop;\n"
 				+ "\n"
@@ -77,10 +88,7 @@ public class FDTMCToParamTest {
 				+ "	[] s=0 -> (rLoop) : (s'=0) + (1-rLoop) : (s'=1);\n"
 				+ "	[] s=1 -> (1) : (s'=1);\n"
 				+ "endmodule\n\n";
-
-		assertEquals(expectedModule, paramWrapper.fdtmcToParam(fdtmc));
 	}
-
 
 	@Test
 	public void testSimpleFDTMCWithParametersAndLabels() {
@@ -97,8 +105,13 @@ public class FDTMCToParamTest {
 		fdtmc.createTransition(s2, s2, null, "1");
 		fdtmc.createTransition(s3, s3, null, "1");
 
-		String expectedModule =
-				"dtmc\n"
+		String expectedModule = stringExpectedModuleWithParamsAndLabels();
+
+		assertEquals(expectedModule, paramWrapper.fdtmcToParam(fdtmc));
+	}
+	
+	private String stringExpectedModuleWithParamsAndLabels() {
+		return "dtmc\n"
 				+ "\n"
 				+ "param double rFail;\n"
 				+ "param double rLoop;\n"
@@ -113,9 +126,5 @@ public class FDTMCToParamTest {
 				+ "\n"
 				+ "label \"error\" = s=3;\n"
 				+ "label \"success\" = s=1 | s=2;\n";
-
-		assertEquals(expectedModule, paramWrapper.fdtmcToParam(fdtmc));
 	}
-
-	// Many states with one label
 }

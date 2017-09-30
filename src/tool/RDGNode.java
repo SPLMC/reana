@@ -1,5 +1,4 @@
 package tool;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -125,10 +124,10 @@ public class RDGNode {
             throw new CyclicRdgException();
         } else if (doesNotContainKey(node, marks)) {
             // Mark node temporarily (cycle detection)
-            marks.put(node, false);
+            addNodeToMap(node, marks, false);
             getDependenciesForEachChild(node, marks, sorted);
             // Mark node permanently (finished sorting branch)
-            marks.put(node, true);
+            addNodeToMap(node, marks, true);
             sorted.add(node);
         }
     }
@@ -168,7 +167,7 @@ public class RDGNode {
             throw new CyclicRdgException();
         } else if (doesNotContainKey(node, marks)) {
             // Mark node temporarily (cycle detection)
-            marks.put(node, false);
+            addNodeToMap(node, marks, false);
 
             Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>();
             // A node always has a path to itself.
@@ -177,13 +176,17 @@ public class RDGNode {
             // sum of the numbers of paths from each of its descendants to Y.
             numberOfPaths = getDependenciesForEachChild(node, marks, cache, numberOfPaths);
             // Mark node permanently (finished sorting branch)
-            marks.put(node, true);
+            addNodeToMap(node, marks, true);
             cache.put(node, numberOfPaths);
             return numberOfPaths;
         }
         // Otherwise, the node has already been visited.
         return cache.get(node);
     }
+
+	private static void addNodeToMap(RDGNode node, Map<RDGNode, Boolean> marks, boolean bool) {
+		marks.put(node, bool);
+	}
 
 	private static boolean containsKeyAndNotHaveNode(RDGNode node, Map<RDGNode, Boolean> marks) {
 		return marks.containsKey(node) && marks.get(node) == false;
