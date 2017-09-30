@@ -90,7 +90,9 @@ public class RDGNode {
     }
 
     public static String getNextId() {
-        return "n" + lastNodeIndex++;
+        String nextId;
+        nextId = "n" + lastNodeIndex++;
+        return nextId;
     }
 
     /**
@@ -102,21 +104,29 @@ public class RDGNode {
     public boolean equals(Object obj) {
         if (obj != null && obj instanceof RDGNode) {
             RDGNode other = (RDGNode) obj;
-            return this.getPresenceCondition().equals(other.getPresenceCondition())
-                    && this.getFDTMC().equals(other.getFDTMC())
-                    && this.getDependencies().equals(other.getDependencies());
+            return compareAttributesOfRDGNodeObject(other);
         }
         return false;
     }
 
+	private boolean compareAttributesOfRDGNodeObject(RDGNode other) {
+		return this.getPresenceCondition().equals(other.getPresenceCondition())
+		        && this.getFDTMC().equals(other.getFDTMC())
+		        && this.getDependencies().equals(other.getDependencies());
+	}
+
     @Override
     public int hashCode() {
-        return id.hashCode() + presenceCondition.hashCode() + fdtmc.hashCode() + dependencies.hashCode();
+        int hashCode;
+        hashCode = id.hashCode() + presenceCondition.hashCode() + fdtmc.hashCode() + dependencies.hashCode();
+        return hashCode;
     }
 
     @Override
     public String toString() {
-        return getId() + " (" + getPresenceCondition() + ")";
+        String newString;
+        newString = getId() + " (" + getPresenceCondition() + ")";
+        return newString;
     }
 
     /**

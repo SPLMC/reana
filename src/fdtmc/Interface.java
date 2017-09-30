@@ -53,14 +53,18 @@ public class Interface {
     public boolean equals(Object obj) {
         if (obj != null && obj instanceof Interface) {
             Interface other = (Interface) obj;
-            return initial.equals(other.initial)
-                    && success.equals(other.success)
-                    && error.equals(other.error)
-                    && successTransition.equals(other.successTransition)
-                    && errorTransition.equals(other.errorTransition);
+            return compareAllAtributtes(other);
         }
         return false;
     }
+
+	private boolean compareAllAtributtes(Interface other) {
+		return initial.equals(other.initial)
+		        && success.equals(other.success)
+		        && error.equals(other.error)
+		        && successTransition.equals(other.successTransition)
+		        && errorTransition.equals(other.errorTransition);
+	}
 
     @Override
     public int hashCode() {

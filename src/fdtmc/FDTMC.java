@@ -156,14 +156,20 @@ public class FDTMC {
 	                                           errorTransition);
 
 	    List<Interface> interfaceOccurrences = null;
-	    if (interfaces.containsKey(id)) {
+	    interfaceOccurrences = checkExistenceOfInterface(id);
+	    interfaceOccurrences.add(newInterface);
+	    return newInterface;
+	}
+
+	private List<Interface> checkExistenceOfInterface(String id) {
+		List<Interface> interfaceOccurrences;
+		if (interfaces.containsKey(id)) {
 	        interfaceOccurrences = interfaces.get(id);
 	    } else {
 	        interfaceOccurrences = new LinkedList<Interface>();
 	        interfaces.put(id, interfaceOccurrences);
 	    }
-	    interfaceOccurrences.add(newInterface);
-	    return newInterface;
+		return interfaceOccurrences;
 	}
 
 	public State getStateByLabel(String label) {
@@ -227,18 +233,28 @@ public class FDTMC {
 	 */
 	@Override
 	public boolean equals(Object obj) {
+		
 	    if (obj != null && obj instanceof FDTMC) {
 	        FDTMC other = (FDTMC) obj;
 	        LinkedList<List<Interface>> thisInterfaces = new LinkedList<List<Interface>>(interfaces.values());
             LinkedList<List<Interface>> otherInterfaces = new LinkedList<List<Interface>>(other.interfaces.values());
-            return states.equals(other.states)
-	                && getInitialState().equals(other.getInitialState())
-	                && getSuccessState().equals(other.getSuccessState())
-	                && getErrorState().equals(other.getErrorState())
-	                && transitionSystem.equals(other.transitionSystem)
-	                && thisInterfaces.equals(otherInterfaces);
+            
+            return compareState(other, thisInterfaces, otherInterfaces);
 	    }
+	    
 	    return false;
+	}
+	
+	private boolean compareState(FDTMC other, LinkedList<List<Interface>> thisInterfaces, LinkedList<List<Interface>> otherInterfaces) {
+		
+		boolean state = states.equals(other.states)
+                && getInitialState().equals(other.getInitialState())
+                && getSuccessState().equals(other.getSuccessState())
+                && getErrorState().equals(other.getErrorState())
+                && transitionSystem.equals(other.transitionSystem)
+                && thisInterfaces.equals(otherInterfaces);
+		
+		return state;
 	}
 
 	@Override
