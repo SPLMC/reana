@@ -38,7 +38,9 @@ class ParamModel {
 			stateVariable = fdtmc.getVariableName();
 		}
 		initialState = fdtmc.getInitialState().getIndex();
-		commands = getCommands(fdtmc);
+		
+		commands = new Command(initialState).getCommands(fdtmc);
+		
 		labels = getLabels(fdtmc);
 		stateRangeStart = Collections.min(commands.keySet());
 		// PARAM não deixa declarar um intervalo com apenas um número.
@@ -47,12 +49,24 @@ class ParamModel {
 		parameters = getParameters(commands.values());
 	}
 
+    public int getParametersNumber() {
+        return parameters.size();
+    }
+
+    public Set<String> getParameters() {
+        return parameters;
+    }
+
+	public int getStatesNumber() {
+	    return stateRangeEnd+1;
+	}
+
 	private Map<String, Set<Integer>> getLabels(FDTMC fdtmc) {
 		Map<String, Set<Integer>> labeledStates = new TreeMap<String, Set<Integer>>();
 		Collection<State> states = fdtmc.getStates();
 		for (State s : states) {
 			String label = s.getLabel();
-			if (label != null) {
+			if (label != null && !label.isEmpty()) {
 				if (!labeledStates.containsKey(label)) {
 					labeledStates.put(label, new TreeSet<Integer>());
 				}
@@ -62,39 +76,41 @@ class ParamModel {
 		return labeledStates;
 	}
 
-	private Map<Integer, Command> getCommands(FDTMC fdtmc) {
-		Map<Integer, Command> tmpCommands = new TreeMap<Integer, Command>();
-		for (Entry<State, List<Transition>> entry : fdtmc.getTransitions().entrySet()) {
-		    int initState = entry.getKey().getIndex();
-			Command command = new Command(initState);
-			if (entry.getValue() != null) {
-			    for (Transition transition : entry.getValue()) {
-			        command.addUpdate(transition.getProbability(),
-			                          transition.getTarget().getIndex());
-			    }
-			} else {
-			    // Workaround: manually adding self-loops in case no
-			    // transition was specified for a given state.
-			    command.addUpdate("1", initState);
-			}
-			tmpCommands.put(initState, command);
-		}
-		return tmpCommands;
-	}
-
 	private Set<String> getParameters(Collection<Command> commands) {
 		Set<String> tmpParameters = new HashSet<String>();
 
-		Pattern validIdentifier = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
+		Pattern validIdentifier = Pattern.compile("(^|\\d+-)([A-Za-z_][A-Za-z0-9_]*)");
 		for (Command command : commands) {
 			for (String probability : command.getUpdatesProbabilities()) {
 				Matcher m = validIdentifier.matcher(probability);
 				while (m.find()) {
-					tmpParameters.add(m.group());
+					tmpParameters.add(m.group(2));
 				}
 			}
 		}
 		return tmpParameters;
+	}
+	
+	private String labelsToModule() {
+		String module = "";
+		
+		for (Map.Entry<String, Set<Integer>> entry : labels.entrySet()) {
+			String label = entry.getKey();
+			module += "label \""+label+"\" = ";
+
+			Set<Integer> states = entry.getValue();
+			int count = 1;
+			for (Integer state : states) {
+				module += stateVariable+"="+state;
+				if (count < states.size()) {
+					module += " | ";
+				}
+				count++;
+			}
+			module += ";\n";
+		}
+		
+		return module;
 	}
 
 	@Override
@@ -115,55 +131,8 @@ class ParamModel {
 			module += "	"+command.makeString(stateVariable) + "\n";
 		}
 		module += "endmodule\n\n";
-		for (Map.Entry<String, Set<Integer>> entry : labels.entrySet()) {
-			module += "label \""+entry.getKey()+"\" = ";
-			
-			Set<Integer> states = entry.getValue();
-			int count = 1;
-			for (Integer state : states) {
-				module += stateVariable+"="+state;
-				if (count < states.size()) {
-					module += " | ";
-				}
-				count++;
-			}
-			module += ";\n";
-		}
+		module += labelsToModule();
+		
 		return module;
-	}
-}
-
-class Command {
-	private int initialState;
-	private List<String> updatesProbabilities;
-	private List<Integer> updatesActions;
-
-	public Command(int initialState) {
-		this.initialState = initialState;
-        this.updatesProbabilities = new LinkedList<String>();
-        this.updatesActions = new LinkedList<Integer>();
-	}
-
-	public void addUpdate(String probability, int update) {
-		updatesProbabilities.add(probability);
-		updatesActions.add(update);
-	}
-
-	public Collection<String> getUpdatesProbabilities() {
-		return updatesProbabilities;
-	}
-
-	public String makeString(String stateVariable) {
-		String command = "[] "+stateVariable+"="+initialState+" -> ";
-		boolean needsPlus = false;
-		for (int i = 0; i < updatesProbabilities.size(); i++) {
-		    if (needsPlus) {
-		        command += " + ";
-		    } else {
-		        needsPlus = true;
-		    }
-			command += "("+updatesProbabilities.get(i)+") : ("+stateVariable+"'="+updatesActions.get(i)+")";
-		}
-		return command+";";
 	}
 }

@@ -25,85 +25,53 @@ public class ParamWrapper implements ParametricModelChecker {
     private static final Logger LOGGER = Logger.getLogger(ParamWrapper.class.getName());
 
 	private String paramPath;
-	private IModelCollector modelCollector;
+	private final String prismPath = "/opt/prism-4.2.1-src/bin/prism";
 	private boolean usePrism = false;
 
-    public ParamWrapper(String paramPath) {
-        this(paramPath, new NoopModelCollector());
-    }
-
-    public ParamWrapper(String paramPath, IModelCollector modelCollector) {
-        this.paramPath = paramPath;
-        this.usePrism = paramPath.contains("prism");
-        this.modelCollector = modelCollector;
-    }
+	public ParamWrapper(String paramPath) {
+	    this.paramPath = paramPath;
+	}
 
 	public String fdtmcToParam(FDTMC fdtmc) {
 		ParamModel model = new ParamModel(fdtmc);
-		modelCollector.collectModel(model.getParametersNumber(), model.getStatesNumber());
 		return model.toString();
 	}
 
 	@Override
 	public String getReliability(FDTMC fdtmc) {
-	    ParamModel model = new ParamModel(fdtmc);
-        modelCollector.collectModel(model.getParametersNumber(), model.getStatesNumber());
-		String modelString = model.toString();
-
-		if (usePrism) {
-		    modelString = modelString.replace("param", "const");
-		}
+		String model = fdtmcToParam(fdtmc);
 		String reliabilityProperty = "P=? [ F \"success\" ]";
 
-		return evaluate(modelString, reliabilityProperty, model);
-	}
-	
-	private File writeFile(String strToBeWritten, String prefix, String suffix) throws IOException {
-		File file = File.createTempFile(prefix, suffix);
-		FileWriter writer = new FileWriter(file);
-		writer.write(strToBeWritten);
-		writer.flush();
-		writer.close();
-		
-		return file;
-	}
-	
-	private String writeFormula(File modelFile, File propertyFile, File resultsFile, 
-			String modelString, ParamModel model) throws IOException {
-		String formula;
-		long startTime = System.nanoTime();
-		if (usePrism && !modelString.contains("const")) {
-		    formula = invokeModelChecker(modelFile.getAbsolutePath(),
-		                                 propertyFile.getAbsolutePath(),
-		                                 resultsFile.getAbsolutePath());
-		} else if(usePrism) {
-		    formula = invokeParametricPRISM(model,
-		                                    modelFile.getAbsolutePath(),
-                                            propertyFile.getAbsolutePath(),
-                                            resultsFile.getAbsolutePath());
-		} else {
-		    formula = invokeParametricModelChecker(modelFile.getAbsolutePath(),
-		                                           propertyFile.getAbsolutePath(),
-		                                           resultsFile.getAbsolutePath());
-		}
-		long elapsedTime = System.nanoTime() - startTime;
-        modelCollector.collectModelCheckingTime(elapsedTime);
-		return formula.trim().replaceAll("\\s+", "");
+		return evaluate(model, reliabilityProperty);
 	}
 
-	private String evaluate(String modelString, String property, ParamModel model) {
+	private String evaluate(String model, String property) {
 		try {
-		    LOGGER.finer(modelString);
-		    
-		    File modelFile = writeFile(modelString, "model", "param");
-		    
-		    File propertyFile = writeFile(property, "property", "prop");
+			File modelFile = File.createTempFile("model", "param");
+			FileWriter modelWriter = new FileWriter(modelFile);
+			modelWriter.write(model);
+			modelWriter.flush();
+			modelWriter.close();
+
+			File propertyFile = File.createTempFile("property", "prop");
+			FileWriter propertyWriter = new FileWriter(propertyFile);
+			propertyWriter.write(property);
+			propertyWriter.flush();
+			propertyWriter.close();
 
 			File resultsFile = File.createTempFile("result", null);
-			
-			String formula = writeFormula(modelFile, propertyFile, resultsFile, modelString, model);
 
-			return formula;
+			String formula;
+			if (usePrism && !model.contains("param")) {
+			    formula = invokeModelChecker(modelFile.getAbsolutePath(),
+			                                 propertyFile.getAbsolutePath(),
+			                                 resultsFile.getAbsolutePath());
+			} else {
+			    formula = invokeParametricModelChecker(modelFile.getAbsolutePath(),
+			                                           propertyFile.getAbsolutePath(),
+			                                           resultsFile.getAbsolutePath());
+			}
+			return formula.trim().replaceAll("\\s+", "");
 		} catch (IOException e) {
 			LOGGER.log(Level.SEVERE, e.toString(), e);
 		}
@@ -120,26 +88,10 @@ public class ParamWrapper implements ParametricModelChecker {
 		return invokeAndGetResult(commandLine, resultsPath+".out");
 	}
 
-    private String invokeParametricPRISM(ParamModel model,
-                                         String modelPath,
-                                         String propertyPath,
-                                         String resultsPath) throws IOException {
-        String commandLine = paramPath+" "
-                             +modelPath+" "
-                             +propertyPath+" "
-                             +"-exportresults "+resultsPath+" "
-                             +"-param "+String.join(",", model.getParameters());
-        String rawResult = invokeAndGetResult(commandLine, resultsPath);
-        int openBracket = rawResult.indexOf("{");
-        int closeBracket = rawResult.indexOf("}");
-        String expression = rawResult.substring(openBracket+1, closeBracket);
-        return expression.trim().replace('|', '/');
-    }
-
 	private String invokeModelChecker(String modelPath,
 									  String propertyPath,
 									  String resultsPath) throws IOException {
-		String commandLine = paramPath+" "
+		String commandLine = prismPath+" "
 				 			 +modelPath+" "
 				 			 +propertyPath+" "
 				 			 +"-exportresults "+resultsPath;
@@ -157,7 +109,6 @@ public class ParamWrapper implements ParametricModelChecker {
 			LOGGER.log(Level.SEVERE, e.toString(), e);
 		}
 		List<String> lines = Files.readAllLines(Paths.get(resultsPath), Charset.forName("UTF-8"));
-		lines.removeIf(String::isEmpty);
 		// Formula
 		return lines.get(lines.size()-1);
 	}
