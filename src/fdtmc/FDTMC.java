@@ -215,9 +215,12 @@ public class FDTMC {
 	private String creteStateMessage(String msg, State temp, Iterator<Transition> itTransitions) {
 		while (itTransitions.hasNext()) {
 			Transition t = itTransitions.next();
-			msg += temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
-					" --- " + t.getActionName() + " / " + t.getProbability() +
-					" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
+			msg += temp.getVariableName() + "=" + temp.getIndex() 
+			+ ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
+			" --- " + t.getActionName() + " / " + t.getProbability() +
+			" ---> " + t.getTarget().getVariableName() 
+			+ "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" 
+			+ t.getTarget().getLabel() + ")" : "") + "\n";
 		}
 		return msg;
 	}
@@ -267,7 +270,13 @@ public class FDTMC {
         FDTMC inlined = new FDTMC();
         Map<State, State> statesMapping = copyForInlining(inlined);
 
-        for (Map.Entry<String, List<Interface>> entry: interfaces.entrySet()) {
+        getValueInlineIfTheyHaveKey(indexedModels, inlined, statesMapping);
+        return inlined;
+    }
+
+	private void getValueInlineIfTheyHaveKey(Map<String, FDTMC> indexedModels, FDTMC inlined,
+			Map<State, State> statesMapping) {
+		for (Map.Entry<String, List<Interface>> entry: interfaces.entrySet()) {
             String dependencyId = entry.getKey();
             if (indexedModels.containsKey(dependencyId)) {
                 FDTMC fragment = indexedModels.get(dependencyId);
@@ -278,8 +287,7 @@ public class FDTMC {
                 }
             }
         }
-        return inlined;
-    }
+	}
 
     /**
      * Inlines the given FDTMCs whenever there is an interface corresponding
