@@ -54,28 +54,40 @@ public class FDTMCTest {
 		s4 = fdtmc1.createState();
 		s5 = fdtmc1.createState();
 
-		Assert.assertNotNull(s0);
-		Assert.assertNotNull(s1);
-		Assert.assertNotNull(s2);
-		Assert.assertNotNull(s3);
-		Assert.assertNotNull(s4);
-		Assert.assertNotNull(s5);
+		assertStatesNotNull(s0, s1, s2, s3, s4, s5);
 
-		Assert.assertTrue(fdtmc1.getStates().contains(s0));
-		Assert.assertTrue(fdtmc1.getStates().contains(s1));
-		Assert.assertTrue(fdtmc1.getStates().contains(s2));
-		Assert.assertTrue(fdtmc1.getStates().contains(s3));
-		Assert.assertTrue(fdtmc1.getStates().contains(s4));
-		Assert.assertTrue(fdtmc1.getStates().contains(s5));
+		assertTrueTheStates(s0, s1, s2, s3, s4, s5);
 
+		assertEqualsTheStates(s0, s1, s2, s3, s4, s5);
+
+		Assert.assertEquals(s0, fdtmc1.getInitialState());
+	}
+
+	private void assertEqualsTheStates(State s0, State s1, State s2, State s3, State s4, State s5) {
 		Assert.assertEquals(0, s0.getIndex());
 		Assert.assertEquals(1, s1.getIndex());
 		Assert.assertEquals(2, s2.getIndex());
 		Assert.assertEquals(3, s3.getIndex());
 		Assert.assertEquals(4, s4.getIndex());
 		Assert.assertEquals(5, s5.getIndex());
+	}
 
-		Assert.assertEquals(s0, fdtmc1.getInitialState());
+	private void assertTrueTheStates(State s0, State s1, State s2, State s3, State s4, State s5) {
+		Assert.assertTrue(fdtmc1.getStates().contains(s0));
+		Assert.assertTrue(fdtmc1.getStates().contains(s1));
+		Assert.assertTrue(fdtmc1.getStates().contains(s2));
+		Assert.assertTrue(fdtmc1.getStates().contains(s3));
+		Assert.assertTrue(fdtmc1.getStates().contains(s4));
+		Assert.assertTrue(fdtmc1.getStates().contains(s5));
+	}
+
+	private void assertStatesNotNull(State s0, State s1, State s2, State s3, State s4, State s5) {
+		Assert.assertNotNull(s0);
+		Assert.assertNotNull(s1);
+		Assert.assertNotNull(s2);
+		Assert.assertNotNull(s3);
+		Assert.assertNotNull(s4);
+		Assert.assertNotNull(s5);
 	}
 
 
