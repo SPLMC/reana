@@ -17,7 +17,7 @@ public class FeatureModelPruningStrategy implements IPruningStrategy {
      */
     @Override
     public ADD pruneInvalidConfigurations(RDGNode node, ADD reliability, ADD featureModel) {
-        return featureModel.times(reliability);
+        return featureModel.operator(reliability, ADD.TIMES);
     }
 
 }

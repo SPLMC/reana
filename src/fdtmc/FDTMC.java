@@ -195,7 +195,6 @@ public class FDTMC {
 	}
 
 
-	@Override
 	public String toString() {
 		String msg = new String();
 
@@ -205,17 +204,25 @@ public class FDTMC {
 			State temp = itStates.next();
 			List<Transition> transitionList = this.transitionSystem.get(temp);
 			if (transitionList != null) {
-				Iterator <Transition> itTransitions = transitionList.iterator();
-				while (itTransitions.hasNext()) {
-					Transition t = itTransitions.next();
-					msg += temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
-							" --- " + t.getActionName() + " / " + t.getProbability() +
-							" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
-				}
+				msg += transitionNext(transitionList, temp);
 			}
 		}
 		return msg;
 	}
+
+	private String transitionNext(List<Transition> transitionList, State temp) {
+		String msg = new String();
+	  
+		Iterator <Transition> itTransitions = transitionList.iterator();
+		while (itTransitions.hasNext()) {
+			Transition t = itTransitions.next();
+			msg += temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
+					" --- " + t.getActionName() + " / " + t.getProbability() +
+					" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
+		}
+		return msg;
+	}
+
 
 	/**
 	 * Two FDTMCs are deemed equal whenever:
@@ -363,62 +370,66 @@ public class FDTMC {
         }
     }
 
+    public class GetStates {
+		public State initialInlined;
+		public State initialFragment;
+		public State successInlined;
+		public State successFragment;
+		public State errorInlined;
+		public State errorFragment;
+
+		public GetStates(Interface iface, FDTMC fragment) {
+	        initialInlined = iface.getInitial();
+	        initialFragment = fragment.getInitialState();
+	        successInlined = iface.getSuccess();
+	        successFragment = fragment.getSuccessState();
+	        errorInlined = iface.getError();
+	        errorFragment = fragment.getErrorState();
+		}
+    }
+
+    public void errorAndSuccessTransitions(GetStates states, Map<State, State> statesMapping, Map<State, State> fragmentStatesMapping) {
+        this.createTransition(fragmentStatesMapping.get(states.successFragment),
+                statesMapping.get(states.successInlined),
+                "",
+                "1");
+        if (states.errorFragment != null) {
+            this.createTransition(fragmentStatesMapping.get(states.errorFragment),
+                                  statesMapping.get(states.errorInlined),
+                                  "",
+                                  "1");
+        }
+    }
+
     private void inlineInterface(Interface iface, FDTMC fragment, Map<State, State> statesMapping) {
         Map<State, State> fragmentStatesMapping = this.inlineStates(fragment);
         this.inlineTransitions(fragment, fragmentStatesMapping);
 
-        State initialInlined = iface.getInitial();
-        State initialFragment = fragment.getInitialState();
-        State successInlined = iface.getSuccess();
-        State successFragment = fragment.getSuccessState();
-        State errorInlined = iface.getError();
-        State errorFragment = fragment.getErrorState();
+        GetStates states = new GetStates(iface, fragment);
 
-        this.createTransition(statesMapping.get(initialInlined),
-                              fragmentStatesMapping.get(initialFragment),
+        this.createTransition(statesMapping.get(states.initialInlined),
+                              fragmentStatesMapping.get(states.initialFragment),
                               "",
                               "1");
-        this.createTransition(fragmentStatesMapping.get(successFragment),
-                              statesMapping.get(successInlined),
-                              "",
-                              "1");
-        if (errorFragment != null) {
-            this.createTransition(fragmentStatesMapping.get(errorFragment),
-                                  statesMapping.get(errorInlined),
-                                  "",
-                                  "1");
-        }
+        errorAndSuccessTransitions(states, statesMapping, fragmentStatesMapping);
     }
 
     private void inlineInterfaceWithVariability(Interface iface, FDTMC fragment, Map<State, State> statesMapping) {
         Map<State, State> fragmentStatesMapping = this.inlineStates(fragment);
         this.inlineTransitions(fragment, fragmentStatesMapping);
 
-        State initialInlined = iface.getInitial();
-        State initialFragment = fragment.getInitialState();
-        State successInlined = iface.getSuccess();
-        State successFragment = fragment.getSuccessState();
-        State errorInlined = iface.getError();
-        State errorFragment = fragment.getErrorState();
+        GetStates states = new GetStates(iface, fragment);
 
-        this.createTransition(statesMapping.get(initialInlined),
-                              fragmentStatesMapping.get(initialFragment),
+
+        this.createTransition(statesMapping.get(states.initialInlined),
+                              fragmentStatesMapping.get(states.initialFragment),
                               "",
                               iface.getAbstractedId());
-        this.createTransition(statesMapping.get(initialInlined),
-                              statesMapping.get(successInlined),
+        this.createTransition(statesMapping.get(states.initialInlined),
+                              statesMapping.get(states.successInlined),
                               "",
                               "1 - " + iface.getAbstractedId());
-        this.createTransition(fragmentStatesMapping.get(successFragment),
-                              statesMapping.get(successInlined),
-                              "",
-                              "1");
-        if (errorFragment != null) {
-            this.createTransition(fragmentStatesMapping.get(errorFragment),
-                                  statesMapping.get(errorInlined),
-                                  "",
-                                  "1");
-        }
+        errorAndSuccessTransitions(states, statesMapping, fragmentStatesMapping);
     }
 
     private Set<Transition> getInterfaceTransitions() {

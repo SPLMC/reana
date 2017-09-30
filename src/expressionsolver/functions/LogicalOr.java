@@ -22,7 +22,7 @@ public class LogicalOr extends PostfixMathCommand {
         Object param1 = inStack.pop();
 
         if ((param1 instanceof ADD) && (param2 instanceof ADD)) {
-            ADD result = ((ADD) param1).or((ADD) param2);
+            ADD result = ((ADD) param1).operator((ADD) param2, ADD.LOGICAL_OR);
             inStack.push(result); // push the result on the inStack
             return;
         }

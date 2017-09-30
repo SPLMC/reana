@@ -51,15 +51,20 @@ public class Interface {
      */
     @Override
     public boolean equals(Object obj) {
+    	boolean equals_result = false;
         if (obj != null && obj instanceof Interface) {
             Interface other = (Interface) obj;
-            return initial.equals(other.initial)
-                    && success.equals(other.success)
-                    && error.equals(other.error)
-                    && successTransition.equals(other.successTransition)
-                    && errorTransition.equals(other.errorTransition);
+            equals_result = compareObjects(other);
         }
-        return false;
+        return equals_result;
+    }
+    
+    private boolean compareObjects(Interface other) {
+    	return initial.equals(other.initial)
+	        && success.equals(other.success)
+	        && error.equals(other.error)
+	        && successTransition.equals(other.successTransition)
+	        && errorTransition.equals(other.errorTransition);
     }
 
     @Override

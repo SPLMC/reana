@@ -147,7 +147,7 @@ public class Analyzer {
         // of the reliability ADD. Thus, we must multiply the result by the
         // {0,1} representation of the feature model in order to retain 0 as the
         // value for invalid configurations.
-        ADD result = featureModel.times(reliability);
+        ADD result = featureModel.operator(reliability, ADD.TIMES);
         timeCollector.stopFamilyBasedTimer();
         return result;
     }

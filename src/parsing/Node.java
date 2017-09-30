@@ -14,21 +14,17 @@ public abstract class Node {
 
 	@Override
 	public boolean equals(Object obj) {
+		
 		if (this == obj) {
 			return true;
 		}
+		
 		if ((obj == null) || (getClass() != obj.getClass())) {
 			return false;
 		}
 		Node other = (Node) obj;
-		if (this.id == null) {
-			if (other.id != null) {
-				return false;
-			}
-		} else if (!this.id.equals(other.id)) {
-			return false;
-		}
-		return true;
+		
+		return this.id.equals(other.id);
 	}
 
 	@Override
