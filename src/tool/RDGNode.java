@@ -1,4 +1,4 @@
-package tool;
+	package tool;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,10 +61,15 @@ public class RDGNode {
 
     public void addDependency(RDGNode child) {
         this.dependencies.add(child);
-        height = Math.max(height, child.height + 1);
+        setHeight(Math.max(height, child.height + 1));
     }
 
-    public Collection<RDGNode> getDependencies() {
+    private void setHeight(int height) {
+    	this.height = height;
+		
+	}
+
+	public Collection<RDGNode> getDependencies() {
         return dependencies;
     }
 
@@ -100,23 +105,33 @@ public class RDGNode {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof RDGNode) {
+        if (isObjectValid(obj)) {
             RDGNode other = (RDGNode) obj;
-            return this.getPresenceCondition().equals(other.getPresenceCondition())
-                    && this.getFDTMC().equals(other.getFDTMC())
-                    && this.getDependencies().equals(other.getDependencies());
+            
+            final boolean presenceEquals = this.getPresenceCondition().equals(other.getPresenceCondition());
+            final boolean FDTMCEquals = this.getFDTMC().equals(other.getFDTMC());
+            final boolean dependenciesEquals = this.getDependencies().equals(other.getDependencies());
+            boolean isEquals; 
+            isEquals = presenceEquals && FDTMCEquals && dependenciesEquals; 
+            return isEquals;
         }
         return false;
+    }
+    
+    private boolean isObjectValid(Object obj){
+    	return obj != null && obj instanceof RDGNode;
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode() + presenceCondition.hashCode() + fdtmc.hashCode() + dependencies.hashCode();
+    	int hashCode = getId().hashCode() + getPresenceCondition().hashCode() + getFDTMC().hashCode() + getDependencies().hashCode();
+    	return hashCode;
     }
 
     @Override
     public String toString() {
-        return getId() + " (" + getPresenceCondition() + ")";
+    	String presenceCondition = getId() + " (" + getPresenceCondition() + ")";
+        return presenceCondition;    		
     }
 
     /**
@@ -143,21 +158,28 @@ public class RDGNode {
      * @throws CyclicRdgException
      */
     private void topoSortVisit(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
+        if (isContainsKeyAndMarksFalse(node, marks, sorted)) {
             // Visiting temporarily marked node -- this means a cyclic dependency!
             throw new CyclicRdgException();
         } else if (!marks.containsKey(node)) {
-            // Mark node temporarily (cycle detection)
-            marks.put(node, false);
-            for (RDGNode child: node.getDependencies()) {
-                topoSortVisit(child, marks, sorted);
-            }
-            // Mark node permanently (finished sorting branch)
-            marks.put(node, true);
-            sorted.add(node);
+            markNode(node, marks, sorted);
         }
     }
-
+    private boolean isContainsKeyAndMarksFalse(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) {
+    	boolean isValid = marks.containsKey(node) && marks.get(node) == false;
+    	return isValid;
+    }
+    private void markNode(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException{
+    	
+    	// Mark node temporarily (cycle detection)
+    	marks.put(node, false);
+    	for (RDGNode child: node.getDependencies()) {
+        topoSortVisit(child, marks, sorted);
+    	}
+    	// Mark node permanently (finished sorting branch)
+    	marks.put(node, true);
+    	sorted.add(node);
+    }
     /**
      * Computes the number of paths from source nodes to every known node.
      * @return A map associating an RDGNode to the corresponding number
@@ -181,26 +203,37 @@ public class RDGNode {
             // Visiting temporarily marked node -- this means a cyclic dependency!
             throw new CyclicRdgException();
         } else if (!marks.containsKey(node)) {
-            // Mark node temporarily (cycle detection)
-            marks.put(node, false);
-
-            Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>();
-            // A node always has a path to itself.
-            numberOfPaths.put(node, 1);
-            // The number of paths from a node X to a node Y is equal to the
-            // sum of the numbers of paths from each of its descendants to Y.
-            for (RDGNode child: node.getDependencies()) {
-                Map<RDGNode, Integer> tmpNumberOfPaths = numPathsVisit(child, marks, cache);
-                numberOfPaths = sumPaths(numberOfPaths, tmpNumberOfPaths);
-            }
-            // Mark node permanently (finished sorting branch)
-            marks.put(node, true);
-            cache.put(node, numberOfPaths);
+        	Map<RDGNode, Integer> numberOfPaths = topologicalSort(node, marks, cache);
             return numberOfPaths;
         }
         // Otherwise, the node has already been visited.
         return cache.get(node);
     }
+        
+    private static Map<RDGNode, Integer> topologicalSort(RDGNode node, Map<RDGNode, Boolean> marks,
+    				Map<RDGNode, Map<RDGNode, Integer>> cache) {
+    		 		marks.put(node, false);
+    		 
+    		 		Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>();
+    		 		// A node always has a path to itself.
+    		 		numberOfPaths.put(node, 1);
+    		 		// The number of paths from a node X to a node Y is equal to the
+    		 		// sum of the numbers of paths from each of its descendants to Y.
+    		 		for (RDGNode child: node.getDependencies()) {
+    		 		    Map<RDGNode, Integer> tmpNumberOfPaths = null;
+						try {
+							tmpNumberOfPaths = numPathsVisit(child, marks, cache);
+						} catch (CyclicRdgException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+    		 		    numberOfPaths = sumPaths(numberOfPaths, tmpNumberOfPaths);
+    		 		}
+    		 		// Mark node permanently (finished sorting branch)
+    		 		marks.put(node, true);
+    		 		cache.put(node, numberOfPaths);
+    		 		return numberOfPaths;
+   	}
 
     /**
      * Sums two paths-counting maps
@@ -231,11 +264,15 @@ public class RDGNode {
      */
     public static RDGNode getSimilarNode(RDGNode target) {
         for (RDGNode candidate: nodesInCreationOrder) {
-            if (candidate != target && candidate.equals(target)) {
+            if (isNotSimilar(candidate, target)) {
                 return candidate;
             }
         }
         return null;
+    }
+    public static boolean isNotSimilar(RDGNode candidate, RDGNode target){
+    	boolean isValid = candidate != target && candidate.equals(target);
+    	return isValid;
     }
 
 }
