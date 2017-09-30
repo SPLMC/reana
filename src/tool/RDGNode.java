@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import fdtmc.FDTMC;
 
 
@@ -100,13 +101,14 @@ public class RDGNode {
      */
     @Override
     public boolean equals(Object obj) {
+        boolean isEqual = false;
         if (obj != null && obj instanceof RDGNode) {
             RDGNode other = (RDGNode) obj;
-            return this.getPresenceCondition().equals(other.getPresenceCondition())
+            isEqual = this.getPresenceCondition().equals(other.getPresenceCondition())
                     && this.getFDTMC().equals(other.getFDTMC())
                     && this.getDependencies().equals(other.getDependencies());
         }
-        return false;
+        return isEqual;
     }
 
     @Override
@@ -143,18 +145,23 @@ public class RDGNode {
      * @throws CyclicRdgException
      */
     private void topoSortVisit(RDGNode node, Map<RDGNode, Boolean> marks, List<RDGNode> sorted) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
+        if (marks.containsKey(node) && !marks.get(node)) {
             // Visiting temporarily marked node -- this means a cyclic dependency!
             throw new CyclicRdgException();
         } else if (!marks.containsKey(node)) {
             // Mark node temporarily (cycle detection)
             marks.put(node, false);
-            for (RDGNode child: node.getDependencies()) {
-                topoSortVisit(child, marks, sorted);
-            }
+            visitChildrenNodes(node, marks, sorted);
             // Mark node permanently (finished sorting branch)
             marks.put(node, true);
             sorted.add(node);
+        }
+    }
+
+    private void visitChildrenNodes(RDGNode node, Map<RDGNode, Boolean> marks,
+                                    List<RDGNode> sorted) throws CyclicRdgException {
+        for (RDGNode child: node.getDependencies()) {
+            topoSortVisit(child, marks, sorted);
         }
     }
 
@@ -177,7 +184,7 @@ public class RDGNode {
 
     // TODO Parameterize topological sort of RDG.
     private static Map<RDGNode, Integer> numPathsVisit(RDGNode node, Map<RDGNode, Boolean> marks, Map<RDGNode, Map<RDGNode, Integer>> cache) throws CyclicRdgException {
-        if (marks.containsKey(node) && marks.get(node) == false) {
+        if (marks.containsKey(node) && !marks.get(node)) {
             // Visiting temporarily marked node -- this means a cyclic dependency!
             throw new CyclicRdgException();
         } else if (!marks.containsKey(node)) {
@@ -211,14 +218,19 @@ public class RDGNode {
     private static Map<RDGNode, Integer> sumPaths(Map<RDGNode, Integer> pathsCountA, Map<RDGNode, Integer> pathsCountB) {
         Map<RDGNode, Integer> numberOfPaths = new HashMap<RDGNode, Integer>(pathsCountA);
         for (Map.Entry<RDGNode, Integer> entry: pathsCountB.entrySet()) {
-            RDGNode node = entry.getKey();
-            Integer count = entry.getValue();
-            if (numberOfPaths.containsKey(node)) {
-                count += numberOfPaths.get(node);
-            }
-            numberOfPaths.put(node, count);
+            numberOfPathsForNode(numberOfPaths, entry);
         }
         return numberOfPaths;
+    }
+
+    private static void numberOfPathsForNode(Map<RDGNode, Integer> numberOfPaths,
+                                             Map.Entry<RDGNode, Integer> entry) {
+        RDGNode node = entry.getKey();
+        Integer count = entry.getValue();
+        if (numberOfPaths.containsKey(node)) {
+            count += numberOfPaths.get(node);
+        }
+        numberOfPaths.put(node, count);
     }
 
     /**
@@ -230,12 +242,18 @@ public class RDGNode {
      * @return a similar RDG node or null in case there is none.
      */
     public static RDGNode getSimilarNode(RDGNode target) {
+        RDGNode rdgNode = null;
         for (RDGNode candidate: nodesInCreationOrder) {
-            if (candidate != target && candidate.equals(target)) {
-                return candidate;
-            }
+            rdgNode = checkSimilarNode(target, rdgNode, candidate);
         }
-        return null;
+        return rdgNode;
+    }
+
+    private static RDGNode checkSimilarNode(RDGNode target, RDGNode rdgNode, RDGNode candidate) {
+        if (candidate != target && candidate.equals(target)) {
+            rdgNode = candidate;
+        }
+        return rdgNode;
     }
 
 }
