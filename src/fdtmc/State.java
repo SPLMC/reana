@@ -34,13 +34,14 @@ public class State {
      * A state is equal to another one if they have equal indices.
      * Labels are only considered when comparing FDTMCs as a whole.
      */
-    @Override
+	@Override
     public boolean equals(Object obj) {
+    		boolean isEqual = false;
         if (obj != null && obj instanceof State) {
             State other = (State) obj;
-            return this.index == other.index;
+            isEqual = this.index == other.index;
         }
-        return false;
+        return isEqual;
     }
 
     @Override
