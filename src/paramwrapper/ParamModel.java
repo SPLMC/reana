@@ -99,14 +99,10 @@ class ParamModel {
 
 	@Override
 	public String toString() {
-		String params = "";
-		for (String parameter : parameters) {
-			params += "param double "+parameter+";\n";
-		}
 		String module =
 				"dtmc\n" +
 				"\n" +
-				params +
+				paramsToString() +
 				"\n" +
 				"module " + moduleName + "\n" +
 				"	"+stateVariable+ " : ["+stateRangeStart+".."+stateRangeEnd+"] init "+initialState+";" +
@@ -115,6 +111,23 @@ class ParamModel {
 			module += "	"+command.makeString(stateVariable) + "\n";
 		}
 		module += "endmodule\n\n";
+		
+		module += labelsToString();
+		
+		return module;
+	}
+
+
+	public String paramsToString() {
+		String params = "";
+		for (String parameter : parameters) {
+			params += "param double "+parameter+";\n";
+		}
+		return params;
+	}
+	
+	public String labelsToString() {
+		String module = "";
 		for (Map.Entry<String, Set<Integer>> entry : labels.entrySet()) {
 			String label = entry.getKey();
 			module += "label \""+label+"\" = ";

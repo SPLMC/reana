@@ -47,10 +47,12 @@ public class ProbabilityEnergyTimeProfileReader {
                     NodeList kChilds = item.getChildNodes();
                     for (int i = 0; i < kChilds.getLength(); i++) {
                         tmp = kChilds.item(i);
-                        if (tmp.getNodeName() != null && tmp.getNodeName().equals("energy")) {
+                        final boolean nodeNameEnergy = tmp.getNodeName() != null && tmp.getNodeName().equals("energy");
+                        if (nodeNameEnergy) {
                             profile.setEnergy(parseTag(tmp.getTextContent(), "energy").floatValue());
                         }
-                        if (tmp.getNodeName() != null && tmp.getNodeName().equals("execTime")) {
+                        final boolean nodeNameExecTime = tmp.getNodeName() != null && tmp.getNodeName().equals("energy");
+                        if (nodeNameExecTime) {
                             profile.setExecTime(parseTag(tmp.getTextContent(), "execTime"));
                         }
                     }
