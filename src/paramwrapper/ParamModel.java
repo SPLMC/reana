@@ -22,16 +22,16 @@ import fdtmc.Transition;
 class ParamModel {
 	private String stateVariable = "s";
 	// TODO Deixar nome do módulo PARAM configurável.
-	private String moduleName = "dummyModule";
+	private final String moduleName = "dummyModule";
 	// TODO Inferir estado inicial a partir da topologia da FDTMC.
 	private int initialState = 0;
 
-	private Set<String> parameters;
-	private Map<String, Set<Integer>> labels;
-	private Map<Integer, Command> commands;
+	private final Set<String> parameters;
+	private final Map<String, Set<Integer>> labels;
+	private final Map<Integer, Command> commands;
 
-	private int stateRangeStart;
-	private int stateRangeEnd;
+	private final int stateRangeStart;
+	private final int stateRangeEnd;
 
 	public ParamModel(FDTMC fdtmc) {
 		if (fdtmc.getVariableName() != null) {
@@ -50,13 +50,13 @@ class ParamModel {
 	private Map<String, Set<Integer>> getLabels(FDTMC fdtmc) {
 		Map<String, Set<Integer>> labeledStates = new TreeMap<String, Set<Integer>>();
 		Collection<State> states = fdtmc.getStates();
-		for (State s : states) {
-			String label = s.getLabel();
+		for (State actualState : states) {
+			String label = actualState.getLabel();
 			if (label != null) {
 				if (!labeledStates.containsKey(label)) {
 					labeledStates.put(label, new TreeSet<Integer>());
 				}
-				labeledStates.get(label).add(s.getIndex());
+				labeledStates.get(label).add(actualState.getIndex());
 			}
 		}
 		return labeledStates;
@@ -88,9 +88,9 @@ class ParamModel {
 		Pattern validIdentifier = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
 		for (Command command : commands) {
 			for (String probability : command.getUpdatesProbabilities()) {
-				Matcher m = validIdentifier.matcher(probability);
-				while (m.find()) {
-					tmpParameters.add(m.group());
+				Matcher matcherToFind = validIdentifier.matcher(probability);
+				while (matcherToFind.find()) {
+					tmpParameters.add(matcherToFind.group());
 				}
 			}
 		}

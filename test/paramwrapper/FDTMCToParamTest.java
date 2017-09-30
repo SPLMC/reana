@@ -23,8 +23,8 @@ public class FDTMCToParamTest {
 	public void testSingletonFDTMC() {
 		FDTMC singletonFDTMC = new FDTMC();
 		singletonFDTMC.setVariableName("s");
-		State s = singletonFDTMC.createState();
-		singletonFDTMC.createTransition(s, s, null, "1");
+		State stateSingleton = singletonFDTMC.createState();
+		singletonFDTMC.createTransition(stateSingleton, stateSingleton, null, "1");
 
 		String expectedModule = stringExpectedModule();
 				
@@ -44,8 +44,8 @@ public class FDTMCToParamTest {
 	public void testSingletonFDTMCWithLabel() {
 		FDTMC singletonFDTMC = new FDTMC();
 		singletonFDTMC.setVariableName("s");
-		State s = singletonFDTMC.createState("success");
-		singletonFDTMC.createTransition(s, s, null, "1");
+		State stateSingleton = singletonFDTMC.createState("success");
+		singletonFDTMC.createTransition(stateSingleton, stateSingleton, null, "1");
 
 		String expectedModule = stringExpectedModuleWithLabel();
 				

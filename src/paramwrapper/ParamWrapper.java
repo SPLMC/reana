@@ -46,6 +46,7 @@ public class ParamWrapper implements ParametricModelChecker {
 	}
 
 	private String evaluate(String model, String property) {
+		final String stringToBeReplaced = "\\s+";
 		try {
 			File modelFile = File.createTempFile("model", "param");
 			FileWriter modelWriter = new FileWriter(modelFile);
@@ -59,7 +60,7 @@ public class ParamWrapper implements ParametricModelChecker {
 
 			String formula;
 			formula = invokeTypeModelChecker(model, modelFile, propertyFile, resultsFile);
-			return formula.trim().replaceAll("\\s+", "");
+			return formula.trim().replaceAll(stringToBeReplaced, "");
 		} catch (IOException e) {
 			LOGGER.log(Level.SEVERE, e.toString(), e);
 		}
@@ -69,9 +70,10 @@ public class ParamWrapper implements ParametricModelChecker {
 	private String invokeTypeModelChecker(String model, 
 										  File modelFile, 
 										  File propertyFile, 
-										  File resultsFile)	throws IOException {
+										  File resultsFile) throws IOException {
 		String formula;
-		if (usePrism && !model.contains("param")) {
+		final boolean modelContainParam = model.contains("param");
+		if (usePrism && !modelContainParam) {
 		    formula = invokeModelChecker(modelFile.getAbsolutePath(),
 		                                 propertyFile.getAbsolutePath(),
 		                                 resultsFile.getAbsolutePath());
