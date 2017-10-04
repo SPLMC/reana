@@ -195,8 +195,19 @@ public class FDTMC {
 	}
 
 
+	public String toState(State temp, Transition t) {
+		String resultado;
+		
+		resultado = temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
+				" --- " + t.getActionName() + " / " + t.getProbability() +
+				" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
+	return resultado;
+	
+	}
+	
 	@Override
 	public String toString() {
+		String resultado = new String();
 		String msg = new String();
 
 		Set<State> tmpStates = this.transitionSystem.keySet();
@@ -208,9 +219,7 @@ public class FDTMC {
 				Iterator <Transition> itTransitions = transitionList.iterator();
 				while (itTransitions.hasNext()) {
 					Transition t = itTransitions.next();
-					msg += temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
-							" --- " + t.getActionName() + " / " + t.getProbability() +
-							" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
+					msg += resultado;
 				}
 			}
 		}
