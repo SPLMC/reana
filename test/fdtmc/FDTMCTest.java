@@ -240,7 +240,7 @@ public class FDTMCTest {
 
 	}
 	
-	private ArrayList<State> testingFDTMC(FDTMC fdtmc){
+	private ArrayList<State> testingFDTMC(FDTMC fdtmc, String interfaceId){
         State init = fdtmc.createInitialState(),
               success = fdtmc.createSuccessState(),
               error = fdtmc.createErrorState(),
@@ -256,7 +256,7 @@ public class FDTMCTest {
         source = target;
         target = fdtmc.createState();
         interface_error = fdtmc.createState();
-        fdtmc.createInterface("F", source, target, interface_error);
+        fdtmc.createInterface(interfaceId, source, target, interface_error);
 
         fdtmc.createTransition(interface_error, error, "error_ground", "1");
 
@@ -283,12 +283,12 @@ public class FDTMCTest {
 	    FDTMC firstFdtmc = new FDTMC();
         firstFdtmc.setVariableName("s");
         
-        ArrayList<State> firstFdtmcStates = testingFDTMC(firstFdtmc);
+        ArrayList<State> firstFdtmcStates = testingFDTMC(firstFdtmc, "F");
         
         FDTMC secondFdtmc = new FDTMC();
         secondFdtmc.setVariableName("v");
         
-        ArrayList<State> secondFdtmcStates = testingFDTMC(secondFdtmc);
+        ArrayList<State> secondFdtmcStates = testingFDTMC(secondFdtmc, "G");
 
         Assert.assertEquals("FDTMCs' states should be compared disregarding variable names",
                 firstFdtmcStates.get(0), secondFdtmcStates.get(0));
