@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.org.apache.xml.internal.dtm.ref.IncrementalSAXSource;
+
 public class FDTMC {
 
     public static final String INITIAL_LABEL = "initial";
@@ -53,21 +55,34 @@ public class FDTMC {
 	}
 
 	public State createState() {
-		State temp = new State();
-		temp.setVariableName(variableName);
-		temp.setIndex(index);
-		states.add(temp);
-		transitionSystem.put(temp, null);
+		State state = new State();
+		state.setVariableName(variableName);
+		state.setIndex(index);
+		addState(state);
+		
+		return state;
+	}
+	
+	private void addState (State state) {
+		states.add(state);
+		transitionSystem.put(state, null);
+		
 		if (index == 0)
-			initialState = temp;
-		index++;
-		return temp;
+			setInitialState(state);
+		
+		increasingIndex();
+		
+	}
+	
+	private int increasingIndex() {
+		return index++;
 	}
 
+
 	public State createState(String label) {
-		State temp = createState();
-		temp.setLabel(label);
-		return temp;
+		State state = createState();
+		state.setLabel(label);
+		return state;
 	}
 
     public State createInitialState() {
