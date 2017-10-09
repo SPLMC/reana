@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.org.apache.xml.internal.dtm.ref.IncrementalSAXSource;
+
 public class FDTMC {
 
     public static final String INITIAL_LABEL = "initial";
@@ -53,21 +55,34 @@ public class FDTMC {
 	}
 
 	public State createState() {
-		State temp = new State();
-		temp.setVariableName(variableName);
-		temp.setIndex(index);
-		states.add(temp);
-		transitionSystem.put(temp, null);
+		State state = new State();
+		state.setVariableName(variableName);
+		state.setIndex(index);
+		addState(state);
+		
+		return state;
+	}
+	
+	private void addState (State state) {
+		states.add(state);
+		transitionSystem.put(state, null);
+		
 		if (index == 0)
-			initialState = temp;
-		index++;
-		return temp;
+			setInitialState(state);
+		
+		increasingIndex();
+		
+	}
+	
+	private int increasingIndex() {
+		return index++;
 	}
 
+
 	public State createState(String label) {
-		State temp = createState();
-		temp.setLabel(label);
-		return temp;
+		State state = createState();
+		state.setLabel(label);
+		return state;
 	}
 
     public State createInitialState() {
@@ -122,14 +137,18 @@ public class FDTMC {
 	        return null;
 	    }
 
-	    List<Transition> l = transitionSystem.get(source);
-		if (l == null) {
-			l = new LinkedList<Transition>();
+	    final List<Transition> transitionsState = transitionSystem.get(source);
+	    List<Transition> transitionsList = null;
+	    
+		if (transitionsState == null) {
+			transitionsList = new LinkedList<Transition>();
+		} else {
+			transitionsList = transitionsState;
 		}
 
 		Transition newTransition = new Transition(source, target, action, reliability);
-		boolean success = l.add(newTransition);
-		transitionSystem.put(source, l);
+		boolean success = transitionsList.add(newTransition);
+		transitionSystem.put(source, transitionsList);
 		return success ? newTransition : null;
 	}
 
@@ -195,8 +214,19 @@ public class FDTMC {
 	}
 
 
+	public String toState(State temp, Transition t) {
+		String resultado;
+		
+		resultado = temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
+				" --- " + t.getActionName() + " / " + t.getProbability() +
+				" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
+	return resultado;
+	
+	}
+	
 	@Override
 	public String toString() {
+		String resultado = new String();
 		String msg = new String();
 
 		Set<State> tmpStates = this.transitionSystem.keySet();
@@ -208,9 +238,7 @@ public class FDTMC {
 				Iterator <Transition> itTransitions = transitionList.iterator();
 				while (itTransitions.hasNext()) {
 					Transition t = itTransitions.next();
-					msg += temp.getVariableName() + "=" + temp.getIndex() + ((temp.getLabel() != null) ? "(" + temp.getLabel() + ")" : "") +
-							" --- " + t.getActionName() + " / " + t.getProbability() +
-							" ---> " + t.getTarget().getVariableName() + "=" + t.getTarget().getIndex() + ((t.getTarget().getLabel() != null) ? "(" + t.getTarget().getLabel() + ")" : "") + "\n";
+					msg += resultado;
 				}
 			}
 		}
@@ -324,6 +352,9 @@ public class FDTMC {
         return statesMapping;
     }
 
+    
+    public 
+    
     /**
      * Inlines all states from {@code fdtmc} stripped of their labels.
      * @param fdtmc
@@ -367,24 +398,25 @@ public class FDTMC {
         Map<State, State> fragmentStatesMapping = this.inlineStates(fragment);
         this.inlineTransitions(fragment, fragmentStatesMapping);
 
-        State initialInlined = iface.getInitial();
-        State initialFragment = fragment.getInitialState();
-        State successInlined = iface.getSuccess();
-        State successFragment = fragment.getSuccessState();
-        State errorInlined = iface.getError();
-        State errorFragment = fragment.getErrorState();
+        InterfaceStates inlineInterfaceStates = new InterfaceStates(iface.getInitial(),
+        															fragment.getInitialState(),
+        															iface.getSuccess(),
+        															fragment.getSuccessState(),
+        															iface.getError(),
+        															fragment.getErrorState());;
 
-        this.createTransition(statesMapping.get(initialInlined),
-                              fragmentStatesMapping.get(initialFragment),
+        this.createTransition(statesMapping.get(inlineInterfaceStates.getInitialInlined()),
+                              fragmentStatesMapping.get(inlineInterfaceStates.getInitialFragment()),
                               "",
                               "1");
-        this.createTransition(fragmentStatesMapping.get(successFragment),
-                              statesMapping.get(successInlined),
+        this.createTransition(fragmentStatesMapping.get(inlineInterfaceStates.getSuccessFragment()),
+                              statesMapping.get(inlineInterfaceStates.getSuccessInlined()),
                               "",
                               "1");
+        final State errorFragment = inlineInterfaceStates.getErrorFragment();
         if (errorFragment != null) {
             this.createTransition(fragmentStatesMapping.get(errorFragment),
-                                  statesMapping.get(errorInlined),
+                                  statesMapping.get(inlineInterfaceStates.getErrorInlined()),
                                   "",
                                   "1");
         }
